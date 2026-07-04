@@ -10,7 +10,16 @@ from app.functions import handlers
 from app.notifications import notify_admin
 
 MODEL = "gpt-4o"
+SUMMARY_MODEL = "gpt-4o-mini"
 MAX_TOOL_ROUNDS = 4
+RECENT_WINDOW = 12
+
+SUMMARY_PROMPT = (
+    "Кратко перескажи (3-5 предложений) суть этой части переписки клиента с ботом ресторана: "
+    "какие факты уже обсуждались (цены, пакеты, даты), что хотел клиент, была ли эскалация. "
+    "Только факты, без оценок и домыслов. Если в переписке было несколько подряд коротких, "
+    "неясных или не по теме сообщений — одной фразой отметь это, не перечисляя их по отдельности."
+)
 
 SYSTEM_PROMPT_BASE = (
     "Ты — ассистент свадебного ресторана «Сарбон», отвечаешь клиентам в Telegram.\n"
@@ -41,11 +50,14 @@ SYSTEM_PROMPT_BASE = (
 )
 
 
-def _system_message() -> dict[str, str]:
-    return {
-        "role": "system",
-        "content": f"{SYSTEM_PROMPT_BASE}\nСегодняшняя дата: {date.today().isoformat()}.",
-    }
+def _system_message(active_notice: str | None = None) -> dict[str, str]:
+    content = f"{SYSTEM_PROMPT_BASE}\nСегодняшняя дата: {date.today().isoformat()}."
+    if active_notice:
+        content += (
+            "\n\nАКТУАЛЬНОЕ ОБЪЯВЛЕНИЕ ОТ ВЛАДЕЛЬЦА (упоминай при уместных вопросах клиента, "
+            f"не выдумывай детали сверх этого текста): {active_notice}"
+        )
+    return {"role": "system", "content": content}
 
 TOOLS: list[dict[str, Any]] = [
     {
@@ -145,9 +157,41 @@ async def _call_tool(name: str, arguments: dict[str, Any], tenant_id: str, conve
     raise ValueError(f"Unknown tool: {name}")
 
 
+async def _summarize(client: AsyncOpenAI, older_messages: list[dict[str, str]]) -> str:
+    transcript = "\n".join(f"{m['role']}: {m['content']}" for m in older_messages)
+    response = await client.chat.completions.create(
+        model=SUMMARY_MODEL,
+        messages=[
+            {"role": "system", "content": SUMMARY_PROMPT},
+            {"role": "user", "content": transcript},
+        ],
+    )
+    return response.choices[0].message.content or ""
+
+
+async def _build_messages(
+    client: AsyncOpenAI, history: list[dict[str, str]], active_notice: str | None
+) -> list[dict[str, Any]]:
+    """Compacts long conversations so the model isn't handed a long run of raw,
+    possibly-repetitive short turns — which was observed to make gpt-4o anchor on
+    repeating its own last reply for later, unrelated questions. Older turns get
+    folded into a short summary (via the cheap model) instead of growing forever."""
+    if len(history) <= RECENT_WINDOW:
+        return [_system_message(active_notice), *history]
+
+    older, recent = history[:-RECENT_WINDOW], history[-RECENT_WINDOW:]
+    summary = await _summarize(client, older)
+    return [
+        _system_message(active_notice),
+        {"role": "system", "content": f"Краткое содержание начала переписки с этим клиентом: {summary}"},
+        *recent,
+    ]
+
+
 async def generate_reply(tenant_id: str, conversation_id: str, history: list[dict[str, str]]) -> str:
     client = get_openai_client()
-    messages: list[dict[str, Any]] = [_system_message(), *history]
+    active_notice = await handlers.get_active_notice(tenant_id)
+    messages: list[dict[str, Any]] = await _build_messages(client, history, active_notice)
 
     for _ in range(MAX_TOOL_ROUNDS):
         response = await client.chat.completions.create(model=MODEL, messages=messages, tools=TOOLS)

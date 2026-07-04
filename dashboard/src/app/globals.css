@@ -597,3 +597,50 @@ textarea.policies {
   background: rgba(255, 255, 255, 0.06);
   transform: scale(0.96);
 }
+
+/* --- Assistant chat --- */
+
+.chat-log {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.chat-bubble {
+  max-width: 85%;
+  padding: 0.75rem 1rem;
+  border-radius: 16px;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.chat-bubble[data-role="user"] {
+  align-self: flex-end;
+  background: var(--color-accent);
+  color: #04140e;
+  border-bottom-right-radius: 4px;
+}
+
+.chat-bubble[data-role="assistant"] {
+  align-self: flex-start;
+  background: var(--color-surface);
+  border: 1px solid var(--color-hairline);
+  border-bottom-left-radius: 4px;
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+  position: sticky;
+  bottom: calc(4.5rem + env(safe-area-inset-bottom));
+}
+
+.chat-input-row textarea {
+  flex: 1;
+  resize: none;
+  min-height: 44px;
+  max-height: 120px;
+}

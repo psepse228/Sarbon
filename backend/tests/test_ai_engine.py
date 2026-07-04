@@ -1,7 +1,20 @@
 import json
 from types import SimpleNamespace
 
+import pytest
+
 from app.ai import engine
+
+
+@pytest.fixture(autouse=True)
+def _no_active_notice(monkeypatch):
+    """Default for every test in this file — override in a specific test to
+    exercise the active_notice injection path."""
+
+    async def fake_get_active_notice(tenant_id):
+        return None
+
+    monkeypatch.setattr(engine.handlers, "get_active_notice", fake_get_active_notice)
 
 
 class _FakeToolCall:
@@ -33,6 +46,49 @@ class _FakeCompletions:
 class _FakeOpenAIClient:
     def __init__(self, responses):
         self.chat = SimpleNamespace(completions=_FakeCompletions(responses))
+
+
+async def test_generate_reply_summarizes_long_history_before_main_call(monkeypatch):
+    long_history = [
+        {"role": "user" if i % 2 == 0 else "assistant", "content": f"сообщение {i}"} for i in range(20)
+    ]
+    client = _FakeOpenAIClient(
+        [
+            _final_response("Краткое содержание: клиент спрашивал про цены."),
+            _final_response("Хорошо, вот ответ на ваш последний вопрос."),
+        ]
+    )
+    monkeypatch.setattr(engine, "get_openai_client", lambda: client)
+
+    result = await engine.generate_reply("tenant-1", "conv-1", long_history)
+
+    assert result == "Хорошо, вот ответ на ваш последний вопрос."
+    calls = client.chat.completions.calls
+    assert len(calls) == 2
+    assert calls[0]["model"] == engine.SUMMARY_MODEL
+    assert calls[1]["model"] == engine.MODEL
+
+    main_messages = calls[1]["messages"]
+    assert len(main_messages) == 2 + engine.RECENT_WINDOW
+    assert "Краткое содержание" in main_messages[1]["content"]
+    assert main_messages[-1] == long_history[-1]
+
+
+async def test_generate_reply_injects_active_notice_into_system_prompt(monkeypatch):
+    async def fake_get_active_notice(tenant_id):
+        assert tenant_id == "tenant-1"
+        return "Акция: скидка 10% на банкеты по будням в июле."
+
+    monkeypatch.setattr(engine.handlers, "get_active_notice", fake_get_active_notice)
+
+    client = _FakeOpenAIClient([_final_response("Да, сейчас у нас скидка 10% на будние дни в июле.")])
+    monkeypatch.setattr(engine, "get_openai_client", lambda: client)
+
+    result = await engine.generate_reply("tenant-1", "conv-1", [{"role": "user", "content": "Есть скидки?"}])
+
+    assert result == "Да, сейчас у нас скидка 10% на будние дни в июле."
+    system_message = client.chat.completions.calls[0]["messages"][0]
+    assert "Акция: скидка 10% на банкеты по будням в июле." in system_message["content"]
 
 
 async def test_generate_reply_returns_content_directly_when_no_tool_call(monkeypatch):

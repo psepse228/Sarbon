@@ -5,7 +5,7 @@ import { randomUUID } from "node:crypto";
 import { getServiceSupabaseClient } from "./supabase/server";
 import type { CompanyProfile, FaqEntry, Package, Partner } from "./types";
 
-const COLUMNS = "packages,faq,partners,policies,updated_at";
+const COLUMNS = "packages,faq,partners,policies,active_notice,updated_at";
 
 // Rows seeded directly in Supabase (before this dashboard existed) predate
 // the client-generated `id` field and, for partners, can have a null
@@ -21,6 +21,7 @@ interface CompanyProfileRow {
   faq: RawFaqEntry[] | null;
   partners: RawPartner[] | null;
   policies: string | null;
+  active_notice: string | null;
   updated_at: string | null;
 }
 
@@ -53,6 +54,7 @@ export async function fetchCompanyProfile(tenantId: string): Promise<CompanyProf
       faq: [],
       partners: [],
       policies: "",
+      activeNotice: null,
       updatedAt: null,
     };
   }
@@ -63,13 +65,14 @@ export async function fetchCompanyProfile(tenantId: string): Promise<CompanyProf
     faq: (data.faq ?? []).map((f) => ({ ...f, id: f.id ?? randomUUID() })),
     partners: (data.partners ?? []).map((p) => ({ ...p, id: p.id ?? randomUUID(), contact: p.contact ?? "" })),
     policies: data.policies ?? "",
+    activeNotice: data.active_notice ?? null,
     updatedAt: data.updated_at,
   };
 }
 
 async function upsertColumn(
   tenantId: string,
-  column: "packages" | "faq" | "partners" | "policies",
+  column: "packages" | "faq" | "partners" | "policies" | "active_notice",
   value: unknown,
 ): Promise<void> {
   const client = getServiceSupabaseClient();
@@ -121,4 +124,10 @@ export function savePartners(tenantId: string, partners: Partner[]): Promise<voi
 
 export function savePolicies(tenantId: string, policies: string): Promise<void> {
   return upsertColumn(tenantId, "policies", policies);
+}
+
+/** Read by the client-facing bot (backend/app/functions/handlers.py's
+ * get_active_notice) and woven into its system prompt when set. */
+export function saveActiveNotice(tenantId: string, notice: string | null): Promise<void> {
+  return upsertColumn(tenantId, "active_notice", notice);
 }

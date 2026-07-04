@@ -49,6 +49,7 @@ export interface CompanyProfile {
   faq: FaqEntry[];
   partners: Partner[];
   policies: string;
+  activeNotice: string | null;
   updatedAt: string | null;
 }
 

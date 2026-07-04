@@ -86,6 +86,34 @@ async def test_list_packages_returns_all_packages(monkeypatch):
     assert result == COMPANY_PROFILE_ROW["packages"]
 
 
+async def test_get_active_notice_returns_notice_when_set(monkeypatch):
+    row = {**COMPANY_PROFILE_ROW, "active_notice": "Скидка 10% на будние дни в июле."}
+    client = _client_with(company_profile=[row])
+    monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)
+
+    result = await handlers.get_active_notice(TENANT_ID)
+
+    assert result == "Скидка 10% на будние дни в июле."
+
+
+async def test_get_active_notice_returns_none_when_not_set(monkeypatch):
+    client = _client_with(company_profile=[COMPANY_PROFILE_ROW])
+    monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)
+
+    result = await handlers.get_active_notice(TENANT_ID)
+
+    assert result is None
+
+
+async def test_get_active_notice_returns_none_when_no_company_profile(monkeypatch):
+    client = _client_with(company_profile=[])
+    monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)
+
+    result = await handlers.get_active_notice(TENANT_ID)
+
+    assert result is None
+
+
 async def test_list_packages_returns_none_when_no_packages(monkeypatch):
     client = _client_with(company_profile=[{"packages": [], "faq": [], "partners": []}])
     monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)

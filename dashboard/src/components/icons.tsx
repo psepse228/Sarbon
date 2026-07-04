@@ -117,3 +117,12 @@ export function ChatIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function SparkleIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M11 3.5 12.4 8.6 17.5 10 12.4 11.4 11 16.5 9.6 11.4 4.5 10 9.6 8.6 11 3.5Z" />
+      <path d="M17.5 14.5 18.1 16.7 20.3 17.3 18.1 17.9 17.5 20.1 16.9 17.9 14.7 17.3 16.9 16.7 17.5 14.5Z" />
+    </svg>
+  );
+}

@@ -7,13 +7,23 @@ def _fetch_company_profile(tenant_id: str) -> dict[str, Any] | None:
     client = get_supabase_client()
     response = (
         client.table("company_profile")
-        .select("packages,faq,partners,policies")
+        .select("packages,faq,partners,policies,active_notice")
         .eq("tenant_id", tenant_id)
         .limit(1)
         .execute()
     )
     rows = response.data
     return rows[0] if rows else None
+
+
+async def get_active_notice(tenant_id: str) -> str | None:
+    """A short-lived announcement the owner's AI assistant can post (see
+    dashboard's /assistant), e.g. "we have a promotion starting tomorrow" —
+    woven into the client bot's system prompt when present."""
+    profile = _fetch_company_profile(tenant_id)
+    if profile is None:
+        return None
+    return profile.get("active_notice") or None
 
 
 async def get_package_price(tenant_id: str, package_name: str) -> dict[str, Any] | None:

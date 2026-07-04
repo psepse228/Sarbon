@@ -4,15 +4,15 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { DevModeBanner, ErrorBanner } from "@/components/StatusBanner";
-import { QuestionIcon, TagIcon, UsersIcon } from "@/components/icons";
+import { ChevronRightIcon, DocumentIcon, QuestionIcon, TagIcon, UsersIcon } from "@/components/icons";
 import { isRunningInTelegram, tmaFetch } from "@/lib/telegram/client";
 import type { AvailabilityEntry, ConversationSummary, Escalation } from "@/lib/types";
 import { useCompanyProfile } from "@/lib/useCompanyProfile";
 
 const SECTIONS = [
-  { href: "/packages", label: "Пакеты и цены", countKey: "packages" as const },
-  { href: "/faq", label: "Частые вопросы", countKey: "faq" as const },
-  { href: "/partners", label: "Партнёры", countKey: "partners" as const },
+  { href: "/packages", label: "Пакеты и цены", countKey: "packages" as const, Icon: TagIcon },
+  { href: "/faq", label: "Частые вопросы", countKey: "faq" as const, Icon: QuestionIcon },
+  { href: "/partners", label: "Партнёры", countKey: "partners" as const, Icon: UsersIcon },
 ];
 
 const QUICK_ACTIONS = [
@@ -94,15 +94,15 @@ export default function HomePage() {
             <h3>Аналитика</h3>
           </div>
           <div style={{ display: "flex", gap: "1.6rem" }}>
-            <Link href="/escalations" style={{ color: "inherit" }}>
+            <Link href="/escalations" className="stat-tap">
               <div className="hero-stat-value">{stats.openEscalations}</div>
               <div className="hero-stat-label">открытых эскалаций</div>
             </Link>
-            <Link href="/conversations" style={{ color: "inherit" }}>
+            <Link href="/conversations" className="stat-tap">
               <div className="hero-stat-value">{stats.totalConversations}</div>
               <div className="hero-stat-label">диалогов</div>
             </Link>
-            <Link href="/availability" style={{ color: "inherit" }}>
+            <Link href="/availability" className="stat-tap">
               <div className="hero-stat-value">{stats.upcomingAvailable}</div>
               <div className="hero-stat-label">свободных дат</div>
             </Link>
@@ -129,19 +129,29 @@ export default function HomePage() {
           <p className="muted">Загрузка…</p>
         ) : profile ? (
           <>
-            <p className="muted">
+            <p className="muted" style={{ marginBottom: "0.9rem" }}>
               Последнее обновление:{" "}
               {profile.updatedAt ? new Date(profile.updatedAt).toLocaleString("ru-RU") : "ещё не сохранялось"}
             </p>
-            {SECTIONS.map((section) => (
-              <div key={section.href} className="card-title-row">
-                <Link href={section.href}>{section.label}</Link>
-                <span className="pill">{profile[section.countKey].length}</span>
-              </div>
-            ))}
-            <div className="card-title-row">
-              <Link href="/policies">Политики</Link>
-              <span className="pill">{profile.policies ? "заполнено" : "пусто"}</span>
+            <div className="hub-card" style={{ background: "transparent", border: "none", padding: 0 }}>
+              {SECTIONS.map((section) => (
+                <Link key={section.href} href={section.href} className="hub-row">
+                  <span className="hub-row-icon">
+                    <section.Icon />
+                  </span>
+                  <span className="hub-row-label">{section.label}</span>
+                  <span className="pill">{profile[section.countKey].length}</span>
+                  <ChevronRightIcon className="hub-row-chevron" />
+                </Link>
+              ))}
+              <Link href="/policies" className="hub-row">
+                <span className="hub-row-icon">
+                  <DocumentIcon />
+                </span>
+                <span className="hub-row-label">Политики</span>
+                <span className="pill">{profile.policies ? "заполнено" : "пусто"}</span>
+                <ChevronRightIcon className="hub-row-chevron" />
+              </Link>
             </div>
           </>
         ) : null}

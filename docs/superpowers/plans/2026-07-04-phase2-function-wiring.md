@@ -277,12 +277,12 @@ Note the type signature change from Phase 0: `get_partners` now returns `list[di
 - [ ] **Step 5: Run tests to verify they pass**
 
 Run: `pytest tests/test_handlers.py -v`
-Expected: all PASS (10 tests)
+Expected: all PASS (9 tests)
 
 - [ ] **Step 6: Run the full suite**
 
 Run: `pytest -v` from `backend/`
-Expected: all tests pass (7 pre-existing minus the 1 deleted `test_stubs.py` test, plus 10 new = 16 total)
+Expected: all tests pass (7 pre-existing minus the 1 deleted `test_stubs.py` test, plus 9 new = 15 total)
 
 - [ ] **Step 7: Commit**
 

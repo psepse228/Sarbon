@@ -9,6 +9,12 @@ import { useEffect, useRef } from "react";
  * time. Result: the video silently renders as a static first frame instead
  * of playing. Setting `.muted` imperatively via a ref before calling
  * `.play()` sidesteps this.
+ *
+ * Belt-and-suspenders: some contexts (Low Power Mode, certain installed-PWA
+ * standalone webviews) block autoplay outright regardless of `muted`. A
+ * one-time listener retries `.play()` on the very first tap anywhere in the
+ * app, which reliably unlocks media playback per the platform's user-gesture
+ * rules.
  */
 export function BackgroundVideo() {
   const ref = useRef<HTMLVideoElement>(null);
@@ -16,11 +22,25 @@ export function BackgroundVideo() {
   useEffect(() => {
     const video = ref.current;
     if (!video) return;
+
     video.muted = true;
     video.play().catch(() => {
-      // Autoplay can still be blocked by the platform (e.g. low-power mode)
-      // — the static first frame is an acceptable fallback in that case.
+      // Expected when autoplay is blocked — the tap listener below retries.
     });
+
+    function retryOnFirstInteraction() {
+      video?.play().catch(() => {});
+      window.removeEventListener("touchstart", retryOnFirstInteraction);
+      window.removeEventListener("click", retryOnFirstInteraction);
+    }
+
+    window.addEventListener("touchstart", retryOnFirstInteraction, { once: true, passive: true });
+    window.addEventListener("click", retryOnFirstInteraction, { once: true });
+
+    return () => {
+      window.removeEventListener("touchstart", retryOnFirstInteraction);
+      window.removeEventListener("click", retryOnFirstInteraction);
+    };
   }, []);
 
   return (

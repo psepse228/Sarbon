@@ -9,6 +9,12 @@
  * `name`/`question`/`category`, not `id`, so adding this field is additive
  * and does not change backend behavior. See dashboard/README.md for the
  * "id leaks into function-calling responses" note.
+ *
+ * `Package`'s non-id fields use the snake_case names already live in
+ * Supabase (`includes`/`excludes`/`min_guests`/`max_guests`/`prepayment`/
+ * `cancellation_policy`) rather than an invented camelCase — see
+ * companyProfile.ts for why (real seeded rows predate this dashboard and
+ * don't have an `id`, which is backfilled on read).
  */
 
 export interface Package {
@@ -16,12 +22,12 @@ export interface Package {
   name: string;
   price: number;
   currency: string;
-  included: string[];
-  excluded: string[];
-  guestsMin: number | null;
-  guestsMax: number | null;
-  prepaymentTerms: string;
-  cancellationTerms: string;
+  includes: string[];
+  excludes: string[];
+  min_guests: number | null;
+  max_guests: number | null;
+  prepayment: string;
+  cancellation_policy: string;
 }
 
 export interface FaqEntry {

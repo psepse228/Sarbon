@@ -15,6 +15,7 @@ export function Nav() {
   const pathname = usePathname();
   return (
     <nav className="nav">
+      <span className="nav-brand">Сарбон</span>
       {LINKS.map((link) => (
         <Link key={link.href} href={link.href} data-active={pathname === link.href}>
           {link.label}

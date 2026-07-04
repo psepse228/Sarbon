@@ -1,14 +1,25 @@
 import "server-only";
 
+import { randomUUID } from "node:crypto";
+
 import { getServiceSupabaseClient } from "./supabase/server";
 import type { CompanyProfile, FaqEntry, Package, Partner } from "./types";
 
 const COLUMNS = "packages,faq,partners,policies,updated_at";
 
+// Rows seeded directly in Supabase (before this dashboard existed) predate
+// the client-generated `id` field and, for partners, can have a null
+// `contact`. These raw types describe what's actually on disk; the accessors
+// below normalize them into the dashboard's `Package`/`FaqEntry`/`Partner`
+// shape (id backfilled, `contact` defaulted to "").
+type RawPackage = Omit<Package, "id"> & { id?: string };
+type RawFaqEntry = Omit<FaqEntry, "id"> & { id?: string };
+type RawPartner = Omit<Partner, "id" | "contact"> & { id?: string; contact: string | null };
+
 interface CompanyProfileRow {
-  packages: Package[] | null;
-  faq: FaqEntry[] | null;
-  partners: Partner[] | null;
+  packages: RawPackage[] | null;
+  faq: RawFaqEntry[] | null;
+  partners: RawPartner[] | null;
   policies: string | null;
   updated_at: string | null;
 }
@@ -48,9 +59,9 @@ export async function fetchCompanyProfile(tenantId: string): Promise<CompanyProf
 
   return {
     tenantId,
-    packages: data.packages ?? [],
-    faq: data.faq ?? [],
-    partners: data.partners ?? [],
+    packages: (data.packages ?? []).map((p) => ({ ...p, id: p.id ?? randomUUID() })),
+    faq: (data.faq ?? []).map((f) => ({ ...f, id: f.id ?? randomUUID() })),
+    partners: (data.partners ?? []).map((p) => ({ ...p, id: p.id ?? randomUUID(), contact: p.contact ?? "" })),
     policies: data.policies ?? "",
     updatedAt: data.updated_at,
   };

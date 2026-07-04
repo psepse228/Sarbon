@@ -5,12 +5,12 @@ export const packageSchema = z.object({
   name: z.string().min(1, "Название пакета обязательно"),
   price: z.number().nonnegative(),
   currency: z.string().min(1).default("RUB"),
-  included: z.array(z.string()),
-  excluded: z.array(z.string()),
-  guestsMin: z.number().int().nonnegative().nullable(),
-  guestsMax: z.number().int().nonnegative().nullable(),
-  prepaymentTerms: z.string(),
-  cancellationTerms: z.string(),
+  includes: z.array(z.string()),
+  excludes: z.array(z.string()),
+  min_guests: z.number().int().nonnegative().nullable(),
+  max_guests: z.number().int().nonnegative().nullable(),
+  prepayment: z.string(),
+  cancellation_policy: z.string(),
 });
 
 export const packagesArraySchema = z.array(packageSchema);

@@ -124,20 +124,21 @@ as-is for this slice since backend is explicitly out of scope here.
 
 ## Design system
 
-Applied per `WEDDING-BOT-CONTEXT.md`: background `#080C12`, white `#F1F5F9`,
-sky blue `#38BDF8`, indigo `#818CF8`, gray `#94A3B8`; Syne for headings, DM
-Sans for body (`src/app/globals.css`, loaded via `next/font/google` in
-`src/app/layout.tsx`).
+Warm "stationery/ledger" palette, diverging from the dark Solura brand
+tokens in `WEDDING-BOT-CONTEXT.md` — chosen for an owner-facing back-office
+tool where warmth and readability at a glance beat the client-facing dark
+brand aesthetic. Cream/paper background (`#F2E8D5`/`#FBF6EC`), deep navy ink
+and primary accent (`#223A63`), muted antique gold secondary accent
+(`#96731F`), warm taupe for muted text (`#83765F`), terracotta for danger
+states (`#B3492E`). Defined as CSS custom properties in
+`src/app/globals.css`.
 
-**Known gap:** neither Syne nor DM Sans ship a `cyrillic` subset on Google
-Fonts (only `latin`/`latin-ext`, +`greek` for Syne) — Next's `next/font`
-build fails if you request an unsupported subset. Since the UI text is
-Russian, Cyrillic glyphs currently render in the browser's fallback font
-while these two fonts only apply to Latin characters (numbers, punctuation,
-the odd Latin brand name). This is a real design-system gap, not something
-this slice can fix without swapping fonts — flagging for a human call: keep
-Syne/DM Sans and accept the fallback, or pick different faces with Cyrillic
-coverage for owner-facing screens.
+Fonts: **Yeseva One** (headings — a serif display face with the character
+often used in Russian wedding/stationery branding) + **Golos Text** (body —
+a modern Russian-designed sans), loaded via `next/font/google` in
+`src/app/layout.tsx`. Both ship a `cyrillic` subset on Google Fonts, unlike
+the previous Syne/DM Sans pair, so Russian UI copy now renders in-brand
+instead of falling back to the system font.
 
 The tone used is plain internal-admin Russian (not the client-facing "вы"
 formal register from the context doc, since this audience is the restaurant

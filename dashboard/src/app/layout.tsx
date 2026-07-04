@@ -1,18 +1,24 @@
 import type { Metadata } from "next";
-import { DM_Sans, Syne } from "next/font/google";
+import { Golos_Text, Yeseva_One } from "next/font/google";
 
 import { Nav } from "@/components/Nav";
 import { TelegramInit } from "@/components/TelegramInit";
 
 import "./globals.css";
 
-// NOTE: neither Syne nor DM Sans ship a `cyrillic` subset on Google Fonts
-// (only latin/latin-ext, +greek for Syne). Since the UI text is Russian,
-// Cyrillic glyphs will render in the browser's fallback font while Latin
-// characters (numbers, punctuation, any Latin brand names) use these fonts.
-// This is a known design-system gap — see dashboard/README.md.
-const syne = Syne({ subsets: ["latin"], variable: "--font-syne", weight: ["700", "800"] });
-const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans", weight: ["400", "500", "700"] });
+// Both fonts ship a `cyrillic` subset on Google Fonts, unlike the previous
+// Syne/DM Sans pair — Cyrillic body copy now renders in-brand instead of
+// falling back to the system font.
+const yesevaOne = Yeseva_One({
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-yeseva",
+  weight: "400",
+});
+const golosText = Golos_Text({
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-golos",
+  weight: ["400", "500", "700"],
+});
 
 export const metadata: Metadata = {
   title: "Sarbon — панель владельца",
@@ -21,7 +27,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={`${syne.variable} ${dmSans.variable}`}>
+    <html lang="ru" className={`${yesevaOne.variable} ${golosText.variable}`}>
       <body>
         <TelegramInit />
         <Nav />

@@ -13,12 +13,12 @@ function newPackage(): Package {
     name: "",
     price: 0,
     currency: "RUB",
-    included: [],
-    excluded: [],
-    guestsMin: null,
-    guestsMax: null,
-    prepaymentTerms: "",
-    cancellationTerms: "",
+    includes: [],
+    excludes: [],
+    min_guests: null,
+    max_guests: null,
+    prepayment: "",
+    cancellation_policy: "",
   };
 }
 
@@ -120,8 +120,8 @@ export function PackagesEditor() {
               <input
                 type="number"
                 min={0}
-                value={pkg.guestsMin ?? ""}
-                onChange={(e) => update(pkg.id, { guestsMin: e.target.value === "" ? null : Number(e.target.value) })}
+                value={pkg.min_guests ?? ""}
+                onChange={(e) => update(pkg.id, { min_guests: e.target.value === "" ? null : Number(e.target.value) })}
               />
             </div>
             <div className="field">
@@ -129,8 +129,8 @@ export function PackagesEditor() {
               <input
                 type="number"
                 min={0}
-                value={pkg.guestsMax ?? ""}
-                onChange={(e) => update(pkg.id, { guestsMax: e.target.value === "" ? null : Number(e.target.value) })}
+                value={pkg.max_guests ?? ""}
+                onChange={(e) => update(pkg.id, { max_guests: e.target.value === "" ? null : Number(e.target.value) })}
               />
             </div>
           </div>
@@ -139,8 +139,8 @@ export function PackagesEditor() {
             <label>Что входит (по одному пункту на строку)</label>
             <textarea
               rows={3}
-              value={pkg.included.join("\n")}
-              onChange={(e) => update(pkg.id, { included: linesToList(e.target.value) })}
+              value={pkg.includes.join("\n")}
+              onChange={(e) => update(pkg.id, { includes: linesToList(e.target.value) })}
             />
           </div>
 
@@ -148,8 +148,8 @@ export function PackagesEditor() {
             <label>Что НЕ входит (по одному пункту на строку)</label>
             <textarea
               rows={3}
-              value={pkg.excluded.join("\n")}
-              onChange={(e) => update(pkg.id, { excluded: linesToList(e.target.value) })}
+              value={pkg.excludes.join("\n")}
+              onChange={(e) => update(pkg.id, { excludes: linesToList(e.target.value) })}
             />
           </div>
 
@@ -157,8 +157,8 @@ export function PackagesEditor() {
             <label>Условия предоплаты</label>
             <textarea
               rows={2}
-              value={pkg.prepaymentTerms}
-              onChange={(e) => update(pkg.id, { prepaymentTerms: e.target.value })}
+              value={pkg.prepayment}
+              onChange={(e) => update(pkg.id, { prepayment: e.target.value })}
             />
           </div>
 
@@ -166,8 +166,8 @@ export function PackagesEditor() {
             <label>Условия отмены/переноса</label>
             <textarea
               rows={2}
-              value={pkg.cancellationTerms}
-              onChange={(e) => update(pkg.id, { cancellationTerms: e.target.value })}
+              value={pkg.cancellation_policy}
+              onChange={(e) => update(pkg.id, { cancellation_policy: e.target.value })}
             />
           </div>
         </div>

@@ -18,16 +18,6 @@ async function loadWebApp(): Promise<TwaWebApp | null> {
   return cachedWebApp;
 }
 
-/**
- * True when running inside an actual Telegram client (webview). Outside of
- * it — e.g. a plain desktop browser during local development —
- * `WebApp.initData` is always an empty string, which is how we detect it.
- */
-export async function isRunningInTelegram(): Promise<boolean> {
-  const webApp = await loadWebApp();
-  return !!webApp && webApp.initData.length > 0;
-}
-
 /** Call once on app mount (see src/components/TelegramInit.tsx) so Telegram sizes the webview correctly. */
 export async function initTelegramWebApp(): Promise<void> {
   const webApp = await loadWebApp();

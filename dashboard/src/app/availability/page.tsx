@@ -86,8 +86,14 @@ export default function AvailabilityPage() {
 
       <div className="card">
         <div className="field">
-          <label>Дата</label>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <label>Дата (ГГГГ-ММ-ДД)</label>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            placeholder="2026-08-15"
+          />
         </div>
         <div className="field">
           <label>Статус</label>

@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { DevModeBanner, ErrorBanner } from "@/components/StatusBanner";
+import { ErrorBanner } from "@/components/StatusBanner";
 import { ChevronRightIcon, DocumentIcon, QuestionIcon, TagIcon, UsersIcon } from "@/components/icons";
-import { isRunningInTelegram, tmaFetch } from "@/lib/telegram/client";
+import { tmaFetch } from "@/lib/telegram/client";
 import type { AvailabilityEntry, ConversationSummary, Escalation } from "@/lib/types";
 import { useCompanyProfile } from "@/lib/useCompanyProfile";
 
@@ -29,12 +29,7 @@ interface Stats {
 
 export default function HomePage() {
   const { profile, loading, error } = useCompanyProfile();
-  const [inTelegram, setInTelegram] = useState(true);
   const [stats, setStats] = useState<Stats | null>(null);
-
-  useEffect(() => {
-    isRunningInTelegram().then(setInTelegram);
-  }, []);
 
   useEffect(() => {
     (async () => {
@@ -83,7 +78,6 @@ export default function HomePage() {
         <span className="hero-powered-by">powered by Solura</span>
       </section>
 
-      {!inTelegram && <DevModeBanner />}
       {error && <ErrorBanner message={error} />}
 
       {stats && (

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Golos_Text, Unbounded } from "next/font/google";
 
 import { AuthGate } from "@/components/AuthGate";
+import { BackgroundVideo } from "@/components/BackgroundVideo";
 import { TabBar } from "@/components/TabBar";
 import { TelegramInit } from "@/components/TelegramInit";
 import { TopHeader } from "@/components/TopHeader";
@@ -40,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ru" className={`${unbounded.variable} ${golosText.variable}`}>
       <body>
-        <video className="app-background-video" src="/background.mp4" autoPlay muted loop playsInline aria-hidden="true" />
+        <BackgroundVideo />
         <span className="app-background-overlay" aria-hidden="true" />
         <TelegramInit />
         <AuthGate>

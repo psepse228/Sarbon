@@ -516,12 +516,6 @@ select:focus {
   color: var(--color-accent);
 }
 
-.status-banner.dev {
-  background: var(--color-warning-tint);
-  border-color: rgba(251, 191, 36, 0.3);
-  color: var(--color-warning);
-}
-
 .muted {
   color: var(--color-text-soft);
   font-size: 0.87rem;

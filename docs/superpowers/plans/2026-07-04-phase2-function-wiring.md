@@ -185,6 +185,8 @@ async def test_escalate_to_human_inserts_and_returns_row(monkeypatch):
 
 All test functions are `async def` — `pyproject.toml`'s `asyncio_mode = "auto"` (set in Phase 0) means no `@pytest.mark.asyncio` marker is needed.
 
+**Post-review fix applied:** the `_FakeQuery`/`_FakeClient` doubles above were revised so `.eq()` records its calls and `_FakeClient.table()` caches one `_FakeQuery` per table name — otherwise a real bug like filtering on the wrong column would pass every test unchanged. Several tests now assert `client.table(...).eq_calls == [...]` to confirm the right column/value pairs were sent. A 10th test, `test_profile_dependent_functions_return_none_when_no_company_profile`, was added to cover the "no company_profile row" branch for the three profile-dependent functions. See `backend/tests/test_handlers.py` for the current, authoritative version.
+
 - [ ] **Step 3: Run tests to verify they fail**
 
 Run (from `backend/`, venv active): `pytest tests/test_handlers.py -v`
@@ -218,7 +220,7 @@ async def get_package_price(tenant_id: str, package_name: str) -> dict[str, Any]
         return None
     target = package_name.strip().lower()
     for package in profile.get("packages") or []:
-        if package.get("name", "").strip().lower() == target:
+        if (package.get("name") or "").strip().lower() == target:
             return package
     return None
 
@@ -243,7 +245,7 @@ async def get_faq(tenant_id: str, topic: str) -> dict[str, Any] | None:
         return None
     target = topic.strip().lower()
     for entry in profile.get("faq") or []:
-        if target in entry.get("question", "").lower():
+        if target in (entry.get("question") or "").lower():
             return entry
     return None
 
@@ -256,7 +258,7 @@ async def get_partners(tenant_id: str, category: str) -> list[dict[str, Any]] | 
     matches = [
         partner
         for partner in profile.get("partners") or []
-        if partner.get("category", "").strip().lower() == target
+        if (partner.get("category") or "").strip().lower() == target
     ]
     return matches or None
 
@@ -277,12 +279,12 @@ Note the type signature change from Phase 0: `get_partners` now returns `list[di
 - [ ] **Step 5: Run tests to verify they pass**
 
 Run: `pytest tests/test_handlers.py -v`
-Expected: all PASS (9 tests)
+Expected: all PASS (10 tests, after the post-review fix noted above)
 
 - [ ] **Step 6: Run the full suite**
 
 Run: `pytest -v` from `backend/`
-Expected: all tests pass (7 pre-existing minus the 1 deleted `test_stubs.py` test, plus 9 new = 15 total)
+Expected: all tests pass (7 pre-existing minus the 1 deleted `test_stubs.py` test, plus 10 new = 16 total)
 
 - [ ] **Step 7: Commit**
 

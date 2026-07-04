@@ -40,6 +40,7 @@ Sarbon/
         __init__.py
         stubs.py                   # 5 function-calling stubs from the spec
     tests/
+      conftest.py                  # sets fake TELEGRAM_BOT_TOKEN/SUPABASE_URL/SUPABASE_KEY for test runs
       test_config.py
       test_health.py
       test_dispatcher.py
@@ -275,9 +276,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    telegram_bot_token: str = "123456:TEST-fake-token-for-local-dev"
-    supabase_url: str = "https://example.supabase.co"
-    supabase_key: str = "test-service-role-key"
+    telegram_bot_token: str
+    supabase_url: str
+    supabase_key: str
     environment: str = "development"
 
 
@@ -286,15 +287,59 @@ def get_settings() -> Settings:
     return Settings()
 ```
 
-- [ ] **Step 8: Run test to verify it passes**
+`telegram_bot_token`, `supabase_url`, and `supabase_key` are required (no default) so a misconfigured deployment fails immediately with a clear `pydantic.ValidationError` instead of silently booting on fake credentials. Only `environment` (not a secret) gets a default.
+
+- [ ] **Step 8: Add the fail-fast test and a conftest so other tests don't need real secrets**
+
+```python
+# backend/tests/conftest.py
+import os
+
+os.environ.setdefault("TELEGRAM_BOT_TOKEN", "123456:TEST-fake-token-for-tests")
+os.environ.setdefault("SUPABASE_URL", "https://example.supabase.co")
+os.environ.setdefault("SUPABASE_KEY", "test-service-role-key")
+```
+
+This runs at module level, before pytest imports any test module, so later tasks' modules that construct `Settings()`/`Bot()` at import time still work in tests without a real `.env`. In production (Railway), no such file runs, so missing env vars fail loudly as intended.
+
+```python
+# backend/tests/test_config.py
+import pytest
+from pydantic import ValidationError
+
+from app.config import Settings
+
+
+def test_settings_reads_from_env(monkeypatch):
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "999:real-token")
+    monkeypatch.setenv("SUPABASE_URL", "https://tenant.supabase.co")
+    monkeypatch.setenv("SUPABASE_KEY", "secret-key")
+
+    settings = Settings()
+
+    assert settings.telegram_bot_token == "999:real-token"
+    assert settings.supabase_url == "https://tenant.supabase.co"
+    assert settings.supabase_key == "secret-key"
+
+
+def test_settings_requires_telegram_credentials(monkeypatch):
+    monkeypatch.delenv("TELEGRAM_BOT_TOKEN", raising=False)
+    monkeypatch.delenv("SUPABASE_URL", raising=False)
+    monkeypatch.delenv("SUPABASE_KEY", raising=False)
+
+    with pytest.raises(ValidationError):
+        Settings()
+```
+
+- [ ] **Step 9: Run tests to verify they pass**
 
 Run: `pytest tests/test_config.py -v`
-Expected: PASS
+Expected: 2 passed
 
-- [ ] **Step 9: Commit**
+- [ ] **Step 10: Commit**
 
 ```bash
-git add backend/requirements.txt backend/pyproject.toml backend/.env.example backend/app/__init__.py backend/app/config.py backend/tests/test_config.py
+git add backend/requirements.txt backend/pyproject.toml backend/.env.example backend/app/__init__.py backend/app/config.py backend/tests/conftest.py backend/tests/test_config.py
 git commit -m "feat: add backend scaffolding and settings"
 ```
 

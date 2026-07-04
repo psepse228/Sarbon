@@ -22,4 +22,4 @@ def test_settings_requires_telegram_credentials(monkeypatch):
     monkeypatch.delenv("SUPABASE_KEY", raising=False)
 
     with pytest.raises(ValidationError):
-        Settings()
+        Settings(_env_file=None)

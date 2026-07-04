@@ -23,11 +23,13 @@ COMPANY_PROFILE_ROW = {
 class _FakeQuery:
     def __init__(self, data):
         self._data = data
+        self.eq_calls = []
 
     def select(self, *_args, **_kwargs):
         return self
 
-    def eq(self, *_args, **_kwargs):
+    def eq(self, column, value):
+        self.eq_calls.append((column, value))
         return self
 
     def limit(self, *_args, **_kwargs):
@@ -44,9 +46,12 @@ class _FakeQuery:
 class _FakeClient:
     def __init__(self, table_data):
         self._table_data = table_data
+        self._queries = {}
 
     def table(self, name):
-        return _FakeQuery(self._table_data.get(name, []))
+        if name not in self._queries:
+            self._queries[name] = _FakeQuery(self._table_data.get(name, []))
+        return self._queries[name]
 
 
 def _client_with(**table_data):
@@ -60,6 +65,7 @@ async def test_get_package_price_returns_matching_package(monkeypatch):
     result = await handlers.get_package_price(TENANT_ID, "Стандарт")
 
     assert result == {"name": "Стандарт", "price": 250000, "currency": "RUB"}
+    assert client.table("company_profile").eq_calls == [("tenant_id", TENANT_ID)]
 
 
 async def test_get_package_price_returns_none_when_package_not_found(monkeypatch):
@@ -80,6 +86,10 @@ async def test_check_date_availability_returns_cached_row(monkeypatch):
     result = await handlers.check_date_availability(TENANT_ID, "2026-08-15")
 
     assert result == {"is_available": False, "event_details": "Забронировано"}
+    assert client.table("availability_cache").eq_calls == [
+        ("tenant_id", TENANT_ID),
+        ("date", "2026-08-15"),
+    ]
 
 
 async def test_check_date_availability_returns_none_when_not_cached(monkeypatch):
@@ -134,3 +144,12 @@ async def test_escalate_to_human_inserts_and_returns_row(monkeypatch):
     result = await handlers.escalate_to_human("conv-1", "price_negotiation")
 
     assert result == {"conversation_id": "conv-1", "reason": "price_negotiation"}
+
+
+async def test_profile_dependent_functions_return_none_when_no_company_profile(monkeypatch):
+    client = _client_with(company_profile=[])
+    monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)
+
+    assert await handlers.get_package_price(TENANT_ID, "Стандарт") is None
+    assert await handlers.get_faq(TENANT_ID, "алкоголь") is None
+    assert await handlers.get_partners(TENANT_ID, "Кортеж") is None

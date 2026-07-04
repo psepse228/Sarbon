@@ -22,7 +22,7 @@ async def get_package_price(tenant_id: str, package_name: str) -> dict[str, Any]
         return None
     target = package_name.strip().lower()
     for package in profile.get("packages") or []:
-        if package.get("name", "").strip().lower() == target:
+        if (package.get("name") or "").strip().lower() == target:
             return package
     return None
 
@@ -47,7 +47,7 @@ async def get_faq(tenant_id: str, topic: str) -> dict[str, Any] | None:
         return None
     target = topic.strip().lower()
     for entry in profile.get("faq") or []:
-        if target in entry.get("question", "").lower():
+        if target in (entry.get("question") or "").lower():
             return entry
     return None
 
@@ -60,7 +60,7 @@ async def get_partners(tenant_id: str, category: str) -> list[dict[str, Any]] | 
     matches = [
         partner
         for partner in profile.get("partners") or []
-        if partner.get("category", "").strip().lower() == target
+        if (partner.get("category") or "").strip().lower() == target
     ]
     return matches or None
 

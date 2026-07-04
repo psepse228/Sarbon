@@ -27,6 +27,14 @@ async def get_package_price(tenant_id: str, package_name: str) -> dict[str, Any]
     return None
 
 
+async def list_packages(tenant_id: str) -> list[dict[str, Any]] | None:
+    profile = _fetch_company_profile(tenant_id)
+    if profile is None:
+        return None
+    packages = profile.get("packages") or []
+    return packages or None
+
+
 async def check_date_availability(tenant_id: str, date: str) -> dict[str, Any] | None:
     client = get_supabase_client()
     response = (

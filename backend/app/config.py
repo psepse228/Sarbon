@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     telegram_bot_token: str
     supabase_url: str
     supabase_key: str
+    openai_api_key: str
+    admin_telegram_chat_id: str | None = None
     environment: str = "development"
 
 

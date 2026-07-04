@@ -77,6 +77,24 @@ async def test_get_package_price_returns_none_when_package_not_found(monkeypatch
     assert result is None
 
 
+async def test_list_packages_returns_all_packages(monkeypatch):
+    client = _client_with(company_profile=[COMPANY_PROFILE_ROW])
+    monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)
+
+    result = await handlers.list_packages(TENANT_ID)
+
+    assert result == COMPANY_PROFILE_ROW["packages"]
+
+
+async def test_list_packages_returns_none_when_no_packages(monkeypatch):
+    client = _client_with(company_profile=[{"packages": [], "faq": [], "partners": []}])
+    monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)
+
+    result = await handlers.list_packages(TENANT_ID)
+
+    assert result is None
+
+
 async def test_check_date_availability_returns_cached_row(monkeypatch):
     client = _client_with(
         availability_cache=[{"is_available": False, "event_details": "Забронировано"}]
@@ -151,5 +169,6 @@ async def test_profile_dependent_functions_return_none_when_no_company_profile(m
     monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)
 
     assert await handlers.get_package_price(TENANT_ID, "Стандарт") is None
+    assert await handlers.list_packages(TENANT_ID) is None
     assert await handlers.get_faq(TENANT_ID, "алкоголь") is None
     assert await handlers.get_partners(TENANT_ID, "Кортеж") is None

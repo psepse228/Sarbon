@@ -1,6 +1,4 @@
-from aiogram import Bot, Dispatcher, Router
-from aiogram.client.default import DefaultBotProperties
-from aiogram.enums import ParseMode
+from aiogram import Bot, Dispatcher, F, Router
 from aiogram.types import Message
 
 from app.config import get_settings
@@ -8,17 +6,14 @@ from app.config import get_settings
 router = Router()
 
 
-@router.message()
+@router.message(F.text)
 async def echo_handler(message: Message) -> None:
-    await message.answer(message.text or "")
+    await message.answer(message.text)
 
 
 def create_bot() -> Bot:
     settings = get_settings()
-    return Bot(
-        token=settings.telegram_bot_token,
-        default=DefaultBotProperties(parse_mode=ParseMode.HTML),
-    )
+    return Bot(token=settings.telegram_bot_token)
 
 
 def create_dispatcher() -> Dispatcher:

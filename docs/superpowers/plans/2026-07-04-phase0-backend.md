@@ -328,8 +328,10 @@ def test_settings_requires_telegram_credentials(monkeypatch):
     monkeypatch.delenv("SUPABASE_KEY", raising=False)
 
     with pytest.raises(ValidationError):
-        Settings()
+        Settings(_env_file=None)
 ```
+
+`_env_file=None` disables pydantic-settings' `.env` file fallback for this one instantiation, so the test's "missing config" assertion stays deterministic regardless of whether a real `backend/.env` (with actual secrets, gitignored) exists on disk — which it will, once real Supabase/Telegram credentials are added for later phases.
 
 - [ ] **Step 9: Run tests to verify they pass**
 
@@ -681,13 +683,18 @@ def test_get_supabase_client_uses_settings(monkeypatch):
     create_client_mock = MagicMock(return_value="fake-client")
     monkeypatch.setattr(db, "create_client", create_client_mock)
 
-    client = db.get_supabase_client()
+    try:
+        client = db.get_supabase_client()
 
-    assert client == "fake-client"
-    create_client_mock.assert_called_once_with(
-        "https://example.supabase.co", "test-service-role-key"
-    )
+        assert client == "fake-client"
+        create_client_mock.assert_called_once_with(
+            "https://example.supabase.co", "test-service-role-key"
+        )
+    finally:
+        db.get_supabase_client.cache_clear()
 ```
+
+The `finally` clears the `lru_cache` after the test too — otherwise the mocked `"fake-client"` value stays cached for the rest of the pytest process and leaks into any later test that calls `get_supabase_client()`.
 
 - [ ] **Step 2: Run test to verify it fails**
 

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Golos_Text, Unbounded } from "next/font/google";
 
 import { TabBar } from "@/components/TabBar";
@@ -23,6 +23,16 @@ const golosText = Golos_Text({
 export const metadata: Metadata = {
   title: "Cortège — панель владельца",
   description: "Управление пакетами, вопросами и партнёрами заведения",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Cortège",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0b0d12",
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

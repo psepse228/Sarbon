@@ -452,9 +452,7 @@ Expected: FAIL with `ModuleNotFoundError: No module named 'app.bot.dispatcher'`
 
 ```python
 # backend/app/bot/dispatcher.py
-from aiogram import Bot, Dispatcher, Router
-from aiogram.client.default import DefaultBotProperties
-from aiogram.enums import ParseMode
+from aiogram import Bot, Dispatcher, F, Router
 from aiogram.types import Message
 
 from app.config import get_settings
@@ -462,17 +460,14 @@ from app.config import get_settings
 router = Router()
 
 
-@router.message()
+@router.message(F.text)
 async def echo_handler(message: Message) -> None:
-    await message.answer(message.text or "")
+    await message.answer(message.text)
 
 
 def create_bot() -> Bot:
     settings = get_settings()
-    return Bot(
-        token=settings.telegram_bot_token,
-        default=DefaultBotProperties(parse_mode=ParseMode.HTML),
-    )
+    return Bot(token=settings.telegram_bot_token)
 
 
 def create_dispatcher() -> Dispatcher:
@@ -484,6 +479,8 @@ def create_dispatcher() -> Dispatcher:
 bot = create_bot()
 dp = create_dispatcher()
 ```
+
+No `parse_mode` default is set — plain-text echo needs no HTML/Markdown parsing, and defaulting to HTML would make Telegram reject any echoed text containing `<`, `&`, or unbalanced tags. The handler is filtered to `F.text` so non-text updates (photos, stickers, voice) never reach it — echoing an empty string for those would also be rejected by Telegram's `sendMessage`.
 
 - [ ] **Step 5: Run test to verify it passes**
 

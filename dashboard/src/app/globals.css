@@ -1,0 +1,238 @@
+:root {
+  --color-bg: #080c12;
+  --color-surface: #0f151d;
+  --color-surface-raised: #141c26;
+  --color-border: #1e2a38;
+  --color-white: #f1f5f9;
+  --color-sky: #38bdf8;
+  --color-indigo: #818cf8;
+  --color-gray: #94a3b8;
+  --color-danger: #f87171;
+  --font-heading: var(--font-syne), sans-serif;
+  --font-body: var(--font-dm-sans), sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-white);
+  font-family: var(--font-body);
+}
+
+body {
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+a {
+  color: var(--color-sky);
+}
+
+button {
+  font-family: var(--font-body);
+}
+
+input,
+textarea,
+select {
+  font-family: var(--font-body);
+  background: var(--color-surface);
+  color: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.95rem;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--color-sky);
+  outline-offset: 1px;
+}
+
+::placeholder {
+  color: var(--color-gray);
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1rem 1rem 4rem;
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.card-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.field label {
+  font-size: 0.8rem;
+  color: var(--color-gray);
+}
+
+.field-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.field-row > .field {
+  flex: 1;
+}
+
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--color-sky);
+  color: #04121c;
+}
+
+.btn-secondary {
+  background: var(--color-surface-raised);
+  color: var(--color-white);
+  border: 1px solid var(--color-border);
+}
+
+.btn-danger {
+  background: transparent;
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-indigo);
+  border: 1px dashed var(--color-indigo);
+  width: 100%;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.8rem;
+  color: var(--color-gray);
+}
+
+.nav {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 1rem;
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  background: var(--color-bg);
+  z-index: 10;
+}
+
+.nav a {
+  color: var(--color-gray);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.nav a[data-active="true"] {
+  color: var(--color-bg);
+  background: var(--color-sky);
+}
+
+.status-banner {
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.status-banner.error {
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
+}
+
+.status-banner.success {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid var(--color-sky);
+  color: var(--color-sky);
+}
+
+.status-banner.dev {
+  background: rgba(129, 140, 248, 0.12);
+  border: 1px solid var(--color-indigo);
+  color: var(--color-indigo);
+}
+
+.muted {
+  color: var(--color-gray);
+  font-size: 0.85rem;
+}
+
+textarea.policies {
+  min-height: 240px;
+  resize: vertical;
+}
+
+.list-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+}

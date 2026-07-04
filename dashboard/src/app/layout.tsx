@@ -40,6 +40,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ru" className={`${unbounded.variable} ${golosText.variable}`}>
       <body>
+        <video className="app-background-video" src="/background.mp4" autoPlay muted loop playsInline aria-hidden="true" />
+        <span className="app-background-overlay" aria-hidden="true" />
         <TelegramInit />
         <AuthGate>
           <TopHeader />

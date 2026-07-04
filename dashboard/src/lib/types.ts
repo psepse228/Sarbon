@@ -51,3 +51,36 @@ export interface CompanyProfile {
   policies: string;
   updatedAt: string | null;
 }
+
+export interface Escalation {
+  id: string;
+  conversationId: string;
+  reason: string;
+  notifiedOwner: boolean;
+  createdAt: string;
+  clientId: string;
+  channel: string;
+}
+
+export interface AvailabilityEntry {
+  id: string;
+  date: string;
+  isAvailable: boolean;
+  eventDetails: string;
+}
+
+export interface ConversationSummary {
+  id: string;
+  clientId: string;
+  channel: string;
+  status: string;
+  lastMessageAt: string | null;
+  createdAt: string;
+}
+
+export interface ConversationMessage {
+  id: string;
+  role: string;
+  content: string;
+  createdAt: string;
+}

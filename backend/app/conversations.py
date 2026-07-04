@@ -33,7 +33,7 @@ def save_message(conversation_id: str, role: str, content: str) -> None:
     ).execute()
 
 
-def get_recent_messages(conversation_id: str, limit: int = 20) -> list[dict[str, Any]]:
+def get_recent_messages(conversation_id: str, limit: int = 30) -> list[dict[str, Any]]:
     client = get_supabase_client()
     response = (
         client.table("messages")

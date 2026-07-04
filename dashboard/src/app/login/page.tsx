@@ -44,7 +44,11 @@ export default function LoginPage() {
     script.setAttribute("data-size", "large");
     script.setAttribute("data-radius", "12");
     script.setAttribute("data-onauth", "onTelegramAuth(user)");
-    script.setAttribute("data-request-access", "write");
+    // Deliberately NOT setting data-request-access="write" — we only need
+    // to identify the owner, not send them messages as this bot. Requesting
+    // write access makes Telegram try to deliver a confirmation *from the
+    // bot*, which silently fails if the user has never started a chat with
+    // it (bots can't message users who haven't messaged them first).
     container.appendChild(script);
 
     return () => {

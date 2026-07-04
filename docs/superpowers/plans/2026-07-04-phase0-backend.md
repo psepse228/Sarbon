@@ -24,6 +24,7 @@ Sarbon/
     requirements.txt
     .env.example
     Procfile                      # Railway start command
+    runtime.txt                   # pins Railway's Python build to match local dev (3.12)
     app/
       __init__.py
       config.py                   # Settings (env vars) via pydantic-settings

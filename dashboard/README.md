@@ -29,6 +29,25 @@ npm run lint
 | `TELEGRAM_BOT_TOKEN` | Same bot token as `backend/.env` — used to verify the HMAC on incoming `initData`. |
 | `TELEGRAM_OWNER_TENANT_MAP` | **Pilot stopgap**, see "Open questions" below. JSON object `{ "<telegram_user_id>": "<tenant_id>" }`. |
 | `DEV_BYPASS_INIT_DATA` | Local dev only. Set to a Telegram user id (e.g. one present in `TELEGRAM_OWNER_TENANT_MAP`) to exercise the app in a plain browser outside Telegram, since real `initData` can only be produced by an actual Telegram client. **Never set in a deployed environment** — `src/lib/telegram/auth.ts` uses it to skip HMAC validation entirely. |
+| `SESSION_SECRET` | Random 32+ byte secret (`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`) signing the PWA/browser session cookie set by `/api/auth/telegram-login`. Unrelated to `TELEGRAM_BOT_TOKEN`. |
+
+### PWA / standalone-app login (Telegram Login Widget)
+
+The dashboard is installable as a PWA (`app/manifest.ts`, `app/icon.png`,
+`app/apple-icon.png`) so it can run outside Telegram's Mini App webview —
+but outside Telegram there's no `initData`. `src/lib/telegram/loginWidget.ts`
+validates the [Telegram Login Widget](https://core.telegram.org/widgets/login)
+callback instead (a *different* HMAC construction than Mini App `initData` —
+see the doc comment), and `/api/auth/telegram-login` exchanges it for a
+signed session cookie (`src/lib/session.ts`). `authenticateOwner()` now
+checks the session cookie first, falling back to the `initData` header —
+both paths resolve through the same `TELEGRAM_OWNER_TENANT_MAP` stopgap.
+
+**Required one-time setup**: message `@BotFather` → `/setdomain` → select
+the bot → give it the dashboard's domain (e.g. `sarbon-khaki.vercel.app`).
+The Login Widget button silently refuses to render on any domain the bot
+hasn't been told about — this isn't scriptable via the Bot API, it's a
+BotFather-chat-only step.
 
 To run the dashboard against the real pilot tenant locally:
 

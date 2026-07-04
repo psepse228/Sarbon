@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Golos_Text, Unbounded } from "next/font/google";
 
+import { AuthGate } from "@/components/AuthGate";
 import { TabBar } from "@/components/TabBar";
 import { TelegramInit } from "@/components/TelegramInit";
 import { TopHeader } from "@/components/TopHeader";
@@ -40,9 +41,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ru" className={`${unbounded.variable} ${golosText.variable}`}>
       <body>
         <TelegramInit />
-        <TopHeader />
-        <main className="container">{children}</main>
-        <TabBar />
+        <AuthGate>
+          <TopHeader />
+          <main className="container">{children}</main>
+          <TabBar />
+        </AuthGate>
       </body>
     </html>
   );

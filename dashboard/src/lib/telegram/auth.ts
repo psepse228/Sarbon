@@ -1,5 +1,6 @@
 import "server-only";
 
+import { verifySessionToken } from "../session";
 import { InitDataValidationError, validateInitData } from "./initData";
 
 export class AuthError extends Error {
@@ -31,7 +32,9 @@ export interface AuthenticatedOwner {
  * lookup once that schema question is answered — nothing else in the
  * dashboard needs to change.
  */
-function resolveTenantId(telegramUserId: number): string {
+export const SESSION_COOKIE_NAME = "cortege_session";
+
+export function resolveTenantId(telegramUserId: number): string {
   const raw = process.env.TELEGRAM_OWNER_TENANT_MAP;
   if (!raw) {
     throw new AuthError(
@@ -57,13 +60,41 @@ function resolveTenantId(telegramUserId: number): string {
   return tenantId;
 }
 
+function readCookie(request: Request, name: string): string | null {
+  const header = request.headers.get("cookie") ?? "";
+  for (const part of header.split(";")) {
+    const [key, ...rest] = part.trim().split("=");
+    if (key === name) return decodeURIComponent(rest.join("="));
+  }
+  return null;
+}
+
+/**
+ * Tries the PWA/browser login path: a session cookie set by
+ * /api/auth/telegram-login after a successful Telegram Login Widget
+ * round-trip (see src/lib/session.ts). Returns null (not an error) when
+ * absent or invalid, so the caller can fall through to the Mini App
+ * initData path.
+ */
+function tryAuthenticateFromSession(request: Request): AuthenticatedOwner | null {
+  const token = readCookie(request, SESSION_COOKIE_NAME);
+  if (!token) return null;
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) return null;
+  const payload = verifySessionToken(token, secret);
+  if (!payload) return null;
+  return { telegramUserId: payload.telegramUserId, tenantId: payload.tenantId };
+}
+
 /**
  * Extracts and validates the caller's identity from an incoming API request.
  *
- * Expects the client to send raw Telegram `initData` in an
- * `Authorization: tma <initData>` header — the scheme Telegram's own docs
- * recommend for Mini Apps talking to a backend
- * (https://core.telegram.org/bots/webapps#validating-data-received-via-the-mini-app).
+ * Two supported paths:
+ * 1. PWA/browser: a `cortege_session` cookie set via the Telegram Login
+ *    Widget flow (see /login and /api/auth/telegram-login).
+ * 2. Telegram Mini App: raw `initData` in an `Authorization: tma <initData>`
+ *    header — the scheme Telegram's own docs recommend
+ *    (https://core.telegram.org/bots/webapps#validating-data-received-via-the-mini-app).
  *
  * `DEV_BYPASS_INIT_DATA` (local dev only, never set in a deployed env) lets
  * you exercise the dashboard from a plain browser outside the Telegram
@@ -78,6 +109,9 @@ export function authenticateOwner(request: Request): AuthenticatedOwner {
     }
     return { telegramUserId, tenantId: resolveTenantId(telegramUserId) };
   }
+
+  const sessionOwner = tryAuthenticateFromSession(request);
+  if (sessionOwner) return sessionOwner;
 
   const authHeader = request.headers.get("authorization") ?? "";
   const [scheme, initDataRaw] = authHeader.split(" ");

@@ -68,9 +68,8 @@ export default function HomePage() {
   return (
     <div>
       <section className="hero">
-        <span className="hero-orb hero-orb-a" aria-hidden="true" />
-        <span className="hero-orb hero-orb-b" aria-hidden="true" />
-        <span className="hero-orb hero-orb-c" aria-hidden="true" />
+        <video className="hero-video" src="/hero.mp4" autoPlay muted loop playsInline aria-hidden="true" />
+        <span className="hero-overlay" aria-hidden="true" />
         <p className="hero-eyebrow">Добро пожаловать в</p>
         <h1 className="hero-title">Cortège</h1>
         <div className="hero-stats">

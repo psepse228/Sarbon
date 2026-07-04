@@ -15,6 +15,10 @@ function backTarget(pathname: string): { href: string; label: string } | null {
 
 export function TopHeader() {
   const pathname = usePathname();
+  if (pathname === "/login") {
+    return <header className="top-header" />;
+  }
+
   const back = backTarget(pathname);
 
   return (

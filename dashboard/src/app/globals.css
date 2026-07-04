@@ -529,12 +529,10 @@ textarea.policies {
 
 .hero {
   position: relative;
-  border-radius: 26px;
-  padding: 1.8rem 1.5rem;
-  margin-bottom: 1.4rem;
+  margin: 0 -1.1rem 1.4rem;
+  padding: 1.6rem 1.5rem 1.7rem;
   overflow: hidden;
   background: linear-gradient(160deg, #132018 0%, #0b0d12 55%);
-  border: 1px solid var(--color-hairline);
 }
 
 .hero-video {
@@ -583,6 +581,15 @@ textarea.policies {
   font-size: 0.76rem;
   color: var(--color-text-soft);
   margin-top: 0.15rem;
+}
+
+.hero-powered-by {
+  position: relative;
+  display: block;
+  margin-top: 1.4rem;
+  font-size: 0.72rem;
+  color: var(--color-text-faint);
+  letter-spacing: 0.02em;
 }
 
 .stat-tap {

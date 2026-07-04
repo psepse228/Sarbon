@@ -70,7 +70,7 @@ export default function HomePage() {
       <section className="hero">
         <video className="hero-video" src="/hero.mp4" autoPlay muted loop playsInline aria-hidden="true" />
         <span className="hero-overlay" aria-hidden="true" />
-        <p className="hero-eyebrow">Добро пожаловать в</p>
+        <p className="hero-eyebrow">Welcome to</p>
         <h1 className="hero-title">Cortège</h1>
         <div className="hero-stats">
           <div>
@@ -82,6 +82,7 @@ export default function HomePage() {
             <div className="hero-stat-label">вопросов</div>
           </div>
         </div>
+        <span className="hero-powered-by">powered by Solura</span>
       </section>
 
       {!inTelegram && <DevModeBanner />}

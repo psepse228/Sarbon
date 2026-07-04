@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { ErrorBanner } from "@/components/StatusBanner";
+import { SendIcon } from "@/components/icons";
 import { tmaFetch } from "@/lib/telegram/client";
 
 interface ChatMessage {
@@ -49,17 +50,14 @@ export default function AssistantPage() {
   return (
     <div>
       <h1>Ассистент</h1>
-      <p className="muted">
-        Спросите, как идут дела, или дайте указание — например про акцию, — и бот для клиентов учтёт это.
-      </p>
+      <p className="muted">Спросите, как идут дела, или дайте указание, которое учтёт бот для клиентов.</p>
 
       {error && <ErrorBanner message={error} />}
 
       {messages.length === 0 && (
-        <div className="card">
-          <p className="muted" style={{ marginBottom: "0.9rem" }}>Попробуйте спросить:</p>
+        <div className="chat-suggestions">
           {SUGGESTIONS.map((s) => (
-            <button key={s} className="btn btn-secondary" style={{ width: "100%", marginBottom: "0.6rem", textAlign: "left" }} onClick={() => send(s)}>
+            <button key={s} className="chat-suggestion" onClick={() => send(s)}>
               {s}
             </button>
           ))}
@@ -89,11 +87,11 @@ export default function AssistantPage() {
               send(input);
             }
           }}
-          placeholder="Напишите вопрос или указание…"
+          placeholder="Напишите сообщение…"
           rows={1}
         />
-        <button className="btn btn-primary" onClick={() => send(input)} disabled={sending || !input.trim()}>
-          Отправить
+        <button className="chat-send-btn" onClick={() => send(input)} disabled={sending || !input.trim()} aria-label="Отправить">
+          <SendIcon />
         </button>
       </div>
     </div>

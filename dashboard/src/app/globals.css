@@ -598,49 +598,112 @@ textarea.policies {
   transform: scale(0.96);
 }
 
-/* --- Assistant chat --- */
+/* --- Assistant chat (ChatGPT-like: plain assistant text, bubble only for the user, floating pill input) --- */
+
+.chat-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.2rem;
+}
+
+.chat-suggestion {
+  text-align: left;
+  background: var(--color-surface);
+  border: 1px solid var(--color-hairline);
+  border-radius: 16px;
+  padding: 0.8rem 1rem;
+  font-size: 0.88rem;
+  color: var(--color-text-soft);
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.chat-suggestion:active {
+  background: var(--color-surface-raised);
+  transform: scale(0.98);
+}
 
 .chat-log {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  gap: 1.3rem;
+  margin-bottom: 1.5rem;
 }
 
 .chat-bubble {
-  max-width: 85%;
-  padding: 0.75rem 1rem;
-  border-radius: 16px;
-  font-size: 0.92rem;
-  line-height: 1.45;
+  font-size: 0.95rem;
+  line-height: 1.6;
   white-space: pre-wrap;
 }
 
 .chat-bubble[data-role="user"] {
   align-self: flex-end;
-  background: var(--color-accent);
-  color: #04140e;
-  border-bottom-right-radius: 4px;
+  max-width: 85%;
+  background: var(--color-surface-raised);
+  padding: 0.65rem 1rem;
+  border-radius: 18px;
+  border-bottom-right-radius: 5px;
 }
 
 .chat-bubble[data-role="assistant"] {
-  align-self: flex-start;
-  background: var(--color-surface);
-  border: 1px solid var(--color-hairline);
-  border-bottom-left-radius: 4px;
+  align-self: stretch;
+  color: var(--color-text);
+  padding-right: 0.5rem;
 }
 
 .chat-input-row {
   display: flex;
-  gap: 0.5rem;
   align-items: flex-end;
+  gap: 0.4rem;
   position: sticky;
   bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  background: var(--color-surface);
+  border: 1px solid var(--color-hairline);
+  border-radius: 24px;
+  padding: 0.35rem 0.35rem 0.35rem 1.1rem;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.4);
 }
 
 .chat-input-row textarea {
   flex: 1;
+  border: none;
+  background: transparent;
   resize: none;
-  min-height: 44px;
-  max-height: 120px;
+  min-height: 24px;
+  max-height: 100px;
+  padding: 0.55rem 0;
+  width: 100%;
+}
+
+.chat-input-row textarea:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.chat-send-btn {
+  width: 40px;
+  height: 40px;
+  min-height: 40px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-accent);
+  color: #04140e;
+  border: none;
+  flex-shrink: 0;
+  cursor: pointer;
+  padding: 0;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.chat-send-btn:active {
+  transform: scale(0.92);
+}
+
+.chat-send-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }

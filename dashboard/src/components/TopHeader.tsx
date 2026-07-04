@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 import { ChevronLeftIcon } from "@/components/icons";
 
-const MAIN_TABS = ["/", "/assistant", "/escalations", "/availability", "/more"];
+const MAIN_TABS = ["/", "/assistant", "/availability", "/more"];
 
 function backTarget(pathname: string): { href: string; label: string } | null {
   if (MAIN_TABS.includes(pathname)) return null;

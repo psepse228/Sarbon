@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { ChatIcon, ChevronRightIcon, DocumentIcon, QuestionIcon, TagIcon, UsersIcon } from "@/components/icons";
+import { BellIcon, ChatIcon, ChevronRightIcon, DocumentIcon, QuestionIcon, TagIcon, UsersIcon } from "@/components/icons";
 
 const VENUE_LINKS = [
   { href: "/packages", label: "Пакеты и цены", Icon: TagIcon },
@@ -9,7 +9,10 @@ const VENUE_LINKS = [
   { href: "/policies", label: "Политики", Icon: DocumentIcon },
 ];
 
-const ACTIVITY_LINKS = [{ href: "/conversations", label: "Диалоги с клиентами", Icon: ChatIcon }];
+const ACTIVITY_LINKS = [
+  { href: "/conversations", label: "Диалоги с клиентами", Icon: ChatIcon },
+  { href: "/escalations", label: "Эскалации", Icon: BellIcon },
+];
 
 function LinkRow({ href, label, Icon }: { href: string; label: string; Icon: typeof TagIcon }) {
   return (

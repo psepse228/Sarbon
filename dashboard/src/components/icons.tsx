@@ -118,6 +118,15 @@ export function ChatIcon({ className }: IconProps) {
   );
 }
 
+export function SendIcon({ className }: IconProps) {
+  return (
+    <svg {...base} width={18} height={18} className={className}>
+      <path d="M11 17.5V6.2" />
+      <path d="M6 10.5 11 5.5l5 5" />
+    </svg>
+  );
+}
+
 export function SparkleIcon({ className }: IconProps) {
   return (
     <svg {...base} className={className}>

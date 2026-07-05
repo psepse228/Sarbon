@@ -15,12 +15,6 @@ const SECTIONS = [
   { href: "/partners", label: "Партнёры", countKey: "partners" as const, Icon: UsersIcon },
 ];
 
-const QUICK_ACTIONS = [
-  { href: "/packages", label: "Пакеты", Icon: TagIcon, primary: true },
-  { href: "/faq", label: "Вопросы", Icon: QuestionIcon },
-  { href: "/partners", label: "Партнёры", Icon: UsersIcon },
-];
-
 interface Stats {
   openEscalations: number;
   totalConversations: number;
@@ -101,17 +95,6 @@ export default function HomePage() {
           </div>
         </div>
       )}
-
-      <div className="icon-actions">
-        {QUICK_ACTIONS.map(({ href, label, Icon, primary }) => (
-          <Link key={href} href={href} className="icon-action" data-primary={primary}>
-            <span className="icon-action-circle">
-              <Icon />
-            </span>
-            <span className="icon-action-label">{label}</span>
-          </Link>
-        ))}
-      </div>
 
       <div className="card">
         <div className="card-title-row">

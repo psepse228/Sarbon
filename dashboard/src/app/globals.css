@@ -432,56 +432,6 @@ select:focus {
   color: var(--color-text);
 }
 
-/* --- Circular icon action (WorldFirst Top up / Send / Statement row) --- */
-
-.icon-actions {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin: 1.4rem 0;
-}
-
-.icon-action {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.45rem;
-  flex: 1;
-  color: var(--color-text-soft);
-}
-
-.icon-action-circle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 52px;
-  height: 52px;
-  border-radius: 999px;
-  background: var(--color-surface-raised);
-  color: var(--color-text);
-  transition: transform 0.1s ease, background-color 0.15s ease;
-}
-
-.icon-action:active .icon-action-circle {
-  transform: scale(0.9);
-  background: var(--color-hairline);
-}
-
-.icon-action[data-primary="true"]:active .icon-action-circle {
-  background: var(--color-accent-strong);
-}
-
-.icon-action[data-primary="true"] .icon-action-circle {
-  background: var(--color-accent);
-  color: #04140e;
-  box-shadow: 0 10px 20px -8px rgba(52, 211, 153, 0.55);
-}
-
-.icon-action-label {
-  font-size: 0.74rem;
-  font-weight: 600;
-}
-
 /* --- Pill / stat chip --- */
 
 .pill {

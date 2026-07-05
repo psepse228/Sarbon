@@ -50,8 +50,24 @@ SYSTEM_PROMPT_BASE = (
 )
 
 
-def _system_message(active_notice: str | None = None) -> dict[str, str]:
+def _system_message(
+    active_notice: str | None = None, company_info: dict[str, str] | None = None
+) -> dict[str, str]:
     content = f"{SYSTEM_PROMPT_BASE}\nСегодняшняя дата: {date.today().isoformat()}."
+    if company_info:
+        lines = []
+        if company_info.get("name"):
+            lines.append(f"Название: {company_info['name']}")
+        if company_info.get("address"):
+            lines.append(f"Адрес: {company_info['address']}")
+        if company_info.get("phone"):
+            lines.append(f"Телефон: {company_info['phone']}")
+        if company_info.get("socials"):
+            lines.append(f"Соцсети/сайт: {company_info['socials']}")
+        content += (
+            "\n\nО ЗАВЕДЕНИИ (используй при вопросах об адресе/контактах, не выдумывай "
+            "сверх этого):\n" + "\n".join(lines)
+        )
     if active_notice:
         content += (
             "\n\nАКТУАЛЬНОЕ ОБЪЯВЛЕНИЕ ОТ ВЛАДЕЛЬЦА (упоминай при уместных вопросах клиента, "
@@ -170,19 +186,22 @@ async def _summarize(client: AsyncOpenAI, older_messages: list[dict[str, str]]) 
 
 
 async def _build_messages(
-    client: AsyncOpenAI, history: list[dict[str, str]], active_notice: str | None
+    client: AsyncOpenAI,
+    history: list[dict[str, str]],
+    active_notice: str | None,
+    company_info: dict[str, str] | None,
 ) -> list[dict[str, Any]]:
     """Compacts long conversations so the model isn't handed a long run of raw,
     possibly-repetitive short turns — which was observed to make gpt-4o anchor on
     repeating its own last reply for later, unrelated questions. Older turns get
     folded into a short summary (via the cheap model) instead of growing forever."""
     if len(history) <= RECENT_WINDOW:
-        return [_system_message(active_notice), *history]
+        return [_system_message(active_notice, company_info), *history]
 
     older, recent = history[:-RECENT_WINDOW], history[-RECENT_WINDOW:]
     summary = await _summarize(client, older)
     return [
-        _system_message(active_notice),
+        _system_message(active_notice, company_info),
         {"role": "system", "content": f"Краткое содержание начала переписки с этим клиентом: {summary}"},
         *recent,
     ]
@@ -191,7 +210,8 @@ async def _build_messages(
 async def generate_reply(tenant_id: str, conversation_id: str, history: list[dict[str, str]]) -> str:
     client = get_openai_client()
     active_notice = await handlers.get_active_notice(tenant_id)
-    messages: list[dict[str, Any]] = await _build_messages(client, history, active_notice)
+    company_info = await handlers.get_company_info(tenant_id)
+    messages: list[dict[str, Any]] = await _build_messages(client, history, active_notice, company_info)
 
     for _ in range(MAX_TOOL_ROUNDS):
         response = await client.chat.completions.create(model=MODEL, messages=messages, tools=TOOLS)

@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { ErrorBanner } from "@/components/StatusBanner";
 import { useCompanyProfile } from "@/lib/useCompanyProfile";
 
@@ -28,6 +30,24 @@ export default function HomePage() {
       </section>
 
       {error && <ErrorBanner message={error} />}
+
+      {!loading && !error && (
+        <div className="card">
+          <div className="card-title-row">
+            <h3>Объявление для клиентов</h3>
+          </div>
+          {profile?.activeNotice ? (
+            <p style={{ marginBottom: "0.9rem" }}>{profile.activeNotice}</p>
+          ) : (
+            <p className="muted" style={{ marginBottom: "0.9rem" }}>
+              Сейчас нет активного объявления — бот отвечает клиентам по умолчанию.
+            </p>
+          )}
+          <Link href="/assistant" className="btn btn-ghost">
+            {profile?.activeNotice ? "Изменить в Ассистенте" : "Добавить через Ассистента"}
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

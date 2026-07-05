@@ -82,7 +82,18 @@ export async function fetchCompanyProfile(tenantId: string): Promise<CompanyProf
   };
 }
 
-async function upsertColumns(tenantId: string, columns: Record<string, unknown>): Promise<void> {
+type CompanyProfileColumn =
+  | "packages"
+  | "faq"
+  | "partners"
+  | "policies"
+  | "active_notice"
+  | "company_name"
+  | "address"
+  | "phone"
+  | "socials";
+
+async function upsertColumns(tenantId: string, columns: Partial<Record<CompanyProfileColumn, unknown>>): Promise<void> {
   const client = getServiceSupabaseClient();
 
   // Update-if-exists, else insert — company_profile has no unique

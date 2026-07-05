@@ -35,3 +35,10 @@ export const partnersArraySchema = z.array(partnerSchema);
 export const policiesSchema = z.object({
   policies: z.string(),
 });
+
+export const companyInfoSchema = z.object({
+  companyName: z.string(),
+  address: z.string(),
+  phone: z.string(),
+  socials: z.string(),
+});

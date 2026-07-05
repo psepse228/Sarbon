@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { CalendarIcon, GridIcon, HomeIcon, SparkleIcon } from "@/components/icons";
+import { AnalyticsIcon, GridIcon, HomeIcon, SparkleIcon } from "@/components/icons";
 
 const TABS = [
   { href: "/", label: "Обзор", Icon: HomeIcon },
+  { href: "/analytics", label: "Аналитика", Icon: AnalyticsIcon },
   { href: "/assistant", label: "Ассистент", Icon: SparkleIcon },
-  { href: "/availability", label: "Календарь", Icon: CalendarIcon },
   { href: "/more", label: "Ещё", Icon: GridIcon },
 ];
 

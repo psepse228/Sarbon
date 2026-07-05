@@ -5,11 +5,13 @@ import { usePathname } from "next/navigation";
 
 import { ChevronLeftIcon } from "@/components/icons";
 
-const MAIN_TABS = ["/", "/assistant", "/availability", "/more"];
+const MAIN_TABS = ["/", "/analytics", "/assistant", "/more"];
+const ANALYTICS_SUBPAGES = ["/conversations", "/escalations", "/faq"];
 
 function backTarget(pathname: string): { href: string; label: string } | null {
   if (MAIN_TABS.includes(pathname)) return null;
   if (pathname.startsWith("/conversations/")) return { href: "/conversations", label: "Диалоги" };
+  if (ANALYTICS_SUBPAGES.includes(pathname)) return { href: "/analytics", label: "Аналитика" };
   return { href: "/more", label: "Ещё" };
 }
 

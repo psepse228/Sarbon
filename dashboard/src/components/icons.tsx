@@ -127,6 +127,28 @@ export function SendIcon({ className }: IconProps) {
   );
 }
 
+export function AnalyticsIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M4 18V9.5" />
+      <path d="M11 18V4" />
+      <path d="M18 18v-6.5" />
+      <path d="M3.2 18h15.6" />
+    </svg>
+  );
+}
+
+export function BuildingIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <rect x="5" y="3.5" width="8.5" height="15" rx="1" />
+      <path d="M13.5 8.5h3.7v10h-3.7" />
+      <path d="M7.5 6.7h1.5M7.5 9.7h1.5M7.5 12.7h1.5M7.5 15.7h1.5" />
+      <path d="M15.6 11.7h1M15.6 14.7h1" />
+    </svg>
+  );
+}
+
 export function SparkleIcon({ className }: IconProps) {
   return (
     <svg {...base} className={className}>

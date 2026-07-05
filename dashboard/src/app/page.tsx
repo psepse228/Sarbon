@@ -4,21 +4,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { ErrorBanner } from "@/components/StatusBanner";
-import { ChevronRightIcon, DocumentIcon, QuestionIcon, TagIcon, UsersIcon } from "@/components/icons";
+import { BellIcon, ChatIcon, ChevronRightIcon, QuestionIcon } from "@/components/icons";
 import { tmaFetch } from "@/lib/telegram/client";
-import type { AvailabilityEntry, ConversationSummary, Escalation } from "@/lib/types";
+import type { ConversationSummary, Escalation } from "@/lib/types";
 import { useCompanyProfile } from "@/lib/useCompanyProfile";
-
-const SECTIONS = [
-  { href: "/packages", label: "Пакеты и цены", countKey: "packages" as const, Icon: TagIcon },
-  { href: "/faq", label: "Частые вопросы", countKey: "faq" as const, Icon: QuestionIcon },
-  { href: "/partners", label: "Партнёры", countKey: "partners" as const, Icon: UsersIcon },
-];
 
 interface Stats {
   openEscalations: number;
   totalConversations: number;
-  upcomingAvailable: number;
 }
 
 export default function HomePage() {
@@ -28,25 +21,21 @@ export default function HomePage() {
   useEffect(() => {
     (async () => {
       try {
-        const [escalationsRes, conversationsRes, availabilityRes] = await Promise.all([
+        const [escalationsRes, conversationsRes] = await Promise.all([
           tmaFetch("/api/escalations"),
           tmaFetch("/api/conversations"),
-          tmaFetch("/api/availability"),
         ]);
-        if (!escalationsRes.ok || !conversationsRes.ok || !availabilityRes.ok) return;
+        if (!escalationsRes.ok || !conversationsRes.ok) return;
 
         const escalations: Escalation[] = await escalationsRes.json();
         const conversations: ConversationSummary[] = await conversationsRes.json();
-        const availability: AvailabilityEntry[] = await availabilityRes.json();
-        const today = new Date().toISOString().slice(0, 10);
 
         setStats({
           openEscalations: escalations.filter((e) => !e.notifiedOwner).length,
           totalConversations: conversations.length,
-          upcomingAvailable: availability.filter((a) => a.isAvailable && a.date >= today).length,
         });
       } catch {
-        // Analytics is a nice-to-have on this page — a failure here shouldn't block the rest of it.
+        // This card is a nice-to-have on this page — a failure here shouldn't block the rest of it.
       }
     })();
   }, []);
@@ -74,62 +63,36 @@ export default function HomePage() {
 
       {error && <ErrorBanner message={error} />}
 
-      {stats && (
-        <div className="card">
-          <div className="card-title-row">
-            <h3>Аналитика</h3>
-          </div>
-          <div style={{ display: "flex", gap: "1.6rem" }}>
-            <Link href="/escalations" className="stat-tap">
-              <div className="hero-stat-value">{stats.openEscalations}</div>
-              <div className="hero-stat-label">открытых эскалаций</div>
-            </Link>
-            <Link href="/conversations" className="stat-tap">
-              <div className="hero-stat-value">{stats.totalConversations}</div>
-              <div className="hero-stat-label">диалогов</div>
-            </Link>
-            <Link href="/availability" className="stat-tap">
-              <div className="hero-stat-value">{stats.upcomingAvailable}</div>
-              <div className="hero-stat-label">свободных дат</div>
-            </Link>
-          </div>
-        </div>
-      )}
-
       <div className="card">
         <div className="card-title-row">
-          <h3>Статус профиля</h3>
+          <h3>Работа с клиентами</h3>
         </div>
-        {loading ? (
-          <p className="muted">Загрузка…</p>
-        ) : profile ? (
-          <>
-            <p className="muted" style={{ marginBottom: "0.9rem" }}>
-              Последнее обновление:{" "}
-              {profile.updatedAt ? new Date(profile.updatedAt).toLocaleString("ru-RU") : "ещё не сохранялось"}
-            </p>
-            <div className="hub-card" style={{ background: "transparent", border: "none", padding: 0 }}>
-              {SECTIONS.map((section) => (
-                <Link key={section.href} href={section.href} className="hub-row">
-                  <span className="hub-row-icon">
-                    <section.Icon />
-                  </span>
-                  <span className="hub-row-label">{section.label}</span>
-                  <span className="pill">{profile[section.countKey].length}</span>
-                  <ChevronRightIcon className="hub-row-chevron" />
-                </Link>
-              ))}
-              <Link href="/policies" className="hub-row">
-                <span className="hub-row-icon">
-                  <DocumentIcon />
-                </span>
-                <span className="hub-row-label">Политики</span>
-                <span className="pill">{profile.policies ? "заполнено" : "пусто"}</span>
-                <ChevronRightIcon className="hub-row-chevron" />
-              </Link>
-            </div>
-          </>
-        ) : null}
+        <div className="hub-card" style={{ background: "transparent", border: "none", padding: 0 }}>
+          <Link href="/conversations" className="hub-row">
+            <span className="hub-row-icon">
+              <ChatIcon />
+            </span>
+            <span className="hub-row-label">Диалоги с клиентами</span>
+            <span className="pill">{stats ? stats.totalConversations : "—"}</span>
+            <ChevronRightIcon className="hub-row-chevron" />
+          </Link>
+          <Link href="/faq" className="hub-row">
+            <span className="hub-row-icon">
+              <QuestionIcon />
+            </span>
+            <span className="hub-row-label">Частые вопросы</span>
+            <span className="pill">{loading ? "—" : faqCount}</span>
+            <ChevronRightIcon className="hub-row-chevron" />
+          </Link>
+          <Link href="/escalations" className="hub-row">
+            <span className="hub-row-icon">
+              <BellIcon />
+            </span>
+            <span className="hub-row-label">Эскалации</span>
+            <span className="pill">{stats ? stats.openEscalations : "—"}</span>
+            <ChevronRightIcon className="hub-row-chevron" />
+          </Link>
+        </div>
       </div>
     </div>
   );

@@ -537,20 +537,6 @@ textarea.policies {
   letter-spacing: 0.02em;
 }
 
-.stat-tap {
-  color: inherit;
-  display: block;
-  border-radius: 12px;
-  padding: 0.3rem 0.5rem;
-  margin: -0.3rem -0.5rem;
-  transition: background-color 0.15s ease, transform 0.1s ease;
-  cursor: pointer;
-}
-
-.stat-tap:active {
-  background: rgba(255, 255, 255, 0.06);
-  transform: scale(0.96);
-}
 
 /* --- Assistant chat (Telegram-style messenger: bubbles both sides, timestamps, static wallpaper) --- */
 

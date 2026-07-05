@@ -50,6 +50,10 @@ export interface CompanyProfile {
   partners: Partner[];
   policies: string;
   activeNotice: string | null;
+  companyName: string | null;
+  address: string | null;
+  phone: string | null;
+  socials: string | null;
   updatedAt: string | null;
 }
 

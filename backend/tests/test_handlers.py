@@ -114,6 +114,44 @@ async def test_get_active_notice_returns_none_when_no_company_profile(monkeypatc
     assert result is None
 
 
+async def test_get_company_info_returns_set_fields_only(monkeypatch):
+    row = {
+        **COMPANY_PROFILE_ROW,
+        "company_name": "Cortège",
+        "address": "Ташкент, ул. Examples 12",
+        "phone": "+998 90 000-00-00",
+        "socials": None,
+    }
+    client = _client_with(company_profile=[row])
+    monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)
+
+    result = await handlers.get_company_info(TENANT_ID)
+
+    assert result == {
+        "name": "Cortège",
+        "address": "Ташкент, ул. Examples 12",
+        "phone": "+998 90 000-00-00",
+    }
+
+
+async def test_get_company_info_returns_none_when_no_fields_set(monkeypatch):
+    client = _client_with(company_profile=[COMPANY_PROFILE_ROW])
+    monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)
+
+    result = await handlers.get_company_info(TENANT_ID)
+
+    assert result is None
+
+
+async def test_get_company_info_returns_none_when_no_company_profile(monkeypatch):
+    client = _client_with(company_profile=[])
+    monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)
+
+    result = await handlers.get_company_info(TENANT_ID)
+
+    assert result is None
+
+
 async def test_list_packages_returns_none_when_no_packages(monkeypatch):
     client = _client_with(company_profile=[{"packages": [], "faq": [], "partners": []}])
     monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)

@@ -7,7 +7,7 @@ def _fetch_company_profile(tenant_id: str) -> dict[str, Any] | None:
     client = get_supabase_client()
     response = (
         client.table("company_profile")
-        .select("packages,faq,partners,policies,active_notice")
+        .select("packages,faq,partners,policies,active_notice,company_name,address,phone,socials")
         .eq("tenant_id", tenant_id)
         .limit(1)
         .execute()
@@ -24,6 +24,22 @@ async def get_active_notice(tenant_id: str) -> str | None:
     if profile is None:
         return None
     return profile.get("active_notice") or None
+
+
+async def get_company_info(tenant_id: str) -> dict[str, str] | None:
+    """Company name/address/phone/socials, woven into the client bot's
+    system prompt when any field is set (see engine._system_message)."""
+    profile = _fetch_company_profile(tenant_id)
+    if profile is None:
+        return None
+    fields = {
+        "name": profile.get("company_name"),
+        "address": profile.get("address"),
+        "phone": profile.get("phone"),
+        "socials": profile.get("socials"),
+    }
+    info = {key: value for key, value in fields.items() if value}
+    return info or None
 
 
 async def get_package_price(tenant_id: str, package_name: str) -> dict[str, Any] | None:

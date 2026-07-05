@@ -1,18 +1,6 @@
 import Link from "next/link";
 
-import { BellIcon, ChatIcon, ChevronRightIcon, DocumentIcon, QuestionIcon, TagIcon, UsersIcon } from "@/components/icons";
-
-const VENUE_LINKS = [
-  { href: "/packages", label: "Пакеты и цены", Icon: TagIcon },
-  { href: "/faq", label: "Частые вопросы", Icon: QuestionIcon },
-  { href: "/partners", label: "Партнёры", Icon: UsersIcon },
-  { href: "/policies", label: "Политики", Icon: DocumentIcon },
-];
-
-const ACTIVITY_LINKS = [
-  { href: "/conversations", label: "Диалоги с клиентами", Icon: ChatIcon },
-  { href: "/escalations", label: "Эскалации", Icon: BellIcon },
-];
+import { BuildingIcon, ChevronRightIcon, TagIcon } from "@/components/icons";
 
 function LinkRow({ href, label, Icon }: { href: string; label: string; Icon: typeof TagIcon }) {
   return (
@@ -30,20 +18,16 @@ export default function MorePage() {
   return (
     <div>
       <h1>Ещё</h1>
-      <p className="muted">Данные заведения и активность клиентов.</p>
+      <p className="muted">Каталог и данные компании.</p>
 
-      <p className="hub-group-title">Данные заведения</p>
+      <p className="hub-group-title">Клиентское предложение</p>
       <div className="card hub-card">
-        {VENUE_LINKS.map((link) => (
-          <LinkRow key={link.href} {...link} />
-        ))}
+        <LinkRow href="/catalog" label="Каталог" Icon={TagIcon} />
       </div>
 
-      <p className="hub-group-title">Активность</p>
+      <p className="hub-group-title">Компания</p>
       <div className="card hub-card">
-        {ACTIVITY_LINKS.map((link) => (
-          <LinkRow key={link.href} {...link} />
-        ))}
+        <LinkRow href="/company-profile" label="Профиль компании" Icon={BuildingIcon} />
       </div>
 
       <p className="powered-by">Cortège · powered by Solura</p>

@@ -17,6 +17,17 @@ def _no_active_notice(monkeypatch):
     monkeypatch.setattr(engine.handlers, "get_active_notice", fake_get_active_notice)
 
 
+@pytest.fixture(autouse=True)
+def _no_company_info(monkeypatch):
+    """Default for every test in this file — override in a specific test to
+    exercise the company-info injection path."""
+
+    async def fake_get_company_info(tenant_id):
+        return None
+
+    monkeypatch.setattr(engine.handlers, "get_company_info", fake_get_company_info)
+
+
 class _FakeToolCall:
     def __init__(self, id_, name, arguments):
         self.id = id_
@@ -89,6 +100,24 @@ async def test_generate_reply_injects_active_notice_into_system_prompt(monkeypat
     assert result == "Да, сейчас у нас скидка 10% на будние дни в июле."
     system_message = client.chat.completions.calls[0]["messages"][0]
     assert "Акция: скидка 10% на банкеты по будням в июле." in system_message["content"]
+
+
+async def test_generate_reply_injects_company_info_into_system_prompt(monkeypatch):
+    async def fake_get_company_info(tenant_id):
+        assert tenant_id == "tenant-1"
+        return {"name": "Cortège", "address": "Ташкент, ул. Examples 12", "phone": "+998 90 000-00-00"}
+
+    monkeypatch.setattr(engine.handlers, "get_company_info", fake_get_company_info)
+
+    client = _FakeOpenAIClient([_final_response("Мы находимся по адресу: Ташкент, ул. Examples 12.")])
+    monkeypatch.setattr(engine, "get_openai_client", lambda: client)
+
+    result = await engine.generate_reply("tenant-1", "conv-1", [{"role": "user", "content": "Где вы находитесь?"}])
+
+    assert result == "Мы находимся по адресу: Ташкент, ул. Examples 12."
+    system_message = client.chat.completions.calls[0]["messages"][0]
+    assert "Ташкент, ул. Examples 12" in system_message["content"]
+    assert "+998 90 000-00-00" in system_message["content"]
 
 
 async def test_generate_reply_returns_content_directly_when_no_tool_call(monkeypatch):

@@ -5,7 +5,7 @@ import { randomUUID } from "node:crypto";
 import { getServiceSupabaseClient } from "./supabase/server";
 import type { CompanyProfile, FaqEntry, Package, Partner } from "./types";
 
-const COLUMNS = "packages,faq,partners,policies,active_notice,updated_at";
+const COLUMNS = "packages,faq,partners,policies,active_notice,company_name,address,phone,socials,updated_at";
 
 // Rows seeded directly in Supabase (before this dashboard existed) predate
 // the client-generated `id` field and, for partners, can have a null
@@ -22,6 +22,10 @@ interface CompanyProfileRow {
   partners: RawPartner[] | null;
   policies: string | null;
   active_notice: string | null;
+  company_name: string | null;
+  address: string | null;
+  phone: string | null;
+  socials: string | null;
   updated_at: string | null;
 }
 
@@ -55,6 +59,10 @@ export async function fetchCompanyProfile(tenantId: string): Promise<CompanyProf
       partners: [],
       policies: "",
       activeNotice: null,
+      companyName: null,
+      address: null,
+      phone: null,
+      socials: null,
       updatedAt: null,
     };
   }
@@ -66,15 +74,26 @@ export async function fetchCompanyProfile(tenantId: string): Promise<CompanyProf
     partners: (data.partners ?? []).map((p) => ({ ...p, id: p.id ?? randomUUID(), contact: p.contact ?? "" })),
     policies: data.policies ?? "",
     activeNotice: data.active_notice ?? null,
+    companyName: data.company_name ?? null,
+    address: data.address ?? null,
+    phone: data.phone ?? null,
+    socials: data.socials ?? null,
     updatedAt: data.updated_at,
   };
 }
 
-async function upsertColumn(
-  tenantId: string,
-  column: "packages" | "faq" | "partners" | "policies" | "active_notice",
-  value: unknown,
-): Promise<void> {
+type CompanyProfileColumn =
+  | "packages"
+  | "faq"
+  | "partners"
+  | "policies"
+  | "active_notice"
+  | "company_name"
+  | "address"
+  | "phone"
+  | "socials";
+
+async function upsertColumns(tenantId: string, columns: Partial<Record<CompanyProfileColumn, unknown>>): Promise<void> {
   const client = getServiceSupabaseClient();
 
   // Update-if-exists, else insert — company_profile has no unique
@@ -94,20 +113,28 @@ async function upsertColumn(
   if (existing) {
     const { error } = await client
       .from("company_profile")
-      .update({ [column]: value, updated_at: new Date().toISOString() })
+      .update({ ...columns, updated_at: new Date().toISOString() })
       .eq("tenant_id", tenantId);
     if (error) {
-      throw new Error(`Failed to update company_profile.${column}: ${error.message}`);
+      throw new Error(`Failed to update company_profile: ${error.message}`);
     }
     return;
   }
 
   const { error } = await client
     .from("company_profile")
-    .insert({ tenant_id: tenantId, [column]: value });
+    .insert({ tenant_id: tenantId, ...columns });
   if (error) {
     throw new Error(`Failed to create company_profile row: ${error.message}`);
   }
+}
+
+function upsertColumn(
+  tenantId: string,
+  column: "packages" | "faq" | "partners" | "policies" | "active_notice",
+  value: unknown,
+): Promise<void> {
+  return upsertColumns(tenantId, { [column]: value });
 }
 
 export function savePackages(tenantId: string, packages: Package[]): Promise<void> {
@@ -130,4 +157,22 @@ export function savePolicies(tenantId: string, policies: string): Promise<void> 
  * get_active_notice) and woven into its system prompt when set. */
 export function saveActiveNotice(tenantId: string, notice: string | null): Promise<void> {
   return upsertColumn(tenantId, "active_notice", notice);
+}
+
+export interface CompanyInfoInput {
+  companyName: string;
+  address: string;
+  phone: string;
+  socials: string;
+}
+
+/** Read by the client-facing bot (backend/app/functions/handlers.py's
+ * get_company_info) and woven into its system prompt when set. */
+export function saveCompanyInfo(tenantId: string, info: CompanyInfoInput): Promise<void> {
+  return upsertColumns(tenantId, {
+    company_name: info.companyName,
+    address: info.address,
+    phone: info.phone,
+    socials: info.socials,
+  });
 }

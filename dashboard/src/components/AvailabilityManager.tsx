@@ -10,7 +10,7 @@ function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-export default function AvailabilityPage() {
+export function AvailabilityManager() {
   const [items, setItems] = useState<AvailabilityEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/map.js": {
+      "includeFiles": "fonts/**"
+    }
+  }
+}

@@ -1,4 +1,9 @@
+const path = require("path");
+
 const NOTION_VERSION = "2025-09-03";
+const FONT_DISPLAY = "Syne";
+const FONT_BODY = "DM Sans";
+const FONT_MONO = "JetBrains Mono";
 
 const DATA_SOURCES = {
   products: "39616c60-57da-80ea-95b6-000b95dd95c9",
@@ -94,10 +99,14 @@ function renderMap({ products, subscriptions, legal }, now) {
   const shelvedCount = products.length - activeCount;
   const productsCaption = shelvedCount === 0
     ? "all active"
-    : `${activeCount} active &middot; ${shelvedCount} shelved`;
+    : `${activeCount} active &#183; ${shelvedCount} shelved`;
 
   const paidSubs = subscriptions.filter((s) => selectName(s, "Status") === "Active-paid");
-  const totalMonthly = paidSubs.reduce((sum, s) => sum + (num(s, "Cost") || 0), 0);
+  const totalMonthly = paidSubs.reduce((sum, s) => {
+    const cost = num(s, "Cost") || 0;
+    const monthlyCost = selectName(s, "Cadence") === "Annual" ? cost / 12 : cost;
+    return sum + monthlyCost;
+  }, 0);
 
   const legalWithDates = legal
     .filter((l) => dateStart(l, "Due Date") && selectName(l, "Status") !== "Done")
@@ -141,26 +150,26 @@ function renderMap({ products, subscriptions, legal }, now) {
 
   // hub
   svg += `<rect x="${hubX}" y="${hubY}" width="${hubW}" height="${hubH}" rx="7" fill="${COLORS.hubFill}" stroke="${COLORS.hubStroke}" stroke-width="1.2" />`;
-  svg += `<text x="${hubX + hubW / 2}" y="${hubY + hubH / 2 - 3}" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="26" letter-spacing="1" fill="${COLORS.text}">SOLURA</text>`;
-  svg += `<text x="${hubX + hubW / 2}" y="${hubY + hubH / 2 + 20}" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="11" fill="${COLORS.textMuted}">AI systems for growing businesses</text>`;
+  svg += `<text x="${hubX + hubW / 2}" y="${hubY + hubH / 2 - 3}" text-anchor="middle" font-family="${FONT_DISPLAY}" font-weight="800" font-size="26" letter-spacing="1" fill="${COLORS.text}">SOLURA</text>`;
+  svg += `<text x="${hubX + hubW / 2}" y="${hubY + hubH / 2 + 20}" text-anchor="middle" font-family="${FONT_BODY}" font-size="11" fill="${COLORS.textMuted}">AI systems for growing businesses</text>`;
 
   // branch: products
   svg += `<rect x="${branchX}" y="${branchProductsY}" width="${branchW}" height="${branchH}" rx="7" fill="${COLORS.cardFill}" stroke="${COLORS.cardStroke}" stroke-width="1.2" />`;
-  svg += `<text x="${branchX + 20}" y="${branchProductsY + 25}" font-family="Segoe UI, Arial, sans-serif" font-size="11" letter-spacing="1" fill="${COLORS.textMuted}">PRODUCTS &amp; PIPELINE</text>`;
-  svg += `<text x="${branchX + 20}" y="${branchProductsY + 57}" font-family="Consolas, 'SF Mono', monospace" font-size="24" fill="${COLORS.text}">${products.length}</text>`;
-  svg += `<text x="${branchX + 20}" y="${branchProductsY + 77}" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="${COLORS.textSecondary}">${productsCaption}</text>`;
+  svg += `<text x="${branchX + 20}" y="${branchProductsY + 25}" font-family="${FONT_BODY}" font-size="11" letter-spacing="1" fill="${COLORS.textMuted}">PRODUCTS &amp; PIPELINE</text>`;
+  svg += `<text x="${branchX + 20}" y="${branchProductsY + 57}" font-family="${FONT_MONO}" font-size="24" fill="${COLORS.text}">${products.length}</text>`;
+  svg += `<text x="${branchX + 20}" y="${branchProductsY + 77}" font-family="${FONT_BODY}" font-size="12" fill="${COLORS.textSecondary}">${productsCaption}</text>`;
 
   // branch: subscriptions
   svg += `<rect x="${branchX}" y="${branchSubsY}" width="${branchW}" height="${branchH}" rx="7" fill="${COLORS.cardFill}" stroke="${COLORS.cardStroke}" stroke-width="1.2" />`;
-  svg += `<text x="${branchX + 20}" y="${branchSubsY + 25}" font-family="Segoe UI, Arial, sans-serif" font-size="11" letter-spacing="1" fill="${COLORS.textMuted}">SUBSCRIPTIONS &amp; COSTS</text>`;
-  svg += `<text x="${branchX + 20}" y="${branchSubsY + 57}" font-family="Consolas, 'SF Mono', monospace" font-size="24" fill="${COLORS.text}">~$${totalMonthly.toFixed(0)}<tspan font-size="14">/mo</tspan></text>`;
-  svg += `<text x="${branchX + 20}" y="${branchSubsY + 77}" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="${COLORS.textSecondary}">${paidSubs.length} paid tools</text>`;
+  svg += `<text x="${branchX + 20}" y="${branchSubsY + 25}" font-family="${FONT_BODY}" font-size="11" letter-spacing="1" fill="${COLORS.textMuted}">SUBSCRIPTIONS &amp; COSTS</text>`;
+  svg += `<text x="${branchX + 20}" y="${branchSubsY + 57}" font-family="${FONT_MONO}" font-size="24" fill="${COLORS.text}">~$${totalMonthly.toFixed(0)}<tspan font-size="14">/mo</tspan></text>`;
+  svg += `<text x="${branchX + 20}" y="${branchSubsY + 77}" font-family="${FONT_BODY}" font-size="12" fill="${COLORS.textSecondary}">${paidSubs.length} paid tools</text>`;
 
   // branch: legal
   svg += `<rect x="${branchX}" y="${branchLegalY}" width="${branchW}" height="${branchH}" rx="7" fill="${COLORS.cardFill}" stroke="${COLORS.cardStroke}" stroke-width="1.2" />`;
-  svg += `<text x="${branchX + 20}" y="${branchLegalY + 25}" font-family="Segoe UI, Arial, sans-serif" font-size="11" letter-spacing="1" fill="${COLORS.textMuted}">LEGAL &amp; COMPLIANCE</text>`;
-  svg += `<text x="${branchX + 20}" y="${branchLegalY + 57}" font-family="Consolas, 'SF Mono', monospace" font-size="24" fill="${urgentLegal.length > 0 ? COLORS.warning : COLORS.text}">${urgentLegal.length}</text>`;
-  svg += `<text x="${branchX + 20}" y="${branchLegalY + 77}" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="${COLORS.textSecondary}">urgent (&le;14 days)</text>`;
+  svg += `<text x="${branchX + 20}" y="${branchLegalY + 25}" font-family="${FONT_BODY}" font-size="11" letter-spacing="1" fill="${COLORS.textMuted}">LEGAL &amp; COMPLIANCE</text>`;
+  svg += `<text x="${branchX + 20}" y="${branchLegalY + 57}" font-family="${FONT_MONO}" font-size="24" fill="${urgentLegal.length > 0 ? COLORS.warning : COLORS.text}">${urgentLegal.length}</text>`;
+  svg += `<text x="${branchX + 20}" y="${branchLegalY + 77}" font-family="${FONT_BODY}" font-size="12" fill="${COLORS.textSecondary}">urgent (14d or less)</text>`;
 
   // leaves: products
   for (let i = 0; i < products.length; i++) {
@@ -168,13 +177,13 @@ function renderMap({ products, subscriptions, legal }, now) {
     const leafY = 10 + i * rowH + (rowH - leafH) / 2;
     const { color, label } = statusColor(selectName(p, "Status"));
     svg += `<rect x="${leafX}" y="${leafY}" width="${leafW}" height="${leafH}" rx="7" fill="${COLORS.cardFill}" stroke="${COLORS.cardStroke}" stroke-width="1.2" />`;
-    svg += `<text x="${leafX + 22}" y="${leafY + 28}" font-family="Segoe UI, Arial, sans-serif" font-weight="700" font-size="15" fill="${COLORS.text}">${escapeXml(title(p))}</text>`;
-    svg += `<text x="${leafX + 22}" y="${leafY + 47}" font-family="Segoe UI, Arial, sans-serif" font-size="11" fill="${COLORS.textMuted}">${escapeXml(selectName(p, "Stage"))}</text>`;
+    svg += `<text x="${leafX + 22}" y="${leafY + 28}" font-family="${FONT_BODY}" font-weight="700" font-size="15" fill="${COLORS.text}">${escapeXml(title(p))}</text>`;
+    svg += `<text x="${leafX + 22}" y="${leafY + 47}" font-family="${FONT_BODY}" font-size="11" fill="${COLORS.textMuted}">${escapeXml(selectName(p, "Stage"))}</text>`;
     svg += `<circle cx="${leafX + 26}" cy="${leafY + 74}" r="4" fill="${color}" />`;
-    svg += `<text x="${leafX + 36}" y="${leafY + 78}" font-family="Segoe UI, Arial, sans-serif" font-size="11" fill="${COLORS.textSecondary}">${escapeXml(label)}</text>`;
+    svg += `<text x="${leafX + 36}" y="${leafY + 78}" font-family="${FONT_BODY}" font-size="11" fill="${COLORS.textSecondary}">${escapeXml(label)}</text>`;
   }
 
-  svg += `<text x="${width - 12}" y="${height - 10}" text-anchor="end" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="${COLORS.textMuted}">live &middot; ${now.toISOString().slice(0, 16).replace("T", " ")} UTC</text>`;
+  svg += `<text x="${width - 12}" y="${height - 10}" text-anchor="end" font-family="${FONT_BODY}" font-size="10" fill="${COLORS.textMuted}">live &#183; ${now.toISOString().slice(0, 16).replace("T", " ")} UTC</text>`;
   svg += `</svg>`;
   return svg;
 }
@@ -182,9 +191,27 @@ function renderMap({ products, subscriptions, legal }, now) {
 function renderErrorSvg(message) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 200" width="1000" height="200">
     <rect width="1000" height="200" fill="${COLORS.bg}" />
-    <text x="30" y="90" font-family="Segoe UI, Arial, sans-serif" font-size="16" fill="${COLORS.critical}">Command Center map temporarily unavailable</text>
-    <text x="30" y="120" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="${COLORS.textMuted}">${escapeXml(message).slice(0, 140)}</text>
+    <text x="30" y="90" font-family="${FONT_BODY}" font-size="16" fill="${COLORS.critical}">Command Center map temporarily unavailable</text>
+    <text x="30" y="120" font-family="${FONT_BODY}" font-size="12" fill="${COLORS.textMuted}">${escapeXml(message).slice(0, 140)}</text>
   </svg>`;
+}
+
+function toPng(svg, width) {
+  const { Resvg } = require("@resvg/resvg-js");
+  const fontsDir = path.join(__dirname, "..", "fonts");
+  const resvg = new Resvg(svg, {
+    fitTo: { mode: "width", value: width * 2 },
+    font: {
+      fontFiles: [
+        path.join(fontsDir, "Syne.ttf"),
+        path.join(fontsDir, "DMSans.ttf"),
+        path.join(fontsDir, "JetBrainsMono.ttf"),
+      ],
+      loadSystemFonts: false,
+      defaultFontFamily: FONT_BODY,
+    },
+  });
+  return resvg.render().asPng();
 }
 
 module.exports = async (req, res) => {
@@ -194,8 +221,7 @@ module.exports = async (req, res) => {
     return;
   }
 
-  res.setHeader("Content-Type", "image/svg+xml; charset=utf-8");
-  res.setHeader("Cache-Control", "private, max-age=300, s-maxage=300");
+  const debug = req.query?.debug === "1";
 
   try {
     const [products, subscriptions, legal] = await Promise.all([
@@ -204,8 +230,17 @@ module.exports = async (req, res) => {
       queryDataSource(DATA_SOURCES.legal),
     ]);
     const svg = renderMap({ products, subscriptions, legal }, new Date());
-    res.status(200).send(svg);
+    res.setHeader("Content-Type", "image/png");
+    res.setHeader("Cache-Control", "private, max-age=300, s-maxage=300");
+    res.status(200).send(toPng(svg, 1000));
   } catch (err) {
-    res.status(200).send(renderErrorSvg(err.message || String(err)));
+    if (debug) {
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      res.status(500).send(String(err && err.stack || err));
+      return;
+    }
+    res.setHeader("Content-Type", "image/png");
+    res.setHeader("Cache-Control", "private, max-age=300, s-maxage=300");
+    res.status(200).send(toPng(renderErrorSvg(err.message || String(err)), 1000));
   }
 };

@@ -157,3 +157,22 @@ export function SparkleIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function GearIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <circle cx="11" cy="11" r="2.8" />
+      <path d="M11 4.2v2M11 15.8v2M4.2 11h2M15.8 11h2M6.3 6.3l1.4 1.4M14.3 14.3l1.4 1.4M6.3 15.7l1.4-1.4M14.3 7.7l1.4-1.4" />
+    </svg>
+  );
+}
+
+export function FlaskIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M9 3.5h4" />
+      <path d="M9.7 3.5v5.3L5.4 16a1.6 1.6 0 0 0 1.4 2.4h8.4a1.6 1.6 0 0 0 1.4-2.4l-4.3-7.2V3.5" />
+      <path d="M7 13.5h8" />
+    </svg>
+  );
+}

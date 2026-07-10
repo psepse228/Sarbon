@@ -3,9 +3,7 @@ import { Golos_Text, Unbounded } from "next/font/google";
 
 import { AuthGate } from "@/components/AuthGate";
 import { BackgroundVideo } from "@/components/BackgroundVideo";
-import { TabBar } from "@/components/TabBar";
 import { TelegramInit } from "@/components/TelegramInit";
-import { TopHeader } from "@/components/TopHeader";
 
 import "./globals.css";
 
@@ -43,11 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <BackgroundVideo />
         <TelegramInit />
-        <AuthGate>
-          <TopHeader />
-          <main className="container">{children}</main>
-          <TabBar />
-        </AuthGate>
+        <AuthGate>{children}</AuthGate>
       </body>
     </html>
   );

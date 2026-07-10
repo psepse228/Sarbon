@@ -73,7 +73,7 @@ async def test_generate_reply_summarizes_long_history_before_main_call(monkeypat
 
     result = await engine.generate_reply("tenant-1", "conv-1", long_history)
 
-    assert result == "Хорошо, вот ответ на ваш последний вопрос."
+    assert result.reply == "Хорошо, вот ответ на ваш последний вопрос."
     calls = client.chat.completions.calls
     assert len(calls) == 2
     assert calls[0]["model"] == engine.SUMMARY_MODEL
@@ -97,7 +97,7 @@ async def test_generate_reply_injects_active_notice_into_system_prompt(monkeypat
 
     result = await engine.generate_reply("tenant-1", "conv-1", [{"role": "user", "content": "Есть скидки?"}])
 
-    assert result == "Да, сейчас у нас скидка 10% на будние дни в июле."
+    assert result.reply == "Да, сейчас у нас скидка 10% на будние дни в июле."
     system_message = client.chat.completions.calls[0]["messages"][0]
     assert "Акция: скидка 10% на банкеты по будням в июле." in system_message["content"]
 
@@ -114,7 +114,7 @@ async def test_generate_reply_injects_company_info_into_system_prompt(monkeypatc
 
     result = await engine.generate_reply("tenant-1", "conv-1", [{"role": "user", "content": "Где вы находитесь?"}])
 
-    assert result == "Мы находимся по адресу: Ташкент, ул. Examples 12."
+    assert result.reply == "Мы находимся по адресу: Ташкент, ул. Examples 12."
     system_message = client.chat.completions.calls[0]["messages"][0]
     assert "Ташкент, ул. Examples 12" in system_message["content"]
     assert "+998 90 000-00-00" in system_message["content"]
@@ -126,7 +126,8 @@ async def test_generate_reply_returns_content_directly_when_no_tool_call(monkeyp
 
     result = await engine.generate_reply("tenant-1", "conv-1", [{"role": "user", "content": "Привет"}])
 
-    assert result == "Добрый день! Чем помочь?"
+    assert result.reply == "Добрый день! Чем помочь?"
+    assert result.tool_calls == []
     assert len(client.chat.completions.calls) == 1
 
 
@@ -151,7 +152,14 @@ async def test_generate_reply_dispatches_tool_call_and_returns_final_content(mon
         "tenant-1", "conv-1", [{"role": "user", "content": "Сколько стоит Стандарт?"}]
     )
 
-    assert result == "Пакет «Стандарт» стоит 250 000 ₽."
+    assert result.reply == "Пакет «Стандарт» стоит 250 000 ₽."
+    assert result.tool_calls == [
+        engine.ToolCallRecord(
+            "get_package_price",
+            {"package_name": "Стандарт"},
+            {"name": "Стандарт", "price": 250000, "currency": "RUB"},
+        )
+    ]
     second_call_messages = client.chat.completions.calls[1]["messages"]
     tool_messages = [m for m in second_call_messages if m["role"] == "tool"]
     assert tool_messages[0]["tool_call_id"] == "call_1"
@@ -180,7 +188,7 @@ async def test_generate_reply_dispatches_list_packages_with_no_arguments(monkeyp
 
     result = await engine.generate_reply("tenant-1", "conv-1", [{"role": "user", "content": "Какие у вас пакеты?"}])
 
-    assert result == "У нас есть пакеты «Стандарт» и «Премиум»."
+    assert result.reply == "У нас есть пакеты «Стандарт» и «Премиум»."
 
 
 async def test_generate_reply_escalates_with_conversation_id_not_tenant_id(monkeypatch):
@@ -209,7 +217,7 @@ async def test_generate_reply_escalates_with_conversation_id_not_tenant_id(monke
 
     result = await engine.generate_reply("tenant-1", "conv-1", [{"role": "user", "content": "Жалоба"}])
 
-    assert result == "Передал администратору, он свяжется с вами."
+    assert result.reply == "Передал администратору, он свяжется с вами."
     assert len(notified) == 1
     assert "conv-1" in notified[0]
     assert "жалоба" in notified[0]
@@ -228,5 +236,41 @@ async def test_generate_reply_gives_up_after_max_tool_rounds(monkeypatch):
 
     result = await engine.generate_reply("tenant-1", "conv-1", [{"role": "user", "content": "?"}])
 
-    assert result == "Уточню детали у администратора и вернусь с ответом."
-    assert len(client.chat.completions.calls) == engine.MAX_TOOL_ROUNDS
+    assert result.reply == "Уточню детали у администратора и вернусь с ответом."
+
+
+async def test_generate_reply_test_mode_escalation_does_not_write_or_notify(monkeypatch):
+    tool_call = _FakeToolCall("call_1", "escalate_to_human", {"reason": "вопрос вне темы"})
+    client = _FakeOpenAIClient(
+        [
+            _tool_call_response(tool_call),
+            _final_response("Уточню и вернусь с ответом."),
+        ]
+    )
+    monkeypatch.setattr(engine, "get_openai_client", lambda: client)
+
+    escalate_calls = []
+
+    async def fake_escalate(conversation_id, reason):
+        escalate_calls.append((conversation_id, reason))
+        return {"conversation_id": conversation_id, "reason": reason}
+
+    monkeypatch.setattr(engine.handlers, "escalate_to_human", fake_escalate)
+
+    notified = []
+
+    async def fake_notify_admin(text):
+        notified.append(text)
+
+    monkeypatch.setattr(engine, "notify_admin", fake_notify_admin)
+
+    result = await engine.generate_reply(
+        "tenant-1", "test-conv", [{"role": "user", "content": "вопрос не по теме"}], test_mode=True
+    )
+
+    assert result.reply == "Уточню и вернусь с ответом."
+    assert escalate_calls == []
+    assert notified == []
+    assert result.tool_calls == [
+        engine.ToolCallRecord("escalate_to_human", {"reason": "вопрос вне темы"}, {"would_escalate": True, "reason": "вопрос вне темы"})
+    ]

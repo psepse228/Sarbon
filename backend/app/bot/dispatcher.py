@@ -38,7 +38,8 @@ async def handle_message(message: Message) -> None:
     ]
 
     try:
-        reply = await generate_reply(tenant_id, conversation_id, history)
+        result = await generate_reply(tenant_id, conversation_id, history)
+        reply = result.reply
     except Exception:
         logger.exception("generate_reply failed for conversation %s", conversation_id)
         reply = _FALLBACK_REPLY

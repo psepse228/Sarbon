@@ -1,7 +1,7 @@
 import json
 from datetime import date
 from functools import lru_cache
-from typing import Any
+from typing import Any, NamedTuple
 
 from openai import AsyncOpenAI
 
@@ -13,6 +13,18 @@ MODEL = "gpt-4o"
 SUMMARY_MODEL = "gpt-4o-mini"
 MAX_TOOL_ROUNDS = 4
 RECENT_WINDOW = 12
+
+
+class ToolCallRecord(NamedTuple):
+    name: str
+    arguments: dict[str, Any]
+    result: Any
+
+
+class GeneratedReply(NamedTuple):
+    reply: str
+    tool_calls: list[ToolCallRecord]
+
 
 SUMMARY_PROMPT = (
     "Кратко перескажи (3-5 предложений) суть этой части переписки клиента с ботом ресторана: "
@@ -153,7 +165,13 @@ def get_openai_client() -> AsyncOpenAI:
     return AsyncOpenAI(api_key=settings.openai_api_key)
 
 
-async def _call_tool(name: str, arguments: dict[str, Any], tenant_id: str, conversation_id: str) -> Any:
+async def _call_tool(
+    name: str,
+    arguments: dict[str, Any],
+    tenant_id: str,
+    conversation_id: str,
+    test_mode: bool = False,
+) -> Any:
     if name == "get_package_price":
         return await handlers.get_package_price(tenant_id, arguments["package_name"])
     if name == "list_packages":
@@ -165,6 +183,11 @@ async def _call_tool(name: str, arguments: dict[str, Any], tenant_id: str, conve
     if name == "get_partners":
         return await handlers.get_partners(tenant_id, arguments["category"])
     if name == "escalate_to_human":
+        if test_mode:
+            # No DB row, no admin notification — the Test Console (see
+            # backend/app/routers/internal.py) surfaces this as "would
+            # escalate" in its own UI instead of a real handoff.
+            return {"would_escalate": True, "reason": arguments["reason"]}
         result = await handlers.escalate_to_human(conversation_id, arguments["reason"])
         await notify_admin(
             f"🔔 Эскалация по диалогу {conversation_id}:\n{arguments['reason']}"
@@ -207,24 +230,33 @@ async def _build_messages(
     ]
 
 
-async def generate_reply(tenant_id: str, conversation_id: str, history: list[dict[str, str]]) -> str:
+async def generate_reply(
+    tenant_id: str,
+    conversation_id: str,
+    history: list[dict[str, str]],
+    test_mode: bool = False,
+) -> GeneratedReply:
     client = get_openai_client()
     active_notice = await handlers.get_active_notice(tenant_id)
     company_info = await handlers.get_company_info(tenant_id)
     messages: list[dict[str, Any]] = await _build_messages(client, history, active_notice, company_info)
+    tool_calls_made: list[ToolCallRecord] = []
 
     for _ in range(MAX_TOOL_ROUNDS):
         response = await client.chat.completions.create(model=MODEL, messages=messages, tools=TOOLS)
         choice = response.choices[0].message
         if not choice.tool_calls:
-            return choice.content or ""
+            return GeneratedReply(choice.content or "", tool_calls_made)
 
         messages.append(
             {"role": "assistant", "content": choice.content, "tool_calls": choice.tool_calls}
         )
         for tool_call in choice.tool_calls:
             arguments = json.loads(tool_call.function.arguments)
-            result = await _call_tool(tool_call.function.name, arguments, tenant_id, conversation_id)
+            result = await _call_tool(
+                tool_call.function.name, arguments, tenant_id, conversation_id, test_mode
+            )
+            tool_calls_made.append(ToolCallRecord(tool_call.function.name, arguments, result))
             messages.append(
                 {
                     "role": "tool",
@@ -233,4 +265,4 @@ async def generate_reply(tenant_id: str, conversation_id: str, history: list[dic
                 }
             )
 
-    return "Уточню детали у администратора и вернусь с ответом."
+    return GeneratedReply("Уточню детали у администратора и вернусь с ответом.", tool_calls_made)

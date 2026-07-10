@@ -1,5 +1,6 @@
 from unittest.mock import AsyncMock
 
+from app.ai.engine import GeneratedReply
 from app.bot import dispatcher
 
 
@@ -33,7 +34,7 @@ async def test_handle_message_persists_conversation_and_replies_with_generated_c
         assert tenant_id == "tenant-1"
         assert conversation_id == "conv-1"
         assert history == [{"role": "user", "content": "Сколько стоит Стандарт?"}]
-        return "Пакет «Стандарт» стоит 250 000 ₽."
+        return GeneratedReply("Пакет «Стандарт» стоит 250 000 ₽.", [])
 
     monkeypatch.setattr(dispatcher, "generate_reply", fake_generate_reply)
 

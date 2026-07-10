@@ -581,15 +581,16 @@ textarea.policies {
 
 .chat-row {
   display: flex;
+  flex-direction: column;
   width: 100%;
 }
 
 .chat-row[data-role="user"] {
-  justify-content: flex-end;
+  align-items: flex-end;
 }
 
 .chat-row[data-role="assistant"] {
-  justify-content: flex-start;
+  align-items: flex-start;
 }
 
 .chat-bubble {

@@ -2,19 +2,9 @@
 
 import { useState } from "react";
 
+import { ChatThread, now, type ChatMessage } from "@/components/ChatThread";
 import { ErrorBanner } from "@/components/StatusBanner";
-import { SendIcon } from "@/components/icons";
 import { tmaFetch } from "@/lib/telegram/client";
-
-interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
-  time: string;
-}
-
-function now() {
-  return new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
-}
 
 const SUGGESTIONS = ["Как идут дела за сегодня?", "У нас акция — скидка 10% на будни, скажи об этом клиентам"];
 
@@ -59,55 +49,7 @@ export default function AssistantPage() {
 
       {error && <ErrorBanner message={error} />}
 
-      <div className="chat-page">
-        {messages.length === 0 && (
-          <div className="chat-suggestions">
-            {SUGGESTIONS.map((s) => (
-              <button key={s} className="chat-suggestion" onClick={() => send(s)}>
-                {s}
-              </button>
-            ))}
-          </div>
-        )}
-
-        <div className="chat-log">
-          {messages.map((message, index) => (
-            <div key={index} className="chat-row" data-role={message.role}>
-              <div className="chat-bubble" data-role={message.role}>
-                <span className="chat-bubble-text">{message.content}</span>
-                <span className="chat-bubble-time">{message.time}</span>
-              </div>
-            </div>
-          ))}
-          {sending && (
-            <div className="chat-row" data-role="assistant">
-              <div className="chat-bubble chat-bubble-typing" data-role="assistant">
-                <span className="chat-typing-dot" />
-                <span className="chat-typing-dot" />
-                <span className="chat-typing-dot" />
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="chat-input-row">
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                send(input);
-              }
-            }}
-            placeholder="Напишите сообщение…"
-            rows={1}
-          />
-          <button className="chat-send-btn" onClick={() => send(input)} disabled={sending || !input.trim()} aria-label="Отправить">
-            <SendIcon />
-          </button>
-        </div>
-      </div>
+      <ChatThread messages={messages} input={input} onInputChange={setInput} onSend={send} sending={sending} suggestions={SUGGESTIONS} />
     </div>
   );
 }

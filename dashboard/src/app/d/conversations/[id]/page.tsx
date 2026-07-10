@@ -1,10 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import { ErrorBanner } from "@/components/StatusBanner";
-import { tmaFetch } from "@/lib/telegram/client";
-import type { ConversationMessage } from "@/lib/types";
+import { useConversationMessages } from "@/lib/useConversationMessages";
 
 const ROLE_LABEL: Record<string, string> = {
   client: "Клиент",
@@ -13,26 +10,7 @@ const ROLE_LABEL: Record<string, string> = {
 };
 
 export default function DesktopConversationDetailPage({ params }: { params: { id: string } }) {
-  const [messages, setMessages] = useState<ConversationMessage[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await tmaFetch(`/api/conversations/${params.id}`);
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          throw new Error(body.error ?? `Request failed (${res.status})`);
-        }
-        setMessages(await res.json());
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Не удалось загрузить сообщения");
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [params.id]);
+  const { messages, loading, error } = useConversationMessages(params.id);
 
   return (
     <div>

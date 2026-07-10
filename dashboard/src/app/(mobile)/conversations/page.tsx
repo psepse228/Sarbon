@@ -1,11 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
 import { ErrorBanner } from "@/components/StatusBanner";
-import { tmaFetch } from "@/lib/telegram/client";
-import type { ConversationSummary } from "@/lib/types";
+import { useConversations } from "@/lib/useConversations";
 
 const STATUS_LABEL: Record<string, string> = {
   active: "Активен",
@@ -14,26 +12,7 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export default function ConversationsPage() {
-  const [items, setItems] = useState<ConversationSummary[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await tmaFetch("/api/conversations");
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          throw new Error(body.error ?? `Request failed (${res.status})`);
-        }
-        setItems(await res.json());
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Не удалось загрузить диалоги");
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+  const { items, loading, error } = useConversations();
 
   return (
     <div>

@@ -5,21 +5,14 @@ import { useEffect, useState } from "react";
 
 import { ErrorBanner } from "@/components/StatusBanner";
 import { BellIcon, ChatIcon, ChevronRightIcon, QuestionIcon } from "@/components/icons";
+import { computeDashboardStats, type DashboardStats } from "@/lib/stats";
 import { tmaFetch } from "@/lib/telegram/client";
 import type { AvailabilityEntry, ConversationSummary, Escalation } from "@/lib/types";
 import { useCompanyProfile } from "@/lib/useCompanyProfile";
 
-interface Stats {
-  totalConversations: number;
-  conversationsWithoutEscalation: number;
-  openEscalations: number;
-  resolvedEscalations: number;
-  upcomingAvailable: number;
-}
-
 export default function AnalyticsPage() {
   const { profile } = useCompanyProfile();
-  const [stats, setStats] = useState<Stats | null>(null);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -37,18 +30,8 @@ export default function AnalyticsPage() {
         const escalations: Escalation[] = await escalationsRes.json();
         const conversations: ConversationSummary[] = await conversationsRes.json();
         const availability: AvailabilityEntry[] = await availabilityRes.json();
-        const today = new Date().toISOString().slice(0, 10);
 
-        const escalatedConversationIds = new Set(escalations.map((e) => e.conversationId));
-        const withoutEscalation = conversations.filter((c) => !escalatedConversationIds.has(c.id)).length;
-
-        setStats({
-          totalConversations: conversations.length,
-          conversationsWithoutEscalation: withoutEscalation,
-          openEscalations: escalations.filter((e) => !e.notifiedOwner).length,
-          resolvedEscalations: escalations.filter((e) => e.notifiedOwner).length,
-          upcomingAvailable: availability.filter((a) => a.isAvailable && a.date >= today).length,
-        });
+        setStats(computeDashboardStats(conversations, escalations, availability));
       } catch (err) {
         setError(err instanceof Error ? err.message : "Не удалось загрузить аналитику");
       }

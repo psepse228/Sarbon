@@ -800,3 +800,101 @@ textarea.policies {
   color: var(--color-text-soft);
   margin-top: 0.15rem;
 }
+
+/* --- Desktop shell (Phase 1 desktop dashboard) --- */
+
+.desktop-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.desktop-sidebar {
+  width: 232px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 1.4rem 1rem;
+  border-right: 1px solid var(--color-hairline);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.desktop-sidebar-brand {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 0.4rem 0.6rem 1.4rem;
+}
+
+.desktop-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.desktop-sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 0.7rem;
+  border-radius: 12px;
+  color: var(--color-text-soft);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.desktop-sidebar-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text);
+}
+
+.desktop-sidebar-item[data-active="true"] {
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+}
+
+.desktop-content {
+  flex: 1;
+  min-width: 0;
+  padding: 2rem 2.4rem;
+  max-width: 1160px;
+}
+
+.desktop-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.9rem;
+  margin-bottom: 1.6rem;
+}
+
+.desktop-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.desktop-table th {
+  text-align: left;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-faint);
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.desktop-table td {
+  padding: 0.75rem 0.8rem;
+  border-bottom: 1px solid var(--color-hairline-soft);
+  font-size: 0.88rem;
+}
+
+.desktop-table tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.desktop-two-pane {
+  display: grid;
+  grid-template-columns: minmax(280px, 380px) 1fr;
+  gap: 1.4rem;
+  align-items: start;
+}

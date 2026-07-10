@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { BuildingIcon, ChevronRightIcon, TagIcon } from "@/components/icons";
+import { BuildingIcon, ChevronRightIcon, GridIcon, TagIcon } from "@/components/icons";
 
 function LinkRow({ href, label, Icon }: { href: string; label: string; Icon: typeof TagIcon }) {
   return (
@@ -28,6 +28,11 @@ export default function MorePage() {
       <p className="hub-group-title">Компания</p>
       <div className="card hub-card">
         <LinkRow href="/company-profile" label="Профиль компании" Icon={BuildingIcon} />
+      </div>
+
+      <p className="hub-group-title">Десктоп</p>
+      <div className="card hub-card">
+        <LinkRow href="/d" label="Открыть десктоп-версию" Icon={GridIcon} />
       </div>
 
       <p className="powered-by">Cortège · powered by Solura</p>

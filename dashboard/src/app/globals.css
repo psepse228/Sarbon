@@ -899,3 +899,15 @@ textarea.policies {
   gap: 1.4rem;
   align-items: start;
 }
+
+/* Desktop shell has no bottom tab bar and its content wrapper (.desktop-content)
+   already carries its own padding, so the shared ChatThread's mobile-tuned
+   .chat-page/.chat-input-row rules (sticky offset for the tab bar, negative
+   margin canceling .container padding) need desktop-scoped overrides. */
+.desktop-content .chat-page {
+  margin: 0;
+}
+
+.desktop-content .chat-input-row {
+  bottom: 0;
+}

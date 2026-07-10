@@ -237,6 +237,7 @@ async def test_generate_reply_gives_up_after_max_tool_rounds(monkeypatch):
     result = await engine.generate_reply("tenant-1", "conv-1", [{"role": "user", "content": "?"}])
 
     assert result.reply == "Уточню детали у администратора и вернусь с ответом."
+    assert len(client.chat.completions.calls) == engine.MAX_TOOL_ROUNDS
 
 
 async def test_generate_reply_test_mode_escalation_does_not_write_or_notify(monkeypatch):

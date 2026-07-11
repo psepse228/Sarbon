@@ -48,6 +48,7 @@ export async function POST(request: Request) {
         tenant_id: tenantId,
         history: history.map(({ role, content }) => ({ role, content })),
       }),
+      signal: AbortSignal.timeout(30_000),
     });
 
     if (!backendResponse.ok) {

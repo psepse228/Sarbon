@@ -911,3 +911,29 @@ textarea.policies {
 .desktop-content .chat-input-row {
   bottom: 0;
 }
+
+/* --- Test Console: tool-call disclosure under a bot reply --- */
+
+.tool-call-trace {
+  margin: 0.35rem 0 0.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  max-width: 80%;
+}
+
+.tool-call-chip {
+  font-family: ui-monospace, monospace;
+  font-size: 0.72rem;
+  color: var(--color-text-faint);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-hairline-soft);
+  border-radius: 8px;
+  padding: 0.35rem 0.55rem;
+}
+
+.tool-call-chip[data-escalated="true"] {
+  color: var(--color-warning);
+  border-color: rgba(251, 191, 36, 0.3);
+  background: var(--color-warning-tint);
+}

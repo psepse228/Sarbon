@@ -61,7 +61,8 @@ async def main() -> None:
             {"role": _DB_ROLE_TO_OPENAI_ROLE[row["role"]], "content": row["content"]}
             for row in get_recent_messages(conversation_id)
         ]
-        reply = await generate_reply(tenant_id, conversation_id, history)
+        result = await generate_reply(tenant_id, conversation_id, history)
+        reply = result.reply
         save_message(conversation_id, "bot", reply)
 
         print(f"\n{'=' * 70}\nQ: {question}\n{'-' * 70}\nA: {reply}")

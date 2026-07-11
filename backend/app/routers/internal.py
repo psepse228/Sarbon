@@ -1,4 +1,5 @@
-from typing import Any
+import hmac
+from typing import Any, Literal
 
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel
@@ -10,7 +11,7 @@ router = APIRouter(prefix="/internal")
 
 
 class TestChatTurn(BaseModel):
-    role: str
+    role: Literal["user", "assistant"]
     content: str
 
 
@@ -40,7 +41,9 @@ async def test_chat(
     paging the admin. Never used by real guests — see
     dashboard/src/app/api/test-chat/route.ts for the only caller."""
     settings = get_settings()
-    if not settings.internal_api_secret or x_internal_secret != settings.internal_api_secret:
+    if not settings.internal_api_secret or not hmac.compare_digest(
+        x_internal_secret, settings.internal_api_secret
+    ):
         raise HTTPException(status_code=401, detail="Invalid internal secret")
 
     history = [{"role": turn.role, "content": turn.content} for turn in body.history]

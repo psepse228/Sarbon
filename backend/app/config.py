@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     supabase_key: str
     openai_api_key: str
     admin_telegram_chat_id: str | None = None
+    internal_api_secret: str | None = None
     environment: str = "development"
 
 

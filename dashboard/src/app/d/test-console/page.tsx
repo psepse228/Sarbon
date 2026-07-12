@@ -20,6 +20,7 @@ function ToolCallTrace({ toolCalls }: { toolCalls: ToolCall[] }) {
       {toolCalls.map((call, index) => {
         const escalated = call.name === "escalate_to_human";
         const gapFlagged = call.name === "flag_knowledge_gap";
+        const leadCaptured = call.name === "capture_lead";
         const argsText = Object.entries(call.arguments)
           .map(([key, value]) => `${key}=${JSON.stringify(value)}`)
           .join(", ");
@@ -28,11 +29,21 @@ function ToolCallTrace({ toolCalls }: { toolCalls: ToolCall[] }) {
           label = `Бот бы передал администратору: ${String((call.result as { reason?: string })?.reason ?? "")}`;
         } else if (gapFlagged) {
           label = `Бот бы зафиксировал пробел в знаниях: ${String((call.result as { question?: string })?.question ?? "")}`;
+        } else if (leadCaptured) {
+          const lead = call.result as { name?: string; phone?: string };
+          const parts = [lead?.name, lead?.phone].filter(Boolean);
+          label = `Бот бы сохранил лид: ${parts.join(", ")}`;
         } else {
           label = `${call.name}(${argsText}) → ${JSON.stringify(call.result)}`;
         }
         return (
-          <div key={index} className="tool-call-chip" data-escalated={escalated} data-gap-flagged={gapFlagged}>
+          <div
+            key={index}
+            className="tool-call-chip"
+            data-escalated={escalated}
+            data-gap-flagged={gapFlagged}
+            data-lead-captured={leadCaptured}
+          >
             {label}
           </div>
         );

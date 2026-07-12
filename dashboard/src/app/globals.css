@@ -943,3 +943,9 @@ textarea.policies {
   border-color: rgba(251, 191, 36, 0.3);
   background: var(--color-warning-tint);
 }
+
+.tool-call-chip[data-lead-captured="true"] {
+  color: var(--color-warning);
+  border-color: rgba(251, 191, 36, 0.3);
+  background: var(--color-warning-tint);
+}

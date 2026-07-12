@@ -118,6 +118,34 @@ async def test_get_active_notice_returns_none_when_no_company_profile(monkeypatc
     assert result is None
 
 
+async def test_get_disabled_skills_returns_list_when_set(monkeypatch):
+    row = {**COMPANY_PROFILE_ROW, "disabled_skills": ["partners", "faq"]}
+    client = _client_with(company_profile=[row])
+    monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)
+
+    result = await handlers.get_disabled_skills(TENANT_ID)
+
+    assert result == ["partners", "faq"]
+
+
+async def test_get_disabled_skills_returns_empty_list_when_not_set(monkeypatch):
+    client = _client_with(company_profile=[COMPANY_PROFILE_ROW])
+    monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)
+
+    result = await handlers.get_disabled_skills(TENANT_ID)
+
+    assert result == []
+
+
+async def test_get_disabled_skills_returns_empty_list_when_no_company_profile(monkeypatch):
+    client = _client_with(company_profile=[])
+    monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)
+
+    result = await handlers.get_disabled_skills(TENANT_ID)
+
+    assert result == []
+
+
 async def test_get_company_info_returns_set_fields_only(monkeypatch):
     row = {
         **COMPANY_PROFILE_ROW,

@@ -331,3 +331,64 @@ async def test_generate_reply_test_mode_gap_does_not_write(monkeypatch):
             {"would_flag": True, "question": "работает ли зимой открытая веранда?"},
         )
     ]
+
+
+async def test_generate_reply_captures_lead_with_tenant_and_conversation_id(monkeypatch):
+    tool_call = _FakeToolCall("call_1", "capture_lead", {"name": "Анна", "phone": "+998901234567"})
+    client = _FakeOpenAIClient(
+        [
+            _tool_call_response(tool_call),
+            _final_response("Спасибо, Анна! Передал заявку администратору."),
+        ]
+    )
+    monkeypatch.setattr(engine, "get_openai_client", lambda: client)
+
+    async def fake_capture(tenant_id, conversation_id, **fields):
+        assert tenant_id == "tenant-1"
+        assert conversation_id == "conv-1"
+        assert fields == {"name": "Анна", "phone": "+998901234567"}
+        return {"tenant_id": tenant_id, "conversation_id": conversation_id, **fields}
+
+    monkeypatch.setattr(engine.handlers, "capture_lead", fake_capture)
+
+    result = await engine.generate_reply(
+        "tenant-1", "conv-1", [{"role": "user", "content": "Меня зовут Анна, номер +998901234567"}]
+    )
+
+    assert result.reply == "Спасибо, Анна! Передал заявку администратору."
+
+
+async def test_generate_reply_test_mode_lead_does_not_write(monkeypatch):
+    tool_call = _FakeToolCall("call_1", "capture_lead", {"name": "Анна", "phone": "+998901234567"})
+    client = _FakeOpenAIClient(
+        [
+            _tool_call_response(tool_call),
+            _final_response("Спасибо, Анна!"),
+        ]
+    )
+    monkeypatch.setattr(engine, "get_openai_client", lambda: client)
+
+    capture_calls = []
+
+    async def fake_capture(tenant_id, conversation_id, **fields):
+        capture_calls.append((tenant_id, conversation_id, fields))
+        return {"tenant_id": tenant_id, "conversation_id": conversation_id, **fields}
+
+    monkeypatch.setattr(engine.handlers, "capture_lead", fake_capture)
+
+    result = await engine.generate_reply(
+        "tenant-1",
+        "test-conv",
+        [{"role": "user", "content": "Меня зовут Анна, номер +998901234567"}],
+        test_mode=True,
+    )
+
+    assert result.reply == "Спасибо, Анна!"
+    assert capture_calls == []
+    assert result.tool_calls == [
+        engine.ToolCallRecord(
+            "capture_lead",
+            {"name": "Анна", "phone": "+998901234567"},
+            {"would_capture_lead": True, "name": "Анна", "phone": "+998901234567"},
+        )
+    ]

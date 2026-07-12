@@ -60,6 +60,12 @@ SYSTEM_PROMPT_BASE = (
     "администратор мог добавить ответ на будущее, и скажи клиенту, что уточнишь и вернёшься с "
     "ответом. Используй escalate_to_human для жалоб/торга/эскалаций к человеку, а flag_knowledge_gap "
     "— для обычных вопросов, на которые у бота просто нет данных.\n"
+    "ЕСЛИ ДАТА, КОТОРУЮ СПРОСИЛ КЛИЕНТ, ОКАЗАЛАСЬ СВОБОДНА (check_date_availability вернул "
+    "доступность), или клиент явно говорит, что хочет забронировать — в этом же ответе попроси "
+    "у него имя и номер телефона, чтобы администратор мог связаться и оформить бронь. Как только "
+    "клиент их укажет — вызови capture_lead с этими данными и любыми другими деталями, которые он "
+    "упомянул (дата, кол-во гостей, бюджет). Не спрашивай контакты повторно в каждом сообщении, "
+    "если клиент уже дал их или проигнорировал вопрос — просто продолжай отвечать по существу.\n"
     "ДАТЫ: сегодняшняя дата указана ниже отдельной строкой — используй именно её как точку отсчёта. "
     "Если клиент называет относительную дату («завтра», «через неделю», «в эти выходные») — сначала "
     "вычисли конкретную дату ГГГГ-ММ-ДД от сегодняшней даты и только потом вызывай "
@@ -173,6 +179,24 @@ TOOLS: list[dict[str, Any]] = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "capture_lead",
+            "description": "Сохранить или дополнить данные клиента, проявившего намерение забронировать (имя, телефон, дата, кол-во гостей, бюджет).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "phone": {"type": "string"},
+                    "preferred_date": {"type": "string", "description": "YYYY-MM-DD"},
+                    "guest_count": {"type": "integer"},
+                    "budget": {"type": "string"},
+                },
+                "required": [],
+            },
+        },
+    },
 ]
 
 
@@ -216,6 +240,12 @@ async def _call_tool(
             # its own UI, same treatment as escalate_to_human's test_mode path.
             return {"would_flag": True, "question": arguments["question"]}
         return await handlers.flag_knowledge_gap(tenant_id, conversation_id, arguments["question"])
+    if name == "capture_lead":
+        if test_mode:
+            # No DB row — Test Console surfaces this as "would capture" in
+            # its own UI, same treatment as the other two tools' test_mode.
+            return {"would_capture_lead": True, **arguments}
+        return await handlers.capture_lead(tenant_id, conversation_id, **arguments)
     raise ValueError(f"Unknown tool: {name}")
 
 

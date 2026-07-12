@@ -9,8 +9,17 @@ import { KnowledgeGapsEditor } from "@/components/KnowledgeGapsEditor";
 import { PackagesEditor } from "@/components/PackagesEditor";
 import { PartnersEditor } from "@/components/PartnersEditor";
 import { PoliciesEditor } from "@/components/PoliciesEditor";
+import { SkillsEditor } from "@/components/SkillsEditor";
 
-type ConfigTab = "info" | "packages" | "faq" | "gaps" | "partners" | "policies" | "availability";
+type ConfigTab =
+  | "info"
+  | "packages"
+  | "faq"
+  | "gaps"
+  | "partners"
+  | "skills"
+  | "policies"
+  | "availability";
 
 const TABS: { key: ConfigTab; label: string }[] = [
   { key: "info", label: "О заведении" },
@@ -18,6 +27,7 @@ const TABS: { key: ConfigTab; label: string }[] = [
   { key: "faq", label: "Вопросы" },
   { key: "gaps", label: "Пробелы" },
   { key: "partners", label: "Партнёры" },
+  { key: "skills", label: "Навыки" },
   { key: "policies", label: "Политики" },
   { key: "availability", label: "Календарь" },
 ];
@@ -43,6 +53,7 @@ export default function DesktopConfigurationPage() {
       {tab === "faq" && <FaqEditor />}
       {tab === "gaps" && <KnowledgeGapsEditor />}
       {tab === "partners" && <PartnersEditor />}
+      {tab === "skills" && <SkillsEditor />}
       {tab === "policies" && <PoliciesEditor />}
       {tab === "availability" && <AvailabilityManager />}
     </div>

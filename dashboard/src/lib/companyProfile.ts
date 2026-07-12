@@ -5,7 +5,7 @@ import { randomUUID } from "node:crypto";
 import { getServiceSupabaseClient } from "./supabase/server";
 import type { CompanyProfile, FaqEntry, Package, Partner } from "./types";
 
-const COLUMNS = "packages,faq,partners,policies,active_notice,company_name,address,phone,socials,updated_at";
+const COLUMNS = "packages,faq,partners,policies,active_notice,company_name,address,phone,socials,disabled_skills,updated_at";
 
 // Rows seeded directly in Supabase (before this dashboard existed) predate
 // the client-generated `id` field and, for partners, can have a null
@@ -26,6 +26,7 @@ interface CompanyProfileRow {
   address: string | null;
   phone: string | null;
   socials: string | null;
+  disabled_skills: string[] | null;
   updated_at: string | null;
 }
 
@@ -63,6 +64,7 @@ export async function fetchCompanyProfile(tenantId: string): Promise<CompanyProf
       address: null,
       phone: null,
       socials: null,
+      disabledSkills: [],
       updatedAt: null,
     };
   }
@@ -78,6 +80,7 @@ export async function fetchCompanyProfile(tenantId: string): Promise<CompanyProf
     address: data.address ?? null,
     phone: data.phone ?? null,
     socials: data.socials ?? null,
+    disabledSkills: data.disabled_skills ?? [],
     updatedAt: data.updated_at,
   };
 }
@@ -91,7 +94,8 @@ type CompanyProfileColumn =
   | "company_name"
   | "address"
   | "phone"
-  | "socials";
+  | "socials"
+  | "disabled_skills";
 
 async function upsertColumns(tenantId: string, columns: Partial<Record<CompanyProfileColumn, unknown>>): Promise<void> {
   const client = getServiceSupabaseClient();
@@ -131,7 +135,7 @@ async function upsertColumns(tenantId: string, columns: Partial<Record<CompanyPr
 
 function upsertColumn(
   tenantId: string,
-  column: "packages" | "faq" | "partners" | "policies" | "active_notice",
+  column: "packages" | "faq" | "partners" | "policies" | "active_notice" | "disabled_skills",
   value: unknown,
 ): Promise<void> {
   return upsertColumns(tenantId, { [column]: value });
@@ -175,4 +179,10 @@ export function saveCompanyInfo(tenantId: string, info: CompanyInfoInput): Promi
     phone: info.phone,
     socials: info.socials,
   });
+}
+
+/** Read by the client-facing bot (backend/app/ai/engine.py's _build_tools)
+ * to decide which optional tools to offer for this tenant. */
+export function saveDisabledSkills(tenantId: string, disabledSkills: string[]): Promise<void> {
+  return upsertColumn(tenantId, "disabled_skills", disabledSkills);
 }

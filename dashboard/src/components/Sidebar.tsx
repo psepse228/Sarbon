@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { ChatIcon, FlaskIcon, GearIcon, HomeIcon, SparkleIcon } from "@/components/icons";
+import { ChatIcon, FlaskIcon, GearIcon, HomeIcon, SparkleIcon, UsersIcon } from "@/components/icons";
 
 const ITEMS = [
   { href: "/d", label: "Обзор", Icon: HomeIcon },
   { href: "/d/conversations", label: "Диалоги", Icon: ChatIcon },
+  { href: "/d/leads", label: "Лиды", Icon: UsersIcon },
   { href: "/d/configuration", label: "Настройки", Icon: GearIcon },
   { href: "/d/test-console", label: "Тест-консоль", Icon: FlaskIcon },
   { href: "/d/assistant", label: "Ассистент", Icon: SparkleIcon },

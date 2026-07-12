@@ -76,6 +76,18 @@ export interface KnowledgeGap {
   createdAt: string;
 }
 
+export interface Lead {
+  id: string;
+  conversationId: string;
+  name: string | null;
+  phone: string | null;
+  preferredDate: string | null;
+  guestCount: number | null;
+  budget: string | null;
+  status: "new" | "contacted" | "booked" | "lost";
+  createdAt: string;
+}
+
 export interface AvailabilityEntry {
   id: string;
   date: string;

@@ -230,6 +230,19 @@ async def test_escalate_to_human_inserts_and_returns_row(monkeypatch):
     assert result == {"conversation_id": "conv-1", "reason": "price_negotiation"}
 
 
+async def test_flag_knowledge_gap_inserts_and_returns_row(monkeypatch):
+    client = _client_with(knowledge_gaps=[])
+    monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)
+
+    result = await handlers.flag_knowledge_gap(TENANT_ID, "conv-1", "есть ли парковка для автобуса?")
+
+    assert result == {
+        "tenant_id": TENANT_ID,
+        "conversation_id": "conv-1",
+        "question": "есть ли парковка для автобуса?",
+    }
+
+
 async def test_profile_dependent_functions_return_none_when_no_company_profile(monkeypatch):
     client = _client_with(company_profile=[])
     monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)

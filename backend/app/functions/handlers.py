@@ -108,3 +108,14 @@ async def escalate_to_human(conversation_id: str, reason: str) -> dict[str, Any]
     )
     rows = response.data
     return rows[0] if rows else None
+
+
+async def flag_knowledge_gap(tenant_id: str, conversation_id: str, question: str) -> dict[str, Any] | None:
+    client = get_supabase_client()
+    response = (
+        client.table("knowledge_gaps")
+        .insert({"tenant_id": tenant_id, "conversation_id": conversation_id, "question": question})
+        .execute()
+    )
+    rows = response.data
+    return rows[0] if rows else None

@@ -98,63 +98,7 @@ def _system_message(
         )
     return {"role": "system", "content": content}
 
-TOOLS: list[dict[str, Any]] = [
-    {
-        "type": "function",
-        "function": {
-            "name": "get_package_price",
-            "description": "Найти пакет и его цену по названию (например «Стандарт», «Премиум»).",
-            "parameters": {
-                "type": "object",
-                "properties": {"package_name": {"type": "string"}},
-                "required": ["package_name"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "list_packages",
-            "description": "Получить список всех пакетов, если клиент не назвал конкретный пакет.",
-            "parameters": {"type": "object", "properties": {}},
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "check_date_availability",
-            "description": "Проверить, свободна ли дата (формат YYYY-MM-DD) для мероприятия.",
-            "parameters": {
-                "type": "object",
-                "properties": {"date": {"type": "string"}},
-                "required": ["date"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_faq",
-            "description": "Найти ответ на частый вопрос по теме (например «алкоголь», «парковка»).",
-            "parameters": {
-                "type": "object",
-                "properties": {"topic": {"type": "string"}},
-                "required": ["topic"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_partners",
-            "description": "Найти партнёров по категории (например «Кортеж», «Флористы»).",
-            "parameters": {
-                "type": "object",
-                "properties": {"category": {"type": "string"}},
-                "required": ["category"],
-            },
-        },
-    },
+ALWAYS_ON_TOOLS: list[dict[str, Any]] = [
     {
         "type": "function",
         "function": {
@@ -198,6 +142,83 @@ TOOLS: list[dict[str, Any]] = [
         },
     },
 ]
+
+TOGGLEABLE_TOOLS: dict[str, list[dict[str, Any]]] = {
+    "packages": [
+        {
+            "type": "function",
+            "function": {
+                "name": "get_package_price",
+                "description": "Найти пакет и его цену по названию (например «Стандарт», «Премиум»).",
+                "parameters": {
+                    "type": "object",
+                    "properties": {"package_name": {"type": "string"}},
+                    "required": ["package_name"],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "list_packages",
+                "description": "Получить список всех пакетов, если клиент не назвал конкретный пакет.",
+                "parameters": {"type": "object", "properties": {}},
+            },
+        },
+    ],
+    "availability": [
+        {
+            "type": "function",
+            "function": {
+                "name": "check_date_availability",
+                "description": "Проверить, свободна ли дата (формат YYYY-MM-DD) для мероприятия.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {"date": {"type": "string"}},
+                    "required": ["date"],
+                },
+            },
+        },
+    ],
+    "faq": [
+        {
+            "type": "function",
+            "function": {
+                "name": "get_faq",
+                "description": "Найти ответ на частый вопрос по теме (например «алкоголь», «парковка»).",
+                "parameters": {
+                    "type": "object",
+                    "properties": {"topic": {"type": "string"}},
+                    "required": ["topic"],
+                },
+            },
+        },
+    ],
+    "partners": [
+        {
+            "type": "function",
+            "function": {
+                "name": "get_partners",
+                "description": "Найти партнёров по категории (например «Кортеж», «Флористы»).",
+                "parameters": {
+                    "type": "object",
+                    "properties": {"category": {"type": "string"}},
+                    "required": ["category"],
+                },
+            },
+        },
+    ],
+}
+
+
+def _build_tools(disabled_skills: list[str]) -> list[dict[str, Any]]:
+    enabled = [
+        tool_def
+        for skill, defs in TOGGLEABLE_TOOLS.items()
+        if skill not in disabled_skills
+        for tool_def in defs
+    ]
+    return [*enabled, *ALWAYS_ON_TOOLS]
 
 
 @lru_cache
@@ -298,11 +319,13 @@ async def generate_reply(
     client = get_openai_client()
     active_notice = await handlers.get_active_notice(tenant_id)
     company_info = await handlers.get_company_info(tenant_id)
+    disabled_skills = await handlers.get_disabled_skills(tenant_id)
     messages: list[dict[str, Any]] = await _build_messages(client, history, active_notice, company_info)
     tool_calls_made: list[ToolCallRecord] = []
+    tools = _build_tools(disabled_skills)
 
     for _ in range(MAX_TOOL_ROUNDS):
-        response = await client.chat.completions.create(model=MODEL, messages=messages, tools=TOOLS)
+        response = await client.chat.completions.create(model=MODEL, messages=messages, tools=tools)
         choice = response.choices[0].message
         if not choice.tool_calls:
             return GeneratedReply(choice.content or "", tool_calls_made)

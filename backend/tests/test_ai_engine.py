@@ -28,6 +28,17 @@ def _no_company_info(monkeypatch):
     monkeypatch.setattr(engine.handlers, "get_company_info", fake_get_company_info)
 
 
+@pytest.fixture(autouse=True)
+def _no_disabled_skills(monkeypatch):
+    """Default for every test in this file — override in a specific test to
+    exercise the skill-filtering path."""
+
+    async def fake_get_disabled_skills(tenant_id):
+        return []
+
+    monkeypatch.setattr(engine.handlers, "get_disabled_skills", fake_get_disabled_skills)
+
+
 class _FakeToolCall:
     def __init__(self, id_, name, arguments):
         self.id = id_
@@ -392,3 +403,49 @@ async def test_generate_reply_test_mode_lead_does_not_write(monkeypatch):
             {"would_capture_lead": True, "name": "Анна", "phone": "+998901234567"},
         )
     ]
+
+
+async def test_generate_reply_offers_all_tools_when_nothing_disabled(monkeypatch):
+    client = _FakeOpenAIClient([_final_response("Добрый день!")])
+    monkeypatch.setattr(engine, "get_openai_client", lambda: client)
+
+    await engine.generate_reply("tenant-1", "conv-1", [{"role": "user", "content": "Привет"}])
+
+    tools_used = client.chat.completions.calls[0]["tools"]
+    names = {t["function"]["name"] for t in tools_used}
+    assert names == {
+        "get_package_price",
+        "list_packages",
+        "check_date_availability",
+        "get_faq",
+        "get_partners",
+        "escalate_to_human",
+        "flag_knowledge_gap",
+        "capture_lead",
+    }
+
+
+async def test_generate_reply_excludes_tools_for_disabled_skills(monkeypatch):
+    async def fake_get_disabled_skills(tenant_id):
+        assert tenant_id == "tenant-1"
+        return ["partners", "faq"]
+
+    monkeypatch.setattr(engine.handlers, "get_disabled_skills", fake_get_disabled_skills)
+
+    client = _FakeOpenAIClient([_final_response("Добрый день!")])
+    monkeypatch.setattr(engine, "get_openai_client", lambda: client)
+
+    await engine.generate_reply("tenant-1", "conv-1", [{"role": "user", "content": "Привет"}])
+
+    tools_used = client.chat.completions.calls[0]["tools"]
+    names = {t["function"]["name"] for t in tools_used}
+    assert "get_partners" not in names
+    assert "get_faq" not in names
+    assert names == {
+        "get_package_price",
+        "list_packages",
+        "check_date_availability",
+        "escalate_to_human",
+        "flag_knowledge_gap",
+        "capture_lead",
+    }

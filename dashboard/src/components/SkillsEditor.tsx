@@ -18,16 +18,21 @@ const SKILLS: { key: SkillKey; label: string; description: string }[] = [
 export function SkillsEditor() {
   const { profile, loading, error, refetch } = useCompanyProfile();
   const [disabled, setDisabled] = useState<string[]>([]);
-  const [busyKey, setBusyKey] = useState<SkillKey | null>(null);
+  const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     if (profile) setDisabled(profile.disabledSkills);
   }, [profile]);
 
+  // All 4 checkboxes are disabled while any save is in flight (rather than
+  // just the one being toggled) — this is a full-replace PUT against one
+  // shared column, so two overlapping toggles would each compute `next` from
+  // the same stale `disabled` snapshot and the loser's change would be
+  // silently dropped. Serializing toggles closes that race.
   async function toggle(key: SkillKey) {
     const next = disabled.includes(key) ? disabled.filter((k) => k !== key) : [...disabled, key];
-    setBusyKey(key);
+    setSaving(true);
     setSaveError(null);
     try {
       const res = await tmaFetch("/api/skills", { method: "PUT", body: JSON.stringify(next) });
@@ -40,7 +45,7 @@ export function SkillsEditor() {
       setSaveError(err instanceof Error ? err.message : "Не удалось сохранить");
       await refetch();
     } finally {
-      setBusyKey(null);
+      setSaving(false);
     }
   }
 
@@ -61,7 +66,7 @@ export function SkillsEditor() {
             <input
               type="checkbox"
               checked={!disabled.includes(skill.key)}
-              disabled={busyKey === skill.key}
+              disabled={saving}
               onChange={() => toggle(skill.key)}
             />
           </div>

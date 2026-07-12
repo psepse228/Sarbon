@@ -5,16 +5,18 @@ import { useState } from "react";
 import { AvailabilityManager } from "@/components/AvailabilityManager";
 import { CompanyInfoEditor } from "@/components/CompanyInfoEditor";
 import { FaqEditor } from "@/components/FaqEditor";
+import { KnowledgeGapsEditor } from "@/components/KnowledgeGapsEditor";
 import { PackagesEditor } from "@/components/PackagesEditor";
 import { PartnersEditor } from "@/components/PartnersEditor";
 import { PoliciesEditor } from "@/components/PoliciesEditor";
 
-type ConfigTab = "info" | "packages" | "faq" | "partners" | "policies" | "availability";
+type ConfigTab = "info" | "packages" | "faq" | "gaps" | "partners" | "policies" | "availability";
 
 const TABS: { key: ConfigTab; label: string }[] = [
   { key: "info", label: "О заведении" },
   { key: "packages", label: "Пакеты" },
   { key: "faq", label: "Вопросы" },
+  { key: "gaps", label: "Пробелы" },
   { key: "partners", label: "Партнёры" },
   { key: "policies", label: "Политики" },
   { key: "availability", label: "Календарь" },
@@ -39,6 +41,7 @@ export default function DesktopConfigurationPage() {
       {tab === "info" && <CompanyInfoEditor />}
       {tab === "packages" && <PackagesEditor />}
       {tab === "faq" && <FaqEditor />}
+      {tab === "gaps" && <KnowledgeGapsEditor />}
       {tab === "partners" && <PartnersEditor />}
       {tab === "policies" && <PoliciesEditor />}
       {tab === "availability" && <AvailabilityManager />}

@@ -54,6 +54,7 @@ export interface CompanyProfile {
   address: string | null;
   phone: string | null;
   socials: string | null;
+  disabledSkills: string[];
   updatedAt: string | null;
 }
 

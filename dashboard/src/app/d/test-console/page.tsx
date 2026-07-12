@@ -19,14 +19,21 @@ function ToolCallTrace({ toolCalls }: { toolCalls: ToolCall[] }) {
     <div className="tool-call-trace">
       {toolCalls.map((call, index) => {
         const escalated = call.name === "escalate_to_human";
+        const gapFlagged = call.name === "flag_knowledge_gap";
         const argsText = Object.entries(call.arguments)
           .map(([key, value]) => `${key}=${JSON.stringify(value)}`)
           .join(", ");
+        let label: string;
+        if (escalated) {
+          label = `Бот бы передал администратору: ${String((call.result as { reason?: string })?.reason ?? "")}`;
+        } else if (gapFlagged) {
+          label = `Бот бы зафиксировал пробел в знаниях: ${String((call.result as { question?: string })?.question ?? "")}`;
+        } else {
+          label = `${call.name}(${argsText}) → ${JSON.stringify(call.result)}`;
+        }
         return (
-          <div key={index} className="tool-call-chip" data-escalated={escalated}>
-            {escalated
-              ? `Бот бы передал администратору: ${String((call.result as { reason?: string })?.reason ?? "")}`
-              : `${call.name}(${argsText}) → ${JSON.stringify(call.result)}`}
+          <div key={index} className="tool-call-chip" data-escalated={escalated} data-gap-flagged={gapFlagged}>
+            {label}
           </div>
         );
       })}

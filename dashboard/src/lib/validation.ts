@@ -42,3 +42,5 @@ export const companyInfoSchema = z.object({
   phone: z.string(),
   socials: z.string(),
 });
+
+export const disabledSkillsSchema = z.array(z.enum(["packages", "availability", "faq", "partners"]));

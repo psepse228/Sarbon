@@ -275,3 +275,59 @@ async def test_generate_reply_test_mode_escalation_does_not_write_or_notify(monk
     assert result.tool_calls == [
         engine.ToolCallRecord("escalate_to_human", {"reason": "вопрос вне темы"}, {"would_escalate": True, "reason": "вопрос вне темы"})
     ]
+
+
+async def test_generate_reply_flags_knowledge_gap_with_tenant_and_conversation_id(monkeypatch):
+    tool_call = _FakeToolCall("call_1", "flag_knowledge_gap", {"question": "есть ли парковка для автобуса?"})
+    client = _FakeOpenAIClient(
+        [
+            _tool_call_response(tool_call),
+            _final_response("Уточню это и вернусь с ответом."),
+        ]
+    )
+    monkeypatch.setattr(engine, "get_openai_client", lambda: client)
+
+    async def fake_flag(tenant_id, conversation_id, question):
+        assert tenant_id == "tenant-1"
+        assert conversation_id == "conv-1"
+        assert question == "есть ли парковка для автобуса?"
+        return {"tenant_id": tenant_id, "conversation_id": conversation_id, "question": question}
+
+    monkeypatch.setattr(engine.handlers, "flag_knowledge_gap", fake_flag)
+
+    result = await engine.generate_reply("tenant-1", "conv-1", [{"role": "user", "content": "Есть парковка для автобуса?"}])
+
+    assert result.reply == "Уточню это и вернусь с ответом."
+
+
+async def test_generate_reply_test_mode_gap_does_not_write(monkeypatch):
+    tool_call = _FakeToolCall("call_1", "flag_knowledge_gap", {"question": "работает ли зимой открытая веранда?"})
+    client = _FakeOpenAIClient(
+        [
+            _tool_call_response(tool_call),
+            _final_response("Уточню и вернусь с ответом."),
+        ]
+    )
+    monkeypatch.setattr(engine, "get_openai_client", lambda: client)
+
+    flag_calls = []
+
+    async def fake_flag(tenant_id, conversation_id, question):
+        flag_calls.append((tenant_id, conversation_id, question))
+        return {"tenant_id": tenant_id, "conversation_id": conversation_id, "question": question}
+
+    monkeypatch.setattr(engine.handlers, "flag_knowledge_gap", fake_flag)
+
+    result = await engine.generate_reply(
+        "tenant-1", "test-conv", [{"role": "user", "content": "работает ли зимой открытая веранда?"}], test_mode=True
+    )
+
+    assert result.reply == "Уточню и вернусь с ответом."
+    assert flag_calls == []
+    assert result.tool_calls == [
+        engine.ToolCallRecord(
+            "flag_knowledge_gap",
+            {"question": "работает ли зимой открытая веранда?"},
+            {"would_flag": True, "question": "работает ли зимой открытая веранда?"},
+        )
+    ]

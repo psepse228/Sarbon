@@ -241,11 +241,17 @@ async def _call_tool(
             return {"would_flag": True, "question": arguments["question"]}
         return await handlers.flag_knowledge_gap(tenant_id, conversation_id, arguments["question"])
     if name == "capture_lead":
+        # Filtered to the tool's own schema keys so a stray "tenant_id" or
+        # "conversation_id" in the model's output can't collide with the
+        # fixed positional arguments below (TypeError: multiple values).
+        lead_fields = {
+            k: v for k, v in arguments.items() if k in {"name", "phone", "preferred_date", "guest_count", "budget"}
+        }
         if test_mode:
             # No DB row — Test Console surfaces this as "would capture" in
             # its own UI, same treatment as the other two tools' test_mode.
-            return {"would_capture_lead": True, **arguments}
-        return await handlers.capture_lead(tenant_id, conversation_id, **arguments)
+            return {"would_capture_lead": True, **lead_fields}
+        return await handlers.capture_lead(tenant_id, conversation_id, **lead_fields)
     raise ValueError(f"Unknown tool: {name}")
 
 

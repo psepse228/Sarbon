@@ -67,6 +67,15 @@ export interface Escalation {
   channel: string;
 }
 
+export interface KnowledgeGap {
+  id: string;
+  conversationId: string;
+  question: string;
+  status: "open" | "answered" | "dismissed";
+  answer: string | null;
+  createdAt: string;
+}
+
 export interface AvailabilityEntry {
   id: string;
   date: string;

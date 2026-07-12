@@ -39,6 +39,10 @@ class _FakeQuery:
         self._data = [payload]
         return self
 
+    def upsert(self, payload, on_conflict=None):
+        self._data = [payload]
+        return self
+
     def execute(self):
         return SimpleNamespace(data=self._data)
 
@@ -241,6 +245,60 @@ async def test_flag_knowledge_gap_inserts_and_returns_row(monkeypatch):
         "conversation_id": "conv-1",
         "question": "есть ли парковка для автобуса?",
     }
+
+
+async def test_capture_lead_creates_new_row_when_none_exists(monkeypatch):
+    client = _client_with(leads=[])
+    monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)
+
+    result = await handlers.capture_lead(TENANT_ID, "conv-1", name="Анна", phone="+998901234567")
+
+    assert result == {
+        "tenant_id": TENANT_ID,
+        "conversation_id": "conv-1",
+        "name": "Анна",
+        "phone": "+998901234567",
+    }
+
+
+async def test_capture_lead_merges_into_existing_row(monkeypatch):
+    existing_row = {
+        "id": "lead-1",
+        "tenant_id": TENANT_ID,
+        "conversation_id": "conv-1",
+        "name": "Анна",
+        "phone": "+998901234567",
+        "preferred_date": None,
+        "guest_count": None,
+        "budget": None,
+        "status": "new",
+    }
+    client = _client_with(leads=[existing_row])
+    monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)
+
+    result = await handlers.capture_lead(TENANT_ID, "conv-1", budget="300000-400000")
+
+    assert result == {**existing_row, "budget": "300000-400000"}
+
+
+async def test_capture_lead_ignores_none_values(monkeypatch):
+    existing_row = {
+        "id": "lead-1",
+        "tenant_id": TENANT_ID,
+        "conversation_id": "conv-1",
+        "name": "Анна",
+        "phone": "+998901234567",
+        "preferred_date": None,
+        "guest_count": None,
+        "budget": None,
+        "status": "new",
+    }
+    client = _client_with(leads=[existing_row])
+    monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)
+
+    result = await handlers.capture_lead(TENANT_ID, "conv-1", name=None, guest_count=50)
+
+    assert result == {**existing_row, "guest_count": 50}
 
 
 async def test_profile_dependent_functions_return_none_when_no_company_profile(monkeypatch):

@@ -119,3 +119,26 @@ async def flag_knowledge_gap(tenant_id: str, conversation_id: str, question: str
     )
     rows = response.data
     return rows[0] if rows else None
+
+
+async def capture_lead(tenant_id: str, conversation_id: str, **fields: Any) -> dict[str, Any] | None:
+    client = get_supabase_client()
+    new_fields = {k: v for k, v in fields.items() if v is not None}
+
+    existing = (
+        client.table("leads")
+        .select("*")
+        .eq("conversation_id", conversation_id)
+        .limit(1)
+        .execute()
+    ).data
+
+    merged = (
+        {**existing[0], **new_fields}
+        if existing
+        else {"tenant_id": tenant_id, "conversation_id": conversation_id, **new_fields}
+    )
+
+    response = client.table("leads").upsert(merged, on_conflict="conversation_id").execute()
+    rows = response.data
+    return rows[0] if rows else None

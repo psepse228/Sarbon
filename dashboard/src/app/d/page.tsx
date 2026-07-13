@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 import { ErrorBanner } from "@/components/StatusBanner";
 import {
@@ -106,13 +107,13 @@ export default function DesktopOverviewPage() {
             ) : (
               <div className="activity-list">
                 {activity.map((item) => (
-                  <a
+                  <Link
                     key={item.conversationId}
                     href={`/d/conversations/${item.conversationId}`}
                     className="activity-row"
                   >
                     <div className="activity-main">
-                      <span className="activity-client">{item.clientId}</span>
+                      <span className="activity-client">Клиент {item.clientId}</span>
                       <span className="activity-channel">{item.channel}</span>
                     </div>
                     <div className="activity-meta">
@@ -123,7 +124,7 @@ export default function DesktopOverviewPage() {
                         {item.status === "escalated" ? "Эскалация" : "Решено"}
                       </span>
                     </div>
-                  </a>
+                  </Link>
                 ))}
               </div>
             )}

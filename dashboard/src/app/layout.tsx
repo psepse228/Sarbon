@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Golos_Text, Unbounded } from "next/font/google";
 
 import { AuthGate } from "@/components/AuthGate";
-import { BackgroundVideo } from "@/components/BackgroundVideo";
 import { TelegramInit } from "@/components/TelegramInit";
 
 import "./globals.css";
@@ -39,7 +38,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ru" className={`${unbounded.variable} ${golosText.variable}`}>
       <body>
-        <BackgroundVideo />
         <TelegramInit />
         <AuthGate>{children}</AuthGate>
       </body>

@@ -67,6 +67,10 @@ SYSTEM_PROMPT_BASE = (
     "клиент их укажет — вызови capture_lead с этими данными и любыми другими деталями, которые он "
     "упомянул (дата, кол-во гостей, бюджет). Не спрашивай контакты повторно в каждом сообщении, "
     "если клиент уже дал их или проигнорировал вопрос — просто продолжай отвечать по существу.\n"
+    "ЕСЛИ КЛИЕНТ САМ (без вопроса с твоей стороны) оставил оценку или отзыв о качестве "
+    "обслуживания (например «спасибо, всё супер, 5 из 5» или «было долго ждать ответа») — вызови "
+    "capture_review с оценкой (1-5) и текстом отзыва, если он был. Никогда не спрашивай оценку "
+    "первым — только фиксируй то, что клиент дал добровольно.\n"
     "ДАТЫ: сегодняшняя дата указана ниже отдельной строкой — используй именно её как точку отсчёта. "
     "Если клиент называет относительную дату («завтра», «через неделю», «в эти выходные») — сначала "
     "вычисли конкретную дату ГГГГ-ММ-ДД от сегодняшней даты и только потом вызывай "
@@ -139,6 +143,21 @@ ALWAYS_ON_TOOLS: list[dict[str, Any]] = [
                     "budget": {"type": "string"},
                 },
                 "required": [],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "capture_review",
+            "description": "Зафиксировать оценку/отзыв, который клиент оставил добровольно о качестве обслуживания (не спрашивать самому, только если клиент сам оценил).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "rating": {"type": "integer", "description": "Оценка от 1 до 5"},
+                    "comment": {"type": "string"},
+                },
+                "required": ["rating"],
             },
         },
     },
@@ -274,6 +293,12 @@ async def _call_tool(
             # its own UI, same treatment as the other two tools' test_mode.
             return {"would_capture_lead": True, **lead_fields}
         return await handlers.capture_lead(tenant_id, conversation_id, **lead_fields)
+    if name == "capture_review":
+        if test_mode:
+            # No DB row — Test Console surfaces this as "would capture" in
+            # its own UI, same treatment as the other ALWAYS_ON_TOOLS.
+            return {"would_capture_review": True, "rating": arguments["rating"], "comment": arguments.get("comment")}
+        return await handlers.capture_review(tenant_id, conversation_id, arguments["rating"], arguments.get("comment"))
     raise ValueError(f"Unknown tool: {name}")
 
 

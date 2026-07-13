@@ -405,6 +405,61 @@ async def test_generate_reply_test_mode_lead_does_not_write(monkeypatch):
     ]
 
 
+async def test_generate_reply_captures_review_with_tenant_and_conversation_id(monkeypatch):
+    tool_call = _FakeToolCall("call_1", "capture_review", {"rating": 5, "comment": "Всё супер!"})
+    client = _FakeOpenAIClient(
+        [
+            _tool_call_response(tool_call),
+            _final_response("Спасибо большое за отзыв!"),
+        ]
+    )
+    monkeypatch.setattr(engine, "get_openai_client", lambda: client)
+
+    async def fake_capture_review(tenant_id, conversation_id, rating, comment=None):
+        assert tenant_id == "tenant-1"
+        assert conversation_id == "conv-1"
+        assert rating == 5
+        assert comment == "Всё супер!"
+        return {"tenant_id": tenant_id, "conversation_id": conversation_id, "rating": rating, "comment": comment}
+
+    monkeypatch.setattr(engine.handlers, "capture_review", fake_capture_review)
+
+    result = await engine.generate_reply(
+        "tenant-1", "conv-1", [{"role": "user", "content": "Спасибо, всё было супер! Оценю на 5"}]
+    )
+
+    assert result.reply == "Спасибо большое за отзыв!"
+
+
+async def test_generate_reply_test_mode_review_does_not_write(monkeypatch):
+    tool_call = _FakeToolCall("call_1", "capture_review", {"rating": 5, "comment": None})
+    client = _FakeOpenAIClient(
+        [
+            _tool_call_response(tool_call),
+            _final_response("Спасибо!"),
+        ]
+    )
+    monkeypatch.setattr(engine, "get_openai_client", lambda: client)
+
+    capture_calls = []
+
+    async def fake_capture_review(tenant_id, conversation_id, rating, comment=None):
+        capture_calls.append((tenant_id, conversation_id, rating, comment))
+        return {"tenant_id": tenant_id, "conversation_id": conversation_id, "rating": rating, "comment": comment}
+
+    monkeypatch.setattr(engine.handlers, "capture_review", fake_capture_review)
+
+    result = await engine.generate_reply(
+        "tenant-1", "test-conv", [{"role": "user", "content": "5 из 5!"}], test_mode=True
+    )
+
+    assert result.reply == "Спасибо!"
+    assert capture_calls == []
+    assert result.tool_calls == [
+        engine.ToolCallRecord("capture_review", {"rating": 5, "comment": None}, {"would_capture_review": True, "rating": 5, "comment": None})
+    ]
+
+
 async def test_generate_reply_offers_all_tools_when_nothing_disabled(monkeypatch):
     client = _FakeOpenAIClient([_final_response("Добрый день!")])
     monkeypatch.setattr(engine, "get_openai_client", lambda: client)
@@ -422,6 +477,7 @@ async def test_generate_reply_offers_all_tools_when_nothing_disabled(monkeypatch
         "escalate_to_human",
         "flag_knowledge_gap",
         "capture_lead",
+        "capture_review",
     }
 
 
@@ -448,4 +504,5 @@ async def test_generate_reply_excludes_tools_for_disabled_skills(monkeypatch):
         "escalate_to_human",
         "flag_knowledge_gap",
         "capture_lead",
+        "capture_review",
     }

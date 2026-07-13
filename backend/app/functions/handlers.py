@@ -151,3 +151,14 @@ async def capture_lead(tenant_id: str, conversation_id: str, **fields: Any) -> d
     response = client.table("cortege_leads").upsert(merged, on_conflict="conversation_id").execute()
     rows = response.data
     return rows[0] if rows else None
+
+
+async def capture_review(tenant_id: str, conversation_id: str, rating: int, comment: str | None = None) -> dict[str, Any] | None:
+    client = get_supabase_client()
+    response = (
+        client.table("reviews")
+        .insert({"tenant_id": tenant_id, "conversation_id": conversation_id, "rating": rating, "comment": comment})
+        .execute()
+    )
+    rows = response.data
+    return rows[0] if rows else None

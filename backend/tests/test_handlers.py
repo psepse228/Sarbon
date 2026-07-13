@@ -329,6 +329,34 @@ async def test_capture_lead_ignores_none_values(monkeypatch):
     assert result == {**existing_row, "guest_count": 50}
 
 
+async def test_capture_review_inserts_and_returns_row(monkeypatch):
+    client = _client_with(reviews=[])
+    monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)
+
+    result = await handlers.capture_review(TENANT_ID, "conv-1", rating=5, comment="Всё отлично, спасибо!")
+
+    assert result == {
+        "tenant_id": TENANT_ID,
+        "conversation_id": "conv-1",
+        "rating": 5,
+        "comment": "Всё отлично, спасибо!",
+    }
+
+
+async def test_capture_review_without_comment(monkeypatch):
+    client = _client_with(reviews=[])
+    monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)
+
+    result = await handlers.capture_review(TENANT_ID, "conv-1", rating=4, comment=None)
+
+    assert result == {
+        "tenant_id": TENANT_ID,
+        "conversation_id": "conv-1",
+        "rating": 4,
+        "comment": None,
+    }
+
+
 async def test_profile_dependent_functions_return_none_when_no_company_profile(monkeypatch):
     client = _client_with(company_profile=[])
     monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)

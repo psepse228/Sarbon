@@ -276,7 +276,7 @@ async def test_flag_knowledge_gap_inserts_and_returns_row(monkeypatch):
 
 
 async def test_capture_lead_creates_new_row_when_none_exists(monkeypatch):
-    client = _client_with(leads=[])
+    client = _client_with(cortege_leads=[])
     monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)
 
     result = await handlers.capture_lead(TENANT_ID, "conv-1", name="Анна", phone="+998901234567")
@@ -301,7 +301,7 @@ async def test_capture_lead_merges_into_existing_row(monkeypatch):
         "budget": None,
         "status": "new",
     }
-    client = _client_with(leads=[existing_row])
+    client = _client_with(cortege_leads=[existing_row])
     monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)
 
     result = await handlers.capture_lead(TENANT_ID, "conv-1", budget="300000-400000")
@@ -321,7 +321,7 @@ async def test_capture_lead_ignores_none_values(monkeypatch):
         "budget": None,
         "status": "new",
     }
-    client = _client_with(leads=[existing_row])
+    client = _client_with(cortege_leads=[existing_row])
     monkeypatch.setattr(handlers, "get_supabase_client", lambda: client)
 
     result = await handlers.capture_lead(TENANT_ID, "conv-1", name=None, guest_count=50)

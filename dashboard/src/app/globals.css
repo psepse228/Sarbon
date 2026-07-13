@@ -18,6 +18,16 @@
   --color-warning-tint: rgba(251, 191, 36, 0.12);
   --font-heading: var(--font-unbounded), "Segoe UI", sans-serif;
   --font-body: var(--font-golos), "Segoe UI", sans-serif;
+
+  --color-gold: #d9b872;
+  --color-gold-tint: rgba(217, 184, 114, 0.14);
+  --color-violet: #7b7ff5;
+  --color-violet-tint: rgba(123, 127, 245, 0.14);
+  --glass: rgba(255, 255, 255, 0.055);
+  --glass-strong: rgba(255, 255, 255, 0.09);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-border-soft: rgba(255, 255, 255, 0.07);
+  --glass-sheen: rgba(255, 255, 255, 0.5);
 }
 
 * {
@@ -948,4 +958,72 @@ textarea.policies {
   color: var(--color-warning);
   border-color: rgba(251, 191, 36, 0.3);
   background: var(--color-warning-tint);
+}
+
+/* --- Desktop shell: ambient background (glassmorphism visual refresh) ---
+   Sits behind the whole desktop shell so backdrop-filter on the glass
+   panels (added in Task 2) has something to actually blur. Fixed and
+   scoped to z-index: 0 so it paints above the global BackgroundVideo
+   (z-index: -2/-1, see layout.tsx and .app-background-*) but behind the
+   sidebar/content, which get z-index: 1 in Tasks 2–3. */
+
+.desktop-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.desktop-ambient::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.3;
+  mix-blend-mode: overlay;
+}
+
+.desktop-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(4px);
+  opacity: 0.7;
+  animation: desktop-orb-drift 26s ease-in-out infinite;
+}
+
+.desktop-orb-mint {
+  width: 46vw;
+  height: 46vw;
+  top: -14%;
+  left: -8%;
+  background: radial-gradient(circle at 35% 35%, rgba(52, 211, 153, 0.5), rgba(52, 211, 153, 0) 70%);
+}
+
+.desktop-orb-violet {
+  width: 40vw;
+  height: 40vw;
+  top: -6%;
+  right: -12%;
+  background: radial-gradient(circle at 60% 40%, var(--color-violet-tint), rgba(123, 127, 245, 0) 70%);
+  animation-delay: -8s;
+}
+
+.desktop-orb-gold {
+  width: 34vw;
+  height: 34vw;
+  bottom: -16%;
+  left: 30%;
+  background: radial-gradient(circle at 50% 50%, var(--color-gold-tint), rgba(217, 184, 114, 0) 70%);
+  animation-delay: -16s;
+}
+
+@keyframes desktop-orb-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(3%, 4%) scale(1.06); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desktop-orb { animation: none; }
 }

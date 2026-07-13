@@ -12,6 +12,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@paper-design/shaders-react": "^0.0.77",
     "@supabase/supabase-js": "^2.45.4",
     "@twa-dev/sdk": "^7.10.1",
     "next": "^14.2.15",

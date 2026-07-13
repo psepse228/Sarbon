@@ -96,6 +96,14 @@ export interface AvailabilityEntry {
   eventDetails: string;
 }
 
+export interface Review {
+  id: string;
+  conversationId: string;
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+}
+
 export interface ConversationSummary {
   id: string;
   clientId: string;

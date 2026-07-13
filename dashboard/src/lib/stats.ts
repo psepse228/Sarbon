@@ -82,6 +82,6 @@ export function selectUpcomingAvailability(availability: AvailabilityEntry[], co
  * as UTC midnight, which renders as the previous day for any viewer west of
  * UTC. */
 export function parseLocalDate(isoDate: string): Date {
-  const [year, month, day] = isoDate.split("-").map(Number);
+  const [year, month, day] = isoDate.split("-").map(Number) as [number, number, number];
   return new Date(year, month - 1, day);
 }

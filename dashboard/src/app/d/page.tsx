@@ -3,12 +3,24 @@
 import { useEffect, useState } from "react";
 
 import { ErrorBanner } from "@/components/StatusBanner";
-import { computeDashboardStats, type DashboardStats } from "@/lib/stats";
+import {
+  computeDashboardStats,
+  parseLocalDate,
+  selectRecentActivity,
+  selectUpcomingAvailability,
+  type DashboardStats,
+  type RecentActivityItem,
+} from "@/lib/stats";
 import { tmaFetch } from "@/lib/telegram/client";
 import type { AvailabilityEntry, ConversationSummary, Escalation } from "@/lib/types";
 
+const WEEKDAY_FORMAT = new Intl.DateTimeFormat("ru-RU", { weekday: "short" });
+const TIME_FORMAT = new Intl.DateTimeFormat("ru-RU", { hour: "2-digit", minute: "2-digit" });
+
 export default function DesktopOverviewPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [activity, setActivity] = useState<RecentActivityItem[]>([]);
+  const [upcoming, setUpcoming] = useState<AvailabilityEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -28,6 +40,8 @@ export default function DesktopOverviewPage() {
         const availability: AvailabilityEntry[] = await availabilityRes.json();
 
         setStats(computeDashboardStats(conversations, escalations, availability));
+        setActivity(selectRecentActivity(conversations, escalations, 5));
+        setUpcoming(selectUpcomingAvailability(availability, 7));
       } catch (err) {
         setError(err instanceof Error ? err.message : "Не удалось загрузить аналитику");
       }
@@ -63,6 +77,76 @@ export default function DesktopOverviewPage() {
           <div className="kpi-tile">
             <div className="kpi-value">{stats.upcomingAvailable}</div>
             <div className="kpi-label">свободных дат</div>
+          </div>
+        </div>
+      )}
+
+      {stats && (
+        <div className="desktop-two-pane" style={{ marginTop: "1rem" }}>
+          <div className="card">
+            <div className="meter-row">
+              <span className="meter-label">Автономность бота</span>
+              <span className="meter-value">{resolutionRate ?? "—"}%</span>
+            </div>
+            <div className="meter-track">
+              <div className="meter-fill" style={{ width: `${resolutionRate ?? 0}%` }} />
+            </div>
+            <p className="meter-caption">
+              {stats.conversationsWithoutEscalation} из {stats.totalConversations} диалогов закрыты без эскалации на
+              человека
+            </p>
+          </div>
+
+          <div className="card">
+            <div className="card-title-row">
+              <h3>Последние диалоги</h3>
+            </div>
+            {activity.length === 0 ? (
+              <p className="muted">Пока нет диалогов.</p>
+            ) : (
+              <div className="activity-list">
+                {activity.map((item) => (
+                  <a
+                    key={item.conversationId}
+                    href={`/d/conversations/${item.conversationId}`}
+                    className="activity-row"
+                  >
+                    <div className="activity-main">
+                      <span className="activity-client">{item.clientId}</span>
+                      <span className="activity-channel">{item.channel}</span>
+                    </div>
+                    <div className="activity-meta">
+                      {item.lastMessageAt && (
+                        <span className="activity-time">{TIME_FORMAT.format(new Date(item.lastMessageAt))}</span>
+                      )}
+                      <span className="activity-status-chip" data-status={item.status}>
+                        {item.status === "escalated" ? "Эскалация" : "Решено"}
+                      </span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {upcoming.length > 0 && (
+        <div className="card avail-panel">
+          <div className="card-title-row">
+            <h3>Ближайшие даты</h3>
+          </div>
+          <div className="avail-strip">
+            {upcoming.map((entry) => {
+              const day = parseLocalDate(entry.date);
+              return (
+                <div key={entry.id} className="avail-day" data-free={entry.isAvailable}>
+                  <div className="avail-dow">{WEEKDAY_FORMAT.format(day)}</div>
+                  <div className="avail-date">{day.getDate()}</div>
+                  <div className="avail-label">{entry.isAvailable ? "свободно" : "занято"}</div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

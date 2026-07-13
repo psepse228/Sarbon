@@ -161,7 +161,7 @@ export function SparkleIcon({ className }: IconProps) {
 export function StarIcon({ className }: IconProps) {
   return (
     <svg {...base} className={className}>
-      <path d="M11 3.3 13.6 8.6l5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 5.8-.8L11 3.3Z" />
+      <path d="M11 3.3 13.6 8.6l5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 5.8-.8L11 3.3Z" fill="currentColor" stroke="none" />
     </svg>
   );
 }

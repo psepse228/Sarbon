@@ -59,7 +59,10 @@ export default function ReviewsPage() {
 
       {reviews.map((review) => (
         <div key={review.id} className="card">
-          <div style={{ display: "flex", gap: "0.2rem", marginBottom: "0.5rem" }}>
+          <div
+            style={{ display: "flex", gap: "0.2rem", marginBottom: "0.5rem" }}
+            aria-label={`Оценка: ${review.rating} из 5`}
+          >
             {[1, 2, 3, 4, 5].map((n) => (
               <StarIcon key={n} className={n <= review.rating ? "review-star-filled" : "review-star-empty"} />
             ))}

@@ -18,6 +18,14 @@
   --color-warning-tint: rgba(251, 191, 36, 0.12);
   --font-heading: var(--font-unbounded), "Segoe UI", sans-serif;
   --font-body: var(--font-golos), "Segoe UI", sans-serif;
+
+  --color-gold: #d9b872;
+  --color-gold-tint: rgba(217, 184, 114, 0.14);
+  --color-violet-tint: rgba(123, 127, 245, 0.14);
+  --glass: rgba(255, 255, 255, 0.055);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-border-soft: rgba(255, 255, 255, 0.07);
+  --glass-sheen: rgba(255, 255, 255, 0.5);
 }
 
 * {
@@ -810,13 +818,36 @@ textarea.policies {
 }
 
 .desktop-sidebar {
-  width: 232px;
+  width: 248px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  padding: 1.4rem 1rem;
-  border-right: 1px solid var(--color-hairline);
-  background: rgba(255, 255, 255, 0.02);
+  margin: 1.1rem 0 1.1rem 1.1rem;
+  padding: 1.5rem 1rem;
+  position: sticky;
+  top: 1.1rem;
+  z-index: 1;
+  height: calc(100vh - 2.2rem);
+  border-radius: 22px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass);
+  backdrop-filter: blur(28px) saturate(150%);
+  -webkit-backdrop-filter: blur(28px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 24px 60px -32px rgba(0, 0, 0, 0.75);
+  overflow: hidden;
+}
+
+.desktop-sidebar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-sheen), transparent);
+  opacity: 0.5;
 }
 
 .desktop-sidebar-brand {
@@ -859,6 +890,8 @@ textarea.policies {
   min-width: 0;
   padding: 2rem 2.4rem;
   max-width: 1160px;
+  position: relative;
+  z-index: 1;
 }
 
 .desktop-kpi-row {
@@ -948,4 +981,246 @@ textarea.policies {
   color: var(--color-warning);
   border-color: rgba(251, 191, 36, 0.3);
   background: var(--color-warning-tint);
+}
+
+/* --- Desktop shell: ambient background (glassmorphism visual refresh) ---
+   Sits behind the whole desktop shell so backdrop-filter on the glass
+   panels (added in Task 2) has something to actually blur. Fixed and
+   scoped to z-index: 0 so it paints above the global BackgroundVideo
+   (z-index: -2/-1, see layout.tsx and .app-background-*) but behind the
+   sidebar/content, which get z-index: 1 in Tasks 2–3. */
+
+.desktop-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.desktop-ambient::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.3;
+  mix-blend-mode: overlay;
+}
+
+.desktop-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(4px);
+  opacity: 0.7;
+  animation: desktop-orb-drift 26s ease-in-out infinite;
+}
+
+.desktop-orb-mint {
+  width: 46vw;
+  height: 46vw;
+  top: -14%;
+  left: -8%;
+  background: radial-gradient(circle at 35% 35%, rgba(52, 211, 153, 0.5), rgba(52, 211, 153, 0) 70%);
+}
+
+.desktop-orb-violet {
+  width: 40vw;
+  height: 40vw;
+  top: -6%;
+  right: -12%;
+  background: radial-gradient(circle at 60% 40%, var(--color-violet-tint), rgba(123, 127, 245, 0) 70%);
+  animation-delay: -8s;
+}
+
+.desktop-orb-gold {
+  width: 34vw;
+  height: 34vw;
+  bottom: -16%;
+  left: 30%;
+  background: radial-gradient(circle at 50% 50%, var(--color-gold-tint), rgba(217, 184, 114, 0) 70%);
+  animation-delay: -16s;
+}
+
+@keyframes desktop-orb-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(3%, 4%) scale(1.06); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desktop-orb { animation: none; }
+}
+
+/* --- Desktop shell: glass primitive (glassmorphism visual refresh) ---
+   Scoped under .desktop-shell so mobile's identical .card/.kpi-tile class
+   names (used throughout (mobile)/**) are completely untouched — this is
+   desktop-only. */
+
+.desktop-shell .card,
+.desktop-shell .kpi-tile {
+  position: relative;
+  overflow: hidden;
+  background: var(--glass);
+  border-color: var(--glass-border);
+  backdrop-filter: blur(28px) saturate(150%);
+  -webkit-backdrop-filter: blur(28px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 24px 60px -32px rgba(0, 0, 0, 0.75);
+}
+
+.desktop-shell .card::before,
+.desktop-shell .kpi-tile::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-sheen), transparent);
+  opacity: 0.5;
+}
+
+.desktop-shell .meter-fill {
+  background: linear-gradient(90deg, var(--color-accent-strong), var(--color-accent));
+  box-shadow: 0 0 16px rgba(52, 211, 153, 0.45);
+}
+
+.desktop-shell .meter-track {
+  border: 1px solid var(--glass-border-soft);
+}
+
+/* --- Desktop Overview: recent activity + availability strip
+   (glassmorphism visual refresh) --- */
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.activity-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-hairline-soft);
+  color: var(--color-text);
+  transition: background-color 0.15s ease;
+}
+
+.activity-row:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.activity-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.activity-client {
+  font-size: 0.9rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.activity-channel {
+  font-size: 0.76rem;
+  color: var(--color-text-faint);
+  text-transform: capitalize;
+}
+
+.activity-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+.activity-time {
+  font-size: 0.78rem;
+  color: var(--color-text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.activity-status-chip {
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+}
+
+.activity-status-chip[data-status="escalated"] {
+  color: var(--color-warning);
+  background: var(--color-warning-tint);
+}
+
+.activity-status-chip[data-status="resolved"] {
+  color: var(--color-accent);
+  background: var(--color-accent-tint);
+}
+
+.avail-panel {
+  margin-top: 1rem;
+  overflow-x: auto;
+}
+
+.avail-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(80px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+
+.avail-day {
+  padding: 0.65rem 0.4rem;
+  border-radius: 13px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-hairline-soft);
+}
+
+.avail-day[data-free="true"] {
+  background: var(--color-accent-tint);
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+.avail-day[data-free="false"] {
+  opacity: 0.55;
+}
+
+.avail-dow {
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-faint);
+}
+
+.avail-date {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.98rem;
+  margin: 0.2rem 0;
+}
+
+.avail-day[data-free="true"] .avail-date {
+  color: var(--color-accent);
+}
+
+.avail-label {
+  font-size: 0.6rem;
+  color: var(--color-text-faint);
+}
+
+.avail-day[data-free="true"] .avail-label {
+  color: var(--color-accent);
 }

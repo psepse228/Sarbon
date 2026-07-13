@@ -11,7 +11,7 @@ async def test_notify_admin_sends_message_when_configured(monkeypatch):
         lambda: SimpleNamespace(admin_telegram_chat_id="12345", telegram_bot_token="123:token"),
     )
     fake_bot = AsyncMock()
-    monkeypatch.setattr(notifications, "_get_notifier_bot", lambda: fake_bot)
+    monkeypatch.setattr(notifications, "get_notifier_bot", lambda: fake_bot)
 
     await notifications.notify_admin("test message")
 
@@ -25,7 +25,7 @@ async def test_notify_admin_noop_when_not_configured(monkeypatch):
         lambda: SimpleNamespace(admin_telegram_chat_id=None, telegram_bot_token="123:token"),
     )
     fake_bot = AsyncMock()
-    monkeypatch.setattr(notifications, "_get_notifier_bot", lambda: fake_bot)
+    monkeypatch.setattr(notifications, "get_notifier_bot", lambda: fake_bot)
 
     await notifications.notify_admin("test message")
 

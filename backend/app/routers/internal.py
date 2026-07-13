@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 from app.ai.engine import generate_reply
 from app.config import get_settings
+from app.notifications import get_notifier_bot
 
 router = APIRouter(prefix="/internal")
 
@@ -57,3 +58,38 @@ async def test_chat(
             for tc in result.tool_calls
         ],
     )
+
+
+class BroadcastRequest(BaseModel):
+    chat_ids: list[str]
+    message: str
+
+
+class BroadcastResponse(BaseModel):
+    sent_count: int
+
+
+@router.post("/broadcast", response_model=BroadcastResponse)
+async def broadcast(
+    body: BroadcastRequest,
+    x_internal_secret: str = Header(..., alias="X-Internal-Secret"),
+) -> BroadcastResponse:
+    """Owner-triggered, send-now message to a filtered guest audience — see
+    dashboard/src/lib/broadcasts.ts for the only caller. Per-recipient
+    failures (blocked bot, invalid chat id) don't abort the batch."""
+    settings = get_settings()
+    if not settings.internal_api_secret or not hmac.compare_digest(
+        x_internal_secret, settings.internal_api_secret
+    ):
+        raise HTTPException(status_code=401, detail="Invalid internal secret")
+
+    bot = get_notifier_bot()
+    sent_count = 0
+    for chat_id in body.chat_ids:
+        try:
+            await bot.send_message(chat_id=chat_id, text=body.message)
+            sent_count += 1
+        except Exception:
+            continue
+
+    return BroadcastResponse(sent_count=sent_count)

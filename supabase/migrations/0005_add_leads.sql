@@ -4,8 +4,12 @@
 -- over the conversation. Owner works the pipeline from the dashboard's new
 -- Leads page; marking a lead "booked" also marks its date unavailable in
 -- availability_cache.
+--
+-- Named cortege_leads, not leads: this Supabase project already has an
+-- unrelated "leads" table belonging to Solura's CRM assistant (Jonik's) —
+-- different schema (business_name/category/city/...), do not touch it.
 
-create table leads (
+create table cortege_leads (
   id uuid primary key default gen_random_uuid(),
   tenant_id uuid references tenants(id),
   conversation_id uuid references conversations(id) unique,
@@ -18,4 +22,4 @@ create table leads (
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
-create index idx_leads_tenant_status on leads(tenant_id, status);
+create index idx_cortege_leads_tenant_status on cortege_leads(tenant_id, status);

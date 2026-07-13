@@ -1208,3 +1208,50 @@ textarea.policies {
 .avail-day[data-free="true"] .avail-label {
   color: var(--color-accent);
 }
+
+/* --- Leads Kanban board --- */
+
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  gap: 1rem;
+  align-items: start;
+  overflow-x: auto;
+}
+
+.kanban-column-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-faint);
+  margin-bottom: 0.8rem;
+}
+
+.kanban-column .card {
+  margin-bottom: 0.7rem;
+  padding: 1rem 1.1rem;
+}
+
+.kanban-card-name {
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+
+.kanban-card-meta {
+  font-size: 0.82rem;
+  color: var(--color-text-soft);
+  margin-bottom: 0.7rem;
+}
+
+.kanban-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 1100px) {
+  .kanban-board {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

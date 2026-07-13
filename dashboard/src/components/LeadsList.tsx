@@ -99,7 +99,7 @@ export function LeadsList() {
                     {lead.phone ?? "—"} · {lead.preferredDate ?? "дата не указана"} · {lead.guestCount ?? "—"} гостей
                   </div>
                   <div className="kanban-card-actions">
-                    <a href={`/d/conversations/${lead.conversationId}`} className="btn btn-ghost">
+                    <a href={`/d/conversations/${lead.conversationId}`} className="btn btn-secondary">
                       Диалог
                     </a>
                     {prev && (
@@ -120,6 +120,16 @@ export function LeadsList() {
                         onClick={() => changeStatus(lead, next)}
                       >
                         {COLUMNS.find((c) => c.status === next)?.label} →
+                      </button>
+                    )}
+                    {column.status === "lost" && (
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        disabled={busyId === lead.id}
+                        onClick={() => changeStatus(lead, "contacted")}
+                      >
+                        Восстановить
                       </button>
                     )}
                     {column.status !== "lost" && (

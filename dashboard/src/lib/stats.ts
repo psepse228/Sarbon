@@ -51,7 +51,11 @@ export function selectRecentActivity(
   );
 
   return [...conversations]
-    .sort((a, b) => (b.lastMessageAt ?? "").localeCompare(a.lastMessageAt ?? ""))
+    .sort((a, b) => {
+      const aTime = a.lastMessageAt ?? "";
+      const bTime = b.lastMessageAt ?? "";
+      return aTime < bTime ? 1 : aTime > bTime ? -1 : 0;
+    })
     .slice(0, limit)
     .map((c) => ({
       conversationId: c.id,
@@ -69,7 +73,7 @@ export function selectUpcomingAvailability(availability: AvailabilityEntry[], co
   const today = new Date().toISOString().slice(0, 10);
   return [...availability]
     .filter((a) => a.date >= today)
-    .sort((a, b) => a.date.localeCompare(b.date))
+    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
     .slice(0, count);
 }
 

@@ -135,7 +135,7 @@ async def capture_lead(tenant_id: str, conversation_id: str, **fields: Any) -> d
     new_fields = {k: v for k, v in fields.items() if v is not None}
 
     existing = (
-        client.table("leads")
+        client.table("cortege_leads")
         .select("*")
         .eq("conversation_id", conversation_id)
         .limit(1)
@@ -148,6 +148,6 @@ async def capture_lead(tenant_id: str, conversation_id: str, **fields: Any) -> d
         else {"tenant_id": tenant_id, "conversation_id": conversation_id, **new_fields}
     )
 
-    response = client.table("leads").upsert(merged, on_conflict="conversation_id").execute()
+    response = client.table("cortege_leads").upsert(merged, on_conflict="conversation_id").execute()
     rows = response.data
     return rows[0] if rows else None

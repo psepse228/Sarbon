@@ -19,7 +19,7 @@ interface RawLeadRow {
 export async function fetchLeads(tenantId: string): Promise<Lead[]> {
   const client = getServiceSupabaseClient();
   const { data, error } = await client
-    .from("leads")
+    .from("cortege_leads")
     .select("id,conversation_id,name,phone,preferred_date,guest_count,budget,status,created_at")
     .eq("tenant_id", tenantId)
     .order("created_at", { ascending: false })
@@ -45,7 +45,7 @@ export async function fetchLeads(tenantId: string): Promise<Lead[]> {
 async function fetchLeadForTenant(tenantId: string, leadId: string): Promise<RawLeadRow> {
   const client = getServiceSupabaseClient();
   const { data, error } = await client
-    .from("leads")
+    .from("cortege_leads")
     .select("id,conversation_id,name,phone,preferred_date,guest_count,budget,status,created_at")
     .eq("id", leadId)
     .eq("tenant_id", tenantId)
@@ -71,7 +71,7 @@ export async function updateLeadStatus(tenantId: string, leadId: string, status:
 
   const client = getServiceSupabaseClient();
   const { error } = await client
-    .from("leads")
+    .from("cortege_leads")
     .update({ status, updated_at: new Date().toISOString() })
     .eq("id", leadId);
   if (error) {

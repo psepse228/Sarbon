@@ -1,4 +1,5 @@
 import hmac
+import logging
 from typing import Any, Literal
 
 from fastapi import APIRouter, Header, HTTPException
@@ -7,6 +8,8 @@ from pydantic import BaseModel
 from app.ai.engine import generate_reply
 from app.config import get_settings
 from app.notifications import get_notifier_bot
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/internal")
 
@@ -90,6 +93,6 @@ async def broadcast(
             await bot.send_message(chat_id=chat_id, text=body.message)
             sent_count += 1
         except Exception:
-            continue
+            logger.exception("broadcast send failed for chat_id %s", chat_id)
 
     return BroadcastResponse(sent_count=sent_count)

@@ -1027,3 +1027,42 @@ textarea.policies {
 @media (prefers-reduced-motion: reduce) {
   .desktop-orb { animation: none; }
 }
+
+/* --- Desktop shell: glass primitive (glassmorphism visual refresh) ---
+   Scoped under .desktop-shell so mobile's identical .card/.kpi-tile class
+   names (used throughout (mobile)/**) are completely untouched — this is
+   desktop-only. */
+
+.desktop-shell .card,
+.desktop-shell .kpi-tile {
+  position: relative;
+  overflow: hidden;
+  background: var(--glass);
+  border-color: var(--glass-border);
+  backdrop-filter: blur(28px) saturate(150%);
+  -webkit-backdrop-filter: blur(28px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 24px 60px -32px rgba(0, 0, 0, 0.75);
+}
+
+.desktop-shell .card::before,
+.desktop-shell .kpi-tile::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-sheen), transparent);
+  opacity: 0.5;
+}
+
+.desktop-shell .meter-fill {
+  background: linear-gradient(90deg, var(--color-accent-strong), var(--color-accent));
+  box-shadow: 0 0 16px rgba(52, 211, 153, 0.45);
+}
+
+.desktop-shell .meter-track {
+  border: 1px solid var(--glass-border-soft);
+}

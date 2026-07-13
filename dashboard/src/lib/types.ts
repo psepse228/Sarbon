@@ -104,6 +104,16 @@ export interface Review {
   createdAt: string;
 }
 
+export type BroadcastAudience = "all" | "leads_new" | "leads_contacted" | "leads_booked";
+
+export interface Broadcast {
+  id: string;
+  message: string;
+  audience: BroadcastAudience;
+  recipientCount: number;
+  createdAt: string;
+}
+
 export interface ConversationSummary {
   id: string;
   clientId: string;

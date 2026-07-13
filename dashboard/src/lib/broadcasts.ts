@@ -94,7 +94,11 @@ export async function sendBroadcast(tenantId: string, audience: BroadcastAudienc
     recipient_count: sentCount,
   });
   if (error) {
-    throw new Error(`Failed to log broadcast: ${error.message}`);
+    // The message was already sent — a failure here means the history row
+    // is missing, not that the send failed. Don't throw: that would surface
+    // as a UI failure and invite a retry, which would resend to the same
+    // audience. Log it and still report the real sent count.
+    console.error(`Failed to log broadcast: ${error.message}`);
   }
 
   return sentCount;

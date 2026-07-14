@@ -540,6 +540,38 @@ async def test_generate_reply_uses_disabled_skills_override_in_test_mode(monkeyp
     }
 
 
+async def test_generate_reply_treats_empty_list_override_as_all_enabled(monkeypatch):
+    async def fail_if_called(tenant_id):
+        raise AssertionError("get_disabled_skills should not be called when an override is provided, even an empty one")
+
+    monkeypatch.setattr(engine.handlers, "get_disabled_skills", fail_if_called)
+
+    client = _FakeOpenAIClient([_final_response("Добрый день!")])
+    monkeypatch.setattr(engine, "get_openai_client", lambda: client)
+
+    await engine.generate_reply(
+        "tenant-1",
+        "test-conv",
+        [{"role": "user", "content": "Привет"}],
+        test_mode=True,
+        disabled_skills_override=[],
+    )
+
+    tools_used = client.chat.completions.calls[0]["tools"]
+    names = {t["function"]["name"] for t in tools_used}
+    assert names == {
+        "get_package_price",
+        "list_packages",
+        "check_date_availability",
+        "get_faq",
+        "get_partners",
+        "escalate_to_human",
+        "flag_knowledge_gap",
+        "capture_lead",
+        "capture_review",
+    }
+
+
 async def test_generate_reply_ignores_override_when_none(monkeypatch):
     real_disabled_skills_called = []
 

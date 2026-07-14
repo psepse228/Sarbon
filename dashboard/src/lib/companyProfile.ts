@@ -38,10 +38,10 @@ interface CompanyProfileRow {
 
 /**
  * Fetches the single `company_profile` row for a tenant. Every caller must
- * supply a `tenantId` resolved server-side from validated Telegram
- * `initData` (see src/lib/telegram/auth.ts) — never a value taken directly
- * from client input, and never hardcoded, even though only one tenant
- * exists in production today.
+ * supply a `tenantId` resolved server-side from the owner's Google-login
+ * session cookie (see src/lib/telegram/auth.ts) — never a value taken
+ * directly from client input, and never hardcoded, even though only one
+ * tenant exists in production today.
  */
 export async function fetchCompanyProfile(tenantId: string): Promise<CompanyProfile> {
   const client = getServiceSupabaseClient();

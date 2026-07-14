@@ -1,4 +1,4 @@
-# Sarbon Dashboard — Owner-Facing Telegram Mini App
+# Sarbon Dashboard — Owner-Facing Dashboard
 
 Next.js 14 (App Router, TypeScript) app implementing the "Dashboard" layer from
 `WEDDING-BOT-CONTEXT.md`: an owner-facing dashboard authenticated via Google

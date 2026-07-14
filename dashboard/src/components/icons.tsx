@@ -166,6 +166,33 @@ export function StarIcon({ className }: IconProps) {
   );
 }
 
+export function SearchIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <circle cx="10" cy="10" r="6.3" />
+      <path d="M14.7 14.7 18.5 18.5" />
+    </svg>
+  );
+}
+
+export function GlobeIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <circle cx="11" cy="11" r="7.8" />
+      <path d="M3.2 11h15.6" />
+      <path d="M11 3.2c2.4 2.1 3.8 4.9 3.8 7.8s-1.4 5.7-3.8 7.8c-2.4-2.1-3.8-4.9-3.8-7.8s1.4-5.7 3.8-7.8Z" />
+    </svg>
+  );
+}
+
+export function ChevronDownIcon({ className }: IconProps) {
+  return (
+    <svg {...base} width={16} height={16} viewBox="0 0 22 22" className={className}>
+      <path d="M5 8.5 11 14.5 17 8.5" />
+    </svg>
+  );
+}
+
 export function GearIcon({ className }: IconProps) {
   return (
     <svg {...base} className={className}>

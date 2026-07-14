@@ -1215,3 +1215,107 @@ textarea.policies {
   color: var(--color-text-faint);
   opacity: 0.4;
 }
+
+/* --- Desktop header (dashboard polish pass) --- */
+
+.desktop-header {
+  position: sticky;
+  top: 1.1rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1.1rem 1.1rem 0;
+  padding: 0.7rem 1rem;
+  border-radius: 18px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(28px) saturate(150%);
+  -webkit-backdrop-filter: blur(28px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 24px 60px -32px rgba(0, 0, 0, 0.75);
+}
+
+.desktop-header-search {
+  flex: 1;
+  max-width: 420px;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.8rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--color-hairline-soft);
+  color: var(--color-text-faint);
+}
+
+.desktop-header-search input {
+  border: none;
+  background: transparent;
+  padding: 0;
+  width: 100%;
+  font-size: 0.88rem;
+}
+
+.desktop-header-search input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.desktop-header-search-kbd {
+  display: flex;
+  gap: 0.2rem;
+  flex-shrink: 0;
+}
+
+.desktop-header-search-kbd kbd {
+  font-family: ui-monospace, monospace;
+  font-size: 0.68rem;
+  color: var(--color-text-faint);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--color-hairline-soft);
+  border-radius: 5px;
+  padding: 0.1rem 0.4rem;
+}
+
+.desktop-header-lang {
+  display: inline-flex;
+  padding: 0.2rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-hairline);
+  border-radius: 999px;
+  gap: 0.1rem;
+  flex-shrink: 0;
+}
+
+.desktop-header-lang button {
+  border: none;
+  background: transparent;
+  color: var(--color-text-soft);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.desktop-header-lang button[data-active="true"] {
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+}
+
+.desktop-content {
+  padding-top: 1.2rem;
+}
+
+.desktop-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.desktop-main .desktop-content {
+  flex: 1;
+}

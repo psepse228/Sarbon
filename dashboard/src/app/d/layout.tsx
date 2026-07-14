@@ -1,3 +1,4 @@
+import { DesktopHeader } from "@/components/DesktopHeader";
 import { GemSmokeBackground } from "@/components/GemSmokeBackground";
 import { Sidebar } from "@/components/Sidebar";
 
@@ -6,7 +7,10 @@ export default function DesktopLayout({ children }: { children: React.ReactNode 
     <div className="desktop-shell">
       <GemSmokeBackground />
       <Sidebar />
-      <main className="desktop-content">{children}</main>
+      <div className="desktop-main">
+        <DesktopHeader />
+        <main className="desktop-content">{children}</main>
+      </div>
     </div>
   );
 }

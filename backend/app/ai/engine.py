@@ -341,11 +341,14 @@ async def generate_reply(
     conversation_id: str,
     history: list[dict[str, str]],
     test_mode: bool = False,
+    disabled_skills_override: list[str] | None = None,
 ) -> GeneratedReply:
     client = get_openai_client()
     active_notice = await handlers.get_active_notice(tenant_id)
     company_info = await handlers.get_company_info(tenant_id)
-    disabled_skills = await handlers.get_disabled_skills(tenant_id)
+    disabled_skills = (
+        disabled_skills_override if disabled_skills_override is not None else await handlers.get_disabled_skills(tenant_id)
+    )
     messages: list[dict[str, Any]] = await _build_messages(client, history, active_notice, company_info)
     tool_calls_made: list[ToolCallRecord] = []
     tools = _build_tools(disabled_skills)

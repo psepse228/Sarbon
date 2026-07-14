@@ -42,6 +42,55 @@ def test_test_chat_returns_reply_and_tool_calls_with_valid_secret(monkeypatch):
         "test-tenant-1",
         [{"role": "user", "content": "Сколько стоит Стандарт?"}],
         test_mode=True,
+        disabled_skills_override=None,
+    )
+
+
+def test_test_chat_passes_through_disabled_skills_override(monkeypatch):
+    monkeypatch.setattr(internal_router, "get_settings", lambda: _fake_settings())
+
+    fake_generate_reply = AsyncMock(return_value=GeneratedReply("Ответ", []))
+    monkeypatch.setattr(internal_router, "generate_reply", fake_generate_reply)
+
+    response = client.post(
+        "/internal/test-chat",
+        json={
+            "tenant_id": "tenant-1",
+            "history": [{"role": "user", "content": "Привет"}],
+            "disabled_skills": ["availability"],
+        },
+        headers={"X-Internal-Secret": "test-secret"},
+    )
+
+    assert response.status_code == 200
+    fake_generate_reply.assert_awaited_once_with(
+        "tenant-1",
+        "test-tenant-1",
+        [{"role": "user", "content": "Привет"}],
+        test_mode=True,
+        disabled_skills_override=["availability"],
+    )
+
+
+def test_test_chat_defaults_disabled_skills_override_to_none(monkeypatch):
+    monkeypatch.setattr(internal_router, "get_settings", lambda: _fake_settings())
+
+    fake_generate_reply = AsyncMock(return_value=GeneratedReply("Ответ", []))
+    monkeypatch.setattr(internal_router, "generate_reply", fake_generate_reply)
+
+    response = client.post(
+        "/internal/test-chat",
+        json={"tenant_id": "tenant-1", "history": [{"role": "user", "content": "Привет"}]},
+        headers={"X-Internal-Secret": "test-secret"},
+    )
+
+    assert response.status_code == 200
+    fake_generate_reply.assert_awaited_once_with(
+        "tenant-1",
+        "test-tenant-1",
+        [{"role": "user", "content": "Привет"}],
+        test_mode=True,
+        disabled_skills_override=None,
     )
 
 

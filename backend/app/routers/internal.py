@@ -22,6 +22,7 @@ class TestChatTurn(BaseModel):
 class TestChatRequest(BaseModel):
     tenant_id: str
     history: list[TestChatTurn]
+    disabled_skills: list[str] | None = None
 
 
 class ToolCallOut(BaseModel):
@@ -52,7 +53,11 @@ async def test_chat(
 
     history = [{"role": turn.role, "content": turn.content} for turn in body.history]
     result = await generate_reply(
-        body.tenant_id, f"test-{body.tenant_id}", history, test_mode=True
+        body.tenant_id,
+        f"test-{body.tenant_id}",
+        history,
+        test_mode=True,
+        disabled_skills_override=body.disabled_skills,
     )
     return TestChatResponse(
         reply=result.reply,

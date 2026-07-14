@@ -506,3 +506,52 @@ async def test_generate_reply_excludes_tools_for_disabled_skills(monkeypatch):
         "capture_lead",
         "capture_review",
     }
+
+
+async def test_generate_reply_uses_disabled_skills_override_in_test_mode(monkeypatch):
+    async def fail_if_called(tenant_id):
+        raise AssertionError("get_disabled_skills should not be called when an override is provided")
+
+    monkeypatch.setattr(engine.handlers, "get_disabled_skills", fail_if_called)
+
+    client = _FakeOpenAIClient([_final_response("Добрый день!")])
+    monkeypatch.setattr(engine, "get_openai_client", lambda: client)
+
+    await engine.generate_reply(
+        "tenant-1",
+        "test-conv",
+        [{"role": "user", "content": "Привет"}],
+        test_mode=True,
+        disabled_skills_override=["faq", "partners"],
+    )
+
+    tools_used = client.chat.completions.calls[0]["tools"]
+    names = {t["function"]["name"] for t in tools_used}
+    assert "get_faq" not in names
+    assert "get_partners" not in names
+    assert names == {
+        "get_package_price",
+        "list_packages",
+        "check_date_availability",
+        "escalate_to_human",
+        "flag_knowledge_gap",
+        "capture_lead",
+        "capture_review",
+    }
+
+
+async def test_generate_reply_ignores_override_when_none(monkeypatch):
+    real_disabled_skills_called = []
+
+    async def fake_get_disabled_skills(tenant_id):
+        real_disabled_skills_called.append(tenant_id)
+        return []
+
+    monkeypatch.setattr(engine.handlers, "get_disabled_skills", fake_get_disabled_skills)
+
+    client = _FakeOpenAIClient([_final_response("Добрый день!")])
+    monkeypatch.setattr(engine, "get_openai_client", lambda: client)
+
+    await engine.generate_reply("tenant-1", "conv-1", [{"role": "user", "content": "Привет"}])
+
+    assert real_disabled_skills_called == ["tenant-1"]

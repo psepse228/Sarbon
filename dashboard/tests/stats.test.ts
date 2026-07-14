@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { computeDashboardStats, parseLocalDate, selectRecentActivity, selectUpcomingAvailability } from "@/lib/stats";
+import {
+  computeDashboardStats,
+  parseLocalDate,
+  selectDailyTrend,
+  selectRecentActivity,
+  selectUpcomingAvailability,
+} from "@/lib/stats";
 import type { AvailabilityEntry, ConversationSummary, Escalation } from "@/lib/types";
 
 function conversation(id: string, lastMessageAt: string | null = null): ConversationSummary {
@@ -100,5 +106,27 @@ describe("parseLocalDate", () => {
     expect(date.getFullYear()).toBe(2026);
     expect(date.getMonth()).toBe(6);
     expect(date.getDate()).toBe(15);
+  });
+});
+
+describe("selectDailyTrend", () => {
+  it("buckets timestamps into the last N days, oldest first, filling gaps with zero", () => {
+    const items = [
+      { createdAt: "2026-07-12T09:00:00Z" },
+      { createdAt: "2026-07-12T14:00:00Z" },
+      { createdAt: "2026-07-14T10:00:00Z" },
+    ];
+
+    const result = selectDailyTrend(items, 3, (item) => item.createdAt, () => new Date("2026-07-14T12:00:00Z"));
+
+    // Window is [07-12 (oldest), 07-13, 07-14 (today)]: two items land on
+    // 07-12, none on 07-13 (the gap), one on 07-14 (today).
+    expect(result).toEqual([2, 0, 1]);
+  });
+
+  it("returns an all-zero array when there are no items", () => {
+    const result = selectDailyTrend([], 4, () => "", () => new Date("2026-07-14T12:00:00Z"));
+
+    expect(result).toEqual([0, 0, 0, 0]);
   });
 });

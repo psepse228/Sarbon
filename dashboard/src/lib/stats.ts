@@ -85,3 +85,33 @@ export function parseLocalDate(isoDate: string): Date {
   const [year, month, day] = isoDate.split("-").map(Number) as [number, number, number];
   return new Date(year, month - 1, day);
 }
+
+/** Buckets arbitrary timestamped items into daily counts for the last `days`
+ * days (oldest first, today last) — used for KPI sparklines. Real counts
+ * only, no fabricated/interpolated data: a day with no items is a genuine
+ * zero, not an estimate. `now` is injectable for tests; defaults to the
+ * real clock. */
+export function selectDailyTrend<T>(
+  items: T[],
+  days: number,
+  getTimestamp: (item: T) => string,
+  now: () => Date = () => new Date(),
+): number[] {
+  const today = now();
+  const dayKeys: string[] = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const day = new Date(today);
+    day.setDate(day.getDate() - i);
+    dayKeys.push(day.toISOString().slice(0, 10));
+  }
+
+  const counts = new Map(dayKeys.map((key) => [key, 0]));
+  for (const item of items) {
+    const key = getTimestamp(item).slice(0, 10);
+    if (counts.has(key)) {
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+  }
+
+  return dayKeys.map((key) => counts.get(key) ?? 0);
+}

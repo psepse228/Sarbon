@@ -1459,3 +1459,8 @@ textarea.policies {
   color: var(--color-text-soft);
   cursor: pointer;
 }
+
+.kpi-sparkline {
+  margin-top: 0.5rem;
+  opacity: 0.85;
+}

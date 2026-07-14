@@ -3,10 +3,13 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
+import { AnalyticsIcon, ChatIcon } from "@/components/icons";
+import { Sparkline } from "@/components/Sparkline";
 import { ErrorBanner } from "@/components/StatusBanner";
 import {
   computeDashboardStats,
   parseLocalDate,
+  selectDailyTrend,
   selectRecentActivity,
   selectUpcomingAvailability,
   type DashboardStats,
@@ -22,6 +25,8 @@ export default function DesktopOverviewPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [activity, setActivity] = useState<RecentActivityItem[]>([]);
   const [upcoming, setUpcoming] = useState<AvailabilityEntry[]>([]);
+  const [conversationsTrend, setConversationsTrend] = useState<number[]>([]);
+  const [escalationsTrend, setEscalationsTrend] = useState<number[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -43,6 +48,8 @@ export default function DesktopOverviewPage() {
         setStats(computeDashboardStats(conversations, escalations, availability));
         setActivity(selectRecentActivity(conversations, escalations, 5));
         setUpcoming(selectUpcomingAvailability(availability, 7));
+        setConversationsTrend(selectDailyTrend(conversations, 7, (c) => c.createdAt));
+        setEscalationsTrend(selectDailyTrend(escalations, 7, (e) => e.createdAt));
       } catch (err) {
         setError(err instanceof Error ? err.message : "Не удалось загрузить аналитику");
       }
@@ -66,10 +73,16 @@ export default function DesktopOverviewPage() {
           <div className="kpi-tile">
             <div className="kpi-value kpi-value-warn">{stats.openEscalations}</div>
             <div className="kpi-label">открытых эскалаций</div>
+            <div className="kpi-sparkline">
+              <Sparkline values={escalationsTrend} color="var(--color-warning)" />
+            </div>
           </div>
           <div className="kpi-tile">
             <div className="kpi-value">{stats.totalConversations}</div>
             <div className="kpi-label">диалогов всего</div>
+            <div className="kpi-sparkline">
+              <Sparkline values={conversationsTrend} color="var(--color-accent)" />
+            </div>
           </div>
           <div className="kpi-tile">
             <div className="kpi-value kpi-value-good">{resolutionRate ?? "—"}%</div>
@@ -85,6 +98,9 @@ export default function DesktopOverviewPage() {
       {stats && (
         <div className="desktop-two-pane" style={{ marginTop: "1rem" }}>
           <div className="card">
+            <div className="card-title-row">
+              <h3><AnalyticsIcon /> Автономность бота</h3>
+            </div>
             <div className="meter-row">
               <span className="meter-label">Автономность бота</span>
               <span className="meter-value">{resolutionRate ?? "—"}%</span>
@@ -100,7 +116,7 @@ export default function DesktopOverviewPage() {
 
           <div className="card">
             <div className="card-title-row">
-              <h3>Последние диалоги</h3>
+              <h3><ChatIcon /> Последние диалоги</h3>
             </div>
             {activity.length === 0 ? (
               <p className="muted">Пока нет диалогов.</p>

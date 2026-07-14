@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import {
+  CalendarIcon,
   ChatIcon,
   ChevronDownIcon,
   FlaskIcon,
@@ -14,6 +15,7 @@ import {
   SendIcon,
   SparkleIcon,
   StarIcon,
+  TagIcon,
   UsersIcon,
 } from "@/components/icons";
 
@@ -27,6 +29,8 @@ const CRM_GROUP_ITEMS = [
 ] as const;
 
 const TOP_ITEMS_AFTER_GROUP = [
+  { href: "/d/catalog", label: "Каталог", Icon: TagIcon },
+  { href: "/d/calendar", label: "Календарь", Icon: CalendarIcon },
   { href: "/d/configuration", label: "Настройки", Icon: GearIcon },
   { href: "/d/test-console", label: "Тест-консоль", Icon: FlaskIcon },
   { href: "/d/assistant", label: "Ассистент", Icon: SparkleIcon },

@@ -870,7 +870,7 @@ textarea.policies {
 .desktop-content {
   flex: 1;
   min-width: 0;
-  padding: 2rem 2.4rem;
+  padding: 1.2rem 2.4rem 2rem;
   max-width: 1160px;
   position: relative;
   z-index: 1;
@@ -1305,17 +1305,9 @@ textarea.policies {
   color: var(--color-accent);
 }
 
-.desktop-content {
-  padding-top: 1.2rem;
-}
-
 .desktop-main {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-}
-
-.desktop-main .desktop-content {
-  flex: 1;
 }

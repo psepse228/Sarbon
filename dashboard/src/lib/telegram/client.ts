@@ -31,18 +31,14 @@ export async function initTelegramWebApp(): Promise<void> {
 }
 
 /**
- * `fetch` wrapper that attaches the Telegram `Authorization: tma <initData>`
- * header expected by every /api/* route handler (see
- * src/lib/telegram/auth.ts). Falls through to a plain fetch with no header
- * when not running inside Telegram — the server's DEV_BYPASS_INIT_DATA
- * escape hatch is what makes that usable in local dev.
+ * `fetch` wrapper used by every dashboard API call. The dashboard now
+ * authenticates purely via the `cortege_session` cookie (Google login, see
+ * src/lib/telegram/auth.ts) — this wrapper no longer attaches any Telegram
+ * initData header, but keeps its name/call signature since ~20 call sites
+ * across the dashboard already depend on it.
  */
 export async function tmaFetch(input: string, init: RequestInit = {}): Promise<Response> {
   const headers = new Headers(init.headers);
-  const webApp = await loadWebApp();
-  if (webApp && webApp.initData.length > 0) {
-    headers.set("Authorization", `tma ${webApp.initData}`);
-  }
   if (init.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }

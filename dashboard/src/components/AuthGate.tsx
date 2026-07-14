@@ -39,10 +39,10 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: "5rem", gap: "1rem" }}>
         <h1>Вход в Cortège</h1>
         <p className="muted" style={{ textAlign: "center", maxWidth: 280 }}>
-          Откройте панель через Telegram, чтобы продолжить.
+          Войдите через Google, чтобы продолжить.
         </p>
         <Link href="/login" className="btn btn-primary">
-          Войти через Telegram
+          Войти через Google
         </Link>
       </div>
     );

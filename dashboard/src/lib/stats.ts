@@ -86,6 +86,13 @@ export function parseLocalDate(isoDate: string): Date {
   return new Date(year, month - 1, day);
 }
 
+function toLocalDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 /** Buckets arbitrary timestamped items into daily counts for the last `days`
  * days (oldest first, today last) — used for KPI sparklines. Real counts
  * only, no fabricated/interpolated data: a day with no items is a genuine
@@ -102,12 +109,12 @@ export function selectDailyTrend<T>(
   for (let i = days - 1; i >= 0; i--) {
     const day = new Date(today);
     day.setDate(day.getDate() - i);
-    dayKeys.push(day.toISOString().slice(0, 10));
+    dayKeys.push(toLocalDateKey(day));
   }
 
   const counts = new Map(dayKeys.map((key) => [key, 0]));
   for (const item of items) {
-    const key = getTimestamp(item).slice(0, 10);
+    const key = toLocalDateKey(new Date(getTimestamp(item)));
     if (counts.has(key)) {
       counts.set(key, (counts.get(key) ?? 0) + 1);
     }

@@ -1311,3 +1311,51 @@ textarea.policies {
   display: flex;
   flex-direction: column;
 }
+
+/* --- Sidebar collapsible group (dashboard polish pass) --- */
+
+.desktop-sidebar-group-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.65rem 0.7rem;
+  border: none;
+  background: transparent;
+  border-radius: 12px;
+  color: var(--color-text-soft);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.desktop-sidebar-group-toggle:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text);
+}
+
+.desktop-sidebar-group-chevron {
+  margin-left: auto;
+  display: flex;
+  transition: transform 0.15s ease;
+}
+
+.desktop-sidebar-group-chevron[data-expanded="true"] {
+  transform: rotate(180deg);
+}
+
+.desktop-sidebar-group-children {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding-left: 1.1rem;
+  margin: 0.1rem 0 0.3rem;
+  border-left: 1px solid var(--color-hairline-soft);
+}
+
+.desktop-sidebar-group-children .desktop-sidebar-item {
+  font-size: 0.86rem;
+  padding: 0.55rem 0.7rem;
+}

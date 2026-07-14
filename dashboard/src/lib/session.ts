@@ -1,7 +1,6 @@
 /**
- * Signed session tokens for the PWA/browser login flow (Telegram Login
- * Widget), stored in an HttpOnly cookie. Mini App usage doesn't need this —
- * it re-validates `initData` on every request instead.
+ * Signed session tokens for the dashboard's Google-login flow, stored in an
+ * HttpOnly cookie.
  *
  * Format: base64url(JSON payload) + "." + HMAC_SHA256(payload, SESSION_SECRET),
  * hex-encoded. Pure Node `crypto`, no framework dependency.
@@ -9,7 +8,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 export interface SessionPayload {
-  telegramUserId: number;
+  email: string;
   tenantId: string;
   exp: number;
 }
@@ -35,7 +34,7 @@ export function verifySessionToken(token: string, secret: string): SessionPayloa
   try {
     const payload = JSON.parse(Buffer.from(encoded, "base64url").toString()) as SessionPayload;
     if (typeof payload.exp !== "number" || payload.exp < Date.now() / 1000) return null;
-    if (typeof payload.telegramUserId !== "number" || typeof payload.tenantId !== "string") return null;
+    if (typeof payload.email !== "string" || typeof payload.tenantId !== "string") return null;
     return payload;
   } catch {
     return null;

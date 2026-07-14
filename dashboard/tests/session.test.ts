@@ -11,18 +11,18 @@ function futureExp(seconds = 3600): number {
 describe("session tokens", () => {
   it("round-trips a valid token", () => {
     const token = createSessionToken(
-      { telegramUserId: 111111111, tenantId: "tenant-1", exp: futureExp() },
+      { email: "owner@example.com", tenantId: "tenant-1", exp: futureExp() },
       SECRET,
     );
 
     const payload = verifySessionToken(token, SECRET);
 
-    expect(payload).toEqual({ telegramUserId: 111111111, tenantId: "tenant-1", exp: expect.any(Number) });
+    expect(payload).toEqual({ email: "owner@example.com", tenantId: "tenant-1", exp: expect.any(Number) });
   });
 
   it("rejects a token signed with a different secret", () => {
     const token = createSessionToken(
-      { telegramUserId: 111111111, tenantId: "tenant-1", exp: futureExp() },
+      { email: "owner@example.com", tenantId: "tenant-1", exp: futureExp() },
       SECRET,
     );
 
@@ -31,12 +31,12 @@ describe("session tokens", () => {
 
   it("rejects a tampered payload", () => {
     const token = createSessionToken(
-      { telegramUserId: 111111111, tenantId: "tenant-1", exp: futureExp() },
+      { email: "owner@example.com", tenantId: "tenant-1", exp: futureExp() },
       SECRET,
     );
     const [, signature] = token.split(".");
     const tamperedPayload = Buffer.from(
-      JSON.stringify({ telegramUserId: 999999999, tenantId: "tenant-1", exp: futureExp() }),
+      JSON.stringify({ email: "attacker@example.com", tenantId: "tenant-1", exp: futureExp() }),
     ).toString("base64url");
 
     expect(verifySessionToken(`${tamperedPayload}.${signature}`, SECRET)).toBeNull();
@@ -44,7 +44,7 @@ describe("session tokens", () => {
 
   it("rejects an expired token", () => {
     const token = createSessionToken(
-      { telegramUserId: 111111111, tenantId: "tenant-1", exp: Math.floor(Date.now() / 1000) - 10 },
+      { email: "owner@example.com", tenantId: "tenant-1", exp: Math.floor(Date.now() / 1000) - 10 },
       SECRET,
     );
 

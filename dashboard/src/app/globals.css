@@ -1412,3 +1412,50 @@ textarea.policies {
   bottom: 1.2rem;
   margin: 0 1.2rem 1.2rem;
 }
+
+/* --- Test Console skill presets (dashboard polish pass) --- */
+
+.preset-row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+
+.preset-chip {
+  border: 1px solid var(--color-hairline);
+  background: var(--color-surface);
+  color: var(--color-text-soft);
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.preset-chip[data-active="true"] {
+  background: var(--color-accent-tint);
+  border-color: rgba(52, 211, 153, 0.4);
+  color: var(--color-accent);
+}
+
+.preset-editor {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.2rem;
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-hairline-soft);
+}
+
+.preset-editor label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--color-text-soft);
+  cursor: pointer;
+}

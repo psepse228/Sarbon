@@ -13,6 +13,7 @@ const turnSchema = z.object({
 
 const bodySchema = z.object({
   history: z.array(turnSchema).min(1),
+  disabledSkills: z.array(z.string()).optional(),
 });
 
 interface BackendToolCall {
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
   try {
     const { tenantId } = authenticateOwner(request);
     const body = await request.json();
-    const { history } = bodySchema.parse(body);
+    const { history, disabledSkills } = bodySchema.parse(body);
 
     const backendUrl = process.env.BACKEND_URL;
     const secret = process.env.INTERNAL_API_SECRET;
@@ -47,6 +48,7 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         tenant_id: tenantId,
         history: history.map(({ role, content }) => ({ role, content })),
+        disabled_skills: disabledSkills ?? null,
       }),
       signal: AbortSignal.timeout(30_000),
     });

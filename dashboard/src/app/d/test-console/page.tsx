@@ -6,6 +6,21 @@ import { ChatThread, now, type ChatMessage } from "@/components/ChatThread";
 import { ErrorBanner } from "@/components/StatusBanner";
 import { tmaFetch } from "@/lib/telegram/client";
 
+type SkillKey = "packages" | "availability" | "faq" | "partners";
+
+const SKILLS: { key: SkillKey; label: string }[] = [
+  { key: "packages", label: "Пакеты и цены" },
+  { key: "availability", label: "Доступность дат" },
+  { key: "faq", label: "Частые вопросы" },
+  { key: "partners", label: "Партнёры" },
+];
+
+const PRESETS: { name: string; disabled: SkillKey[] }[] = [
+  { name: "Полный", disabled: [] },
+  { name: "Только цены", disabled: ["availability", "faq", "partners"] },
+  { name: "Без бронирования", disabled: ["availability"] },
+];
+
 interface ToolCall {
   name: string;
   arguments: Record<string, unknown>;
@@ -57,6 +72,17 @@ export default function TestConsolePage() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activePreset, setActivePreset] = useState(0);
+  const [disabledSkills, setDisabledSkills] = useState<SkillKey[]>(PRESETS[0]!.disabled);
+
+  function selectPreset(index: number) {
+    setActivePreset(index);
+    setDisabledSkills(PRESETS[index]!.disabled);
+  }
+
+  function toggleSkill(key: SkillKey) {
+    setDisabledSkills((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+  }
 
   async function send(text: string) {
     const trimmed = text.trim();
@@ -71,7 +97,10 @@ export default function TestConsolePage() {
     try {
       const res = await tmaFetch("/api/test-chat", {
         method: "POST",
-        body: JSON.stringify({ history: nextMessages.map(({ role, content }) => ({ role, content })) }),
+        body: JSON.stringify({
+          history: nextMessages.map(({ role, content }) => ({ role, content })),
+          disabledSkills,
+        }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -93,9 +122,32 @@ export default function TestConsolePage() {
     <div>
       <h1>Тест-консоль</h1>
       <p className="muted">
-        Спросите так, как спросил бы клиент — это настоящий бот, ответы не сохраняются в диалоги и не уходят
-        клиентам. Под каждым ответом видно, что бот на самом деле проверил.
+        Постройте и протестируйте вашего бота. Спросите так, как спросил бы клиент — это настоящий бот, ответы не
+        сохраняются в диалоги и не уходят клиентам. Под каждым ответом видно, что бот на самом деле проверил.
       </p>
+
+      <div className="preset-row">
+        {PRESETS.map((preset, index) => (
+          <button
+            key={preset.name}
+            type="button"
+            className="preset-chip"
+            data-active={activePreset === index}
+            onClick={() => selectPreset(index)}
+          >
+            {preset.name}
+          </button>
+        ))}
+      </div>
+
+      <div className="preset-editor">
+        {SKILLS.map((skill) => (
+          <label key={skill.key}>
+            <input type="checkbox" checked={!disabledSkills.includes(skill.key)} onChange={() => toggleSkill(skill.key)} />
+            {skill.label}
+          </label>
+        ))}
+      </div>
 
       {error && <ErrorBanner message={error} />}
 

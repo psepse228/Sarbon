@@ -37,7 +37,7 @@ const CRM_EXPANDED_KEY = "cortege-sidebar-crm-expanded";
 export function Sidebar() {
   const pathname = usePathname();
   const isOnCrmRoute = CRM_GROUP_ITEMS.some((item) => pathname.startsWith(item.href));
-  const [expanded, setExpanded] = useState(isOnCrmRoute);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     const stored = window.localStorage.getItem(CRM_EXPANDED_KEY);
@@ -73,14 +73,24 @@ export function Sidebar() {
       <div className="desktop-sidebar-nav">
         {TOP_ITEMS_BEFORE_GROUP.map(renderLink)}
 
-        <button type="button" className="desktop-sidebar-group-toggle" onClick={toggleExpanded} aria-expanded={expanded}>
+        <button
+          type="button"
+          className="desktop-sidebar-group-toggle"
+          onClick={toggleExpanded}
+          aria-expanded={expanded}
+          aria-controls="crm-group-children"
+        >
           <GridIcon />
           <span>CRM</span>
           <span className="desktop-sidebar-group-chevron" data-expanded={expanded}>
             <ChevronDownIcon />
           </span>
         </button>
-        {expanded && <div className="desktop-sidebar-group-children">{CRM_GROUP_ITEMS.map(renderLink)}</div>}
+        {expanded && (
+          <div id="crm-group-children" className="desktop-sidebar-group-children">
+            {CRM_GROUP_ITEMS.map(renderLink)}
+          </div>
+        )}
 
         {TOP_ITEMS_AFTER_GROUP.map(renderLink)}
       </div>

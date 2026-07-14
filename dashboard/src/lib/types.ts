@@ -28,6 +28,7 @@ export interface Package {
   max_guests: number | null;
   prepayment: string;
   cancellation_policy: string;
+  imageUrl: string | null;
 }
 
 export interface FaqEntry {
@@ -41,6 +42,7 @@ export interface Partner {
   category: string;
   name: string;
   contact: string;
+  imageUrl: string | null;
 }
 
 export interface CompanyProfile {
@@ -55,6 +57,7 @@ export interface CompanyProfile {
   phone: string | null;
   socials: string | null;
   disabledSkills: string[];
+  googleCalendarId: string | null;
   updatedAt: string | null;
 }
 

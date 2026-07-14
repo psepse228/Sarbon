@@ -5,16 +5,21 @@ import { randomUUID } from "node:crypto";
 import { getServiceSupabaseClient } from "./supabase/server";
 import type { CompanyProfile, FaqEntry, Package, Partner } from "./types";
 
-const COLUMNS = "packages,faq,partners,policies,active_notice,company_name,address,phone,socials,disabled_skills,updated_at";
+const COLUMNS =
+  "packages,faq,partners,policies,active_notice,company_name,address,phone,socials,disabled_skills,google_calendar_id,updated_at";
 
 // Rows seeded directly in Supabase (before this dashboard existed) predate
 // the client-generated `id` field and, for partners, can have a null
 // `contact`. These raw types describe what's actually on disk; the accessors
 // below normalize them into the dashboard's `Package`/`FaqEntry`/`Partner`
 // shape (id backfilled, `contact` defaulted to "").
-type RawPackage = Omit<Package, "id"> & { id?: string };
+type RawPackage = Omit<Package, "id" | "imageUrl"> & { id?: string; imageUrl?: string | null };
 type RawFaqEntry = Omit<FaqEntry, "id"> & { id?: string };
-type RawPartner = Omit<Partner, "id" | "contact"> & { id?: string; contact: string | null };
+type RawPartner = Omit<Partner, "id" | "contact" | "imageUrl"> & {
+  id?: string;
+  contact: string | null;
+  imageUrl?: string | null;
+};
 
 interface CompanyProfileRow {
   packages: RawPackage[] | null;
@@ -27,6 +32,7 @@ interface CompanyProfileRow {
   phone: string | null;
   socials: string | null;
   disabled_skills: string[] | null;
+  google_calendar_id: string | null;
   updated_at: string | null;
 }
 
@@ -65,15 +71,21 @@ export async function fetchCompanyProfile(tenantId: string): Promise<CompanyProf
       phone: null,
       socials: null,
       disabledSkills: [],
+      googleCalendarId: null,
       updatedAt: null,
     };
   }
 
   return {
     tenantId,
-    packages: (data.packages ?? []).map((p) => ({ ...p, id: p.id ?? randomUUID() })),
+    packages: (data.packages ?? []).map((p) => ({ ...p, id: p.id ?? randomUUID(), imageUrl: p.imageUrl ?? null })),
     faq: (data.faq ?? []).map((f) => ({ ...f, id: f.id ?? randomUUID() })),
-    partners: (data.partners ?? []).map((p) => ({ ...p, id: p.id ?? randomUUID(), contact: p.contact ?? "" })),
+    partners: (data.partners ?? []).map((p) => ({
+      ...p,
+      id: p.id ?? randomUUID(),
+      contact: p.contact ?? "",
+      imageUrl: p.imageUrl ?? null,
+    })),
     policies: data.policies ?? "",
     activeNotice: data.active_notice ?? null,
     companyName: data.company_name ?? null,
@@ -81,6 +93,7 @@ export async function fetchCompanyProfile(tenantId: string): Promise<CompanyProf
     phone: data.phone ?? null,
     socials: data.socials ?? null,
     disabledSkills: data.disabled_skills ?? [],
+    googleCalendarId: data.google_calendar_id,
     updatedAt: data.updated_at,
   };
 }
@@ -95,7 +108,8 @@ type CompanyProfileColumn =
   | "address"
   | "phone"
   | "socials"
-  | "disabled_skills";
+  | "disabled_skills"
+  | "google_calendar_id";
 
 async function upsertColumns(tenantId: string, columns: Partial<Record<CompanyProfileColumn, unknown>>): Promise<void> {
   const client = getServiceSupabaseClient();
@@ -135,7 +149,7 @@ async function upsertColumns(tenantId: string, columns: Partial<Record<CompanyPr
 
 function upsertColumn(
   tenantId: string,
-  column: "packages" | "faq" | "partners" | "policies" | "active_notice" | "disabled_skills",
+  column: "packages" | "faq" | "partners" | "policies" | "active_notice" | "disabled_skills" | "google_calendar_id",
   value: unknown,
 ): Promise<void> {
   return upsertColumns(tenantId, { [column]: value });
@@ -185,4 +199,10 @@ export function saveCompanyInfo(tenantId: string, info: CompanyInfoInput): Promi
  * to decide which optional tools to offer for this tenant. */
 export function saveDisabledSkills(tenantId: string, disabledSkills: string[]): Promise<void> {
   return upsertColumn(tenantId, "disabled_skills", disabledSkills);
+}
+
+/** The venue's own Google Calendar ID (their calendar's email address) —
+ * see backend/app/calendar_sync.py for how it's used. */
+export function saveGoogleCalendarId(tenantId: string, googleCalendarId: string | null): Promise<void> {
+  return upsertColumn(tenantId, "google_calendar_id", googleCalendarId);
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { ChatThread, now, type ChatMessage } from "@/components/ChatThread";
+import { SkillsEditor } from "@/components/SkillsEditor";
 import { ErrorBanner } from "@/components/StatusBanner";
 import { tmaFetch } from "@/lib/telegram/client";
 
@@ -142,9 +143,13 @@ export default function TestConsolePage() {
 
       <div className="preset-editor">
         {SKILLS.map((skill) => (
-          <label key={skill.key}>
-            <input type="checkbox" checked={!disabledSkills.includes(skill.key)} onChange={() => toggleSkill(skill.key)} />
-            {skill.label}
+          <label key={skill.key} className="toggle-switch-row">
+            <span>{skill.label}</span>
+            <label className="toggle-switch">
+              <input type="checkbox" checked={!disabledSkills.includes(skill.key)} onChange={() => toggleSkill(skill.key)} />
+              <span className="toggle-switch-track" />
+              <span className="toggle-switch-knob" />
+            </label>
           </label>
         ))}
       </div>
@@ -153,6 +158,10 @@ export default function TestConsolePage() {
 
       <div className="chat-frame">
         <ChatThread messages={messages} input={input} onInputChange={setInput} onSend={send} sending={sending} />
+      </div>
+
+      <div style={{ marginTop: "2rem", paddingTop: "2rem", borderTop: "1px solid var(--color-hairline)" }}>
+        <SkillsEditor />
       </div>
     </div>
   );

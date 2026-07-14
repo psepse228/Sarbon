@@ -1556,3 +1556,12 @@ textarea.policies {
   color: var(--color-text-faint);
   font-size: 0.78rem;
 }
+
+.toggle-switch-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+  color: var(--color-text-soft);
+  cursor: default;
+}

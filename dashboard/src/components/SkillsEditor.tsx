@@ -25,7 +25,7 @@ export function SkillsEditor() {
     if (profile) setDisabled(profile.disabledSkills);
   }, [profile]);
 
-  // All 4 checkboxes are disabled while any save is in flight (rather than
+  // All 4 toggles are disabled while any save is in flight (rather than
   // just the one being toggled) — this is a full-replace PUT against one
   // shared column, so two overlapping toggles would each compute `next` from
   // the same stale `disabled` snapshot and the loser's change would be
@@ -54,8 +54,13 @@ export function SkillsEditor() {
 
   return (
     <div>
-      <h1>Навыки</h1>
-      <p className="muted">Какие возможности бота включены для клиентов.</p>
+      <div className="card-title-row">
+        <h3>Навыки ИИ</h3>
+      </div>
+      <p className="muted">
+        Эти настройки применяются к реальному боту для всех клиентов — в отличие от пресетов выше, которые
+        действуют только в этом тесте.
+      </p>
 
       {saveError && <ErrorBanner message={saveError} />}
 
@@ -63,12 +68,16 @@ export function SkillsEditor() {
         <div key={skill.key} className="card">
           <div className="card-title-row">
             <strong>{skill.label}</strong>
-            <input
-              type="checkbox"
-              checked={!disabled.includes(skill.key)}
-              disabled={saving}
-              onChange={() => toggle(skill.key)}
-            />
+            <label className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={!disabled.includes(skill.key)}
+                disabled={saving}
+                onChange={() => toggle(skill.key)}
+              />
+              <span className="toggle-switch-track" />
+              <span className="toggle-switch-knob" />
+            </label>
           </div>
           <p className="muted">{skill.description}</p>
         </div>

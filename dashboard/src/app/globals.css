@@ -1565,3 +1565,88 @@ textarea.policies {
   color: var(--color-text-soft);
   cursor: default;
 }
+
+/* --- Calendar month grid (Календарь section) --- */
+
+.calendar-grid-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.calendar-grid-month {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-transform: capitalize;
+}
+
+.calendar-grid-nav {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.4rem;
+}
+
+.calendar-grid-dow {
+  text-align: center;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-faint);
+  padding-bottom: 0.4rem;
+}
+
+.calendar-grid-day {
+  aspect-ratio: 1;
+  border-radius: 12px;
+  border: 1px solid var(--color-hairline-soft);
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--color-text-soft);
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.calendar-grid-day:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.calendar-grid-day[data-empty="true"] {
+  visibility: hidden;
+  cursor: default;
+}
+
+.calendar-grid-day[data-status="available"] {
+  background: var(--color-accent-tint);
+  border-color: rgba(52, 211, 153, 0.3);
+  color: var(--color-accent);
+}
+
+.calendar-grid-day[data-status="booked"] {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: var(--color-hairline-soft);
+  color: var(--color-text-faint);
+  opacity: 0.6;
+}
+
+.calendar-grid-day[data-selected="true"] {
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+
+.calendar-day-editor {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-hairline-soft);
+}

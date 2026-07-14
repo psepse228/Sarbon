@@ -44,12 +44,14 @@ export default function DesktopAssistantPage() {
 
   return (
     <div>
-      <h1>Ассистент</h1>
+      <h1>Ваш Личный Ассистент</h1>
       <p className="muted">Спросите, как идут дела, или дайте указание, которое учтёт бот для клиентов.</p>
 
       {error && <ErrorBanner message={error} />}
 
-      <ChatThread messages={messages} input={input} onInputChange={setInput} onSend={send} sending={sending} suggestions={SUGGESTIONS} />
+      <div className="chat-frame">
+        <ChatThread messages={messages} input={input} onInputChange={setInput} onSend={send} sending={sending} suggestions={SUGGESTIONS} />
+      </div>
     </div>
   );
 }

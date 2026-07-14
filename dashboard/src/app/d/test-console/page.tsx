@@ -99,7 +99,9 @@ export default function TestConsolePage() {
 
       {error && <ErrorBanner message={error} />}
 
-      <ChatThread messages={messages} input={input} onInputChange={setInput} onSend={send} sending={sending} />
+      <div className="chat-frame">
+        <ChatThread messages={messages} input={input} onInputChange={setInput} onSend={send} sending={sending} />
+      </div>
     </div>
   );
 }

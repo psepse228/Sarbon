@@ -19,6 +19,7 @@ function newPackage(): Package {
     max_guests: null,
     prepayment: "",
     cancellation_policy: "",
+    imageUrl: null,
   };
 }
 
@@ -78,102 +79,105 @@ export function PackagesEditor() {
 
   return (
     <div>
-      <h1>Пакеты и цены</h1>
-      <p className="muted">Пакеты, которые бот предлагает клиентам, с ценами и условиями.</p>
+      <div className="card-title-row">
+        <h3>Пакеты</h3>
+      </div>
 
       {saveError && <ErrorBanner message={saveError} />}
       {saved && <SuccessBanner message="Сохранено" />}
 
-      {items.map((pkg) => (
-        <div key={pkg.id} className="card">
-          <div className="card-title-row">
-            <input
-              placeholder="Название пакета (например, Стандарт)"
-              value={pkg.name}
-              onChange={(e) => update(pkg.id, { name: e.target.value })}
-              style={{ flex: 1, fontWeight: 700 }}
-            />
-            <button className="btn btn-danger" onClick={() => remove(pkg.id)}>
-              Удалить
-            </button>
-          </div>
-
-          <div className="field-row">
-            <div className="field">
-              <label>Цена</label>
+      <div className="catalog-grid">
+        {items.map((pkg) => (
+          <div key={pkg.id} className="card">
+            {pkg.imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={pkg.imageUrl} alt={pkg.name || "Пакет"} className="catalog-card-image" />
+            ) : (
+              <div className="catalog-card-image-placeholder">Нет фото</div>
+            )}
+            <div className="card-title-row">
               <input
-                type="number"
-                min={0}
-                value={pkg.price}
-                onChange={(e) => update(pkg.id, { price: Number(e.target.value) })}
+                placeholder="Название пакета"
+                value={pkg.name}
+                onChange={(e) => update(pkg.id, { name: e.target.value })}
+                style={{ flex: 1 }}
+              />
+              <button className="btn btn-danger" onClick={() => remove(pkg.id)}>
+                Удалить
+              </button>
+            </div>
+            <div className="field">
+              <label>Ссылка на фото</label>
+              <input
+                placeholder="https://…"
+                value={pkg.imageUrl ?? ""}
+                onChange={(e) => update(pkg.id, { imageUrl: e.target.value || null })}
+              />
+            </div>
+            <div className="field-row">
+              <div className="field">
+                <label>Цена</label>
+                <input
+                  type="number"
+                  value={pkg.price}
+                  onChange={(e) => update(pkg.id, { price: Number(e.target.value) })}
+                />
+              </div>
+              <div className="field">
+                <label>Валюта</label>
+                <input value={pkg.currency} onChange={(e) => update(pkg.id, { currency: e.target.value })} />
+              </div>
+            </div>
+            <div className="field">
+              <label>Входит в пакет (по одному пункту на строку)</label>
+              <textarea
+                rows={3}
+                value={pkg.includes.join("\n")}
+                onChange={(e) => update(pkg.id, { includes: linesToList(e.target.value) })}
               />
             </div>
             <div className="field">
-              <label>Валюта</label>
-              <input value={pkg.currency} onChange={(e) => update(pkg.id, { currency: e.target.value })} />
-            </div>
-          </div>
-
-          <div className="field-row">
-            <div className="field">
-              <label>Мин. гостей</label>
-              <input
-                type="number"
-                min={0}
-                value={pkg.min_guests ?? ""}
-                onChange={(e) => update(pkg.id, { min_guests: e.target.value === "" ? null : Number(e.target.value) })}
+              <label>Не входит в пакет (по одному пункту на строку)</label>
+              <textarea
+                rows={3}
+                value={pkg.excludes.join("\n")}
+                onChange={(e) => update(pkg.id, { excludes: linesToList(e.target.value) })}
               />
             </div>
+            <div className="field-row">
+              <div className="field">
+                <label>Мин. гостей</label>
+                <input
+                  type="number"
+                  value={pkg.min_guests ?? ""}
+                  onChange={(e) => update(pkg.id, { min_guests: e.target.value ? Number(e.target.value) : null })}
+                />
+              </div>
+              <div className="field">
+                <label>Макс. гостей</label>
+                <input
+                  type="number"
+                  value={pkg.max_guests ?? ""}
+                  onChange={(e) => update(pkg.id, { max_guests: e.target.value ? Number(e.target.value) : null })}
+                />
+              </div>
+            </div>
             <div className="field">
-              <label>Макс. гостей</label>
+              <label>Условия предоплаты</label>
+              <input value={pkg.prepayment} onChange={(e) => update(pkg.id, { prepayment: e.target.value })} />
+            </div>
+            <div className="field">
+              <label>Условия отмены</label>
               <input
-                type="number"
-                min={0}
-                value={pkg.max_guests ?? ""}
-                onChange={(e) => update(pkg.id, { max_guests: e.target.value === "" ? null : Number(e.target.value) })}
+                value={pkg.cancellation_policy}
+                onChange={(e) => update(pkg.id, { cancellation_policy: e.target.value })}
               />
             </div>
           </div>
+        ))}
+      </div>
 
-          <div className="field">
-            <label>Что входит (по одному пункту на строку)</label>
-            <textarea
-              rows={3}
-              value={pkg.includes.join("\n")}
-              onChange={(e) => update(pkg.id, { includes: linesToList(e.target.value) })}
-            />
-          </div>
-
-          <div className="field">
-            <label>Что НЕ входит (по одному пункту на строку)</label>
-            <textarea
-              rows={3}
-              value={pkg.excludes.join("\n")}
-              onChange={(e) => update(pkg.id, { excludes: linesToList(e.target.value) })}
-            />
-          </div>
-
-          <div className="field">
-            <label>Условия предоплаты</label>
-            <textarea
-              rows={2}
-              value={pkg.prepayment}
-              onChange={(e) => update(pkg.id, { prepayment: e.target.value })}
-            />
-          </div>
-
-          <div className="field">
-            <label>Условия отмены/переноса</label>
-            <textarea
-              rows={2}
-              value={pkg.cancellation_policy}
-              onChange={(e) => update(pkg.id, { cancellation_policy: e.target.value })}
-            />
-          </div>
-        </div>
-      ))}
-
-      <button className="btn btn-ghost" onClick={add}>
+      <button className="btn btn-ghost" onClick={add} style={{ marginTop: "1rem" }}>
         + Добавить пакет
       </button>
 

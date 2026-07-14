@@ -11,6 +11,7 @@ export const packageSchema = z.object({
   max_guests: z.number().int().nonnegative().nullable(),
   prepayment: z.string(),
   cancellation_policy: z.string(),
+  imageUrl: z.string().nullable().default(null),
 });
 
 export const packagesArraySchema = z.array(packageSchema);
@@ -28,6 +29,7 @@ export const partnerSchema = z.object({
   category: z.string().min(1, "Категория обязательна"),
   name: z.string().min(1, "Название партнёра обязательно"),
   contact: z.string(),
+  imageUrl: z.string().nullable().default(null),
 });
 
 export const partnersArraySchema = z.array(partnerSchema);

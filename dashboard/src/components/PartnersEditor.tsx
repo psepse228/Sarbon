@@ -8,7 +8,7 @@ import type { Partner } from "@/lib/types";
 import { useCompanyProfile } from "@/lib/useCompanyProfile";
 
 function newPartner(): Partner {
-  return { id: crypto.randomUUID(), category: "", name: "", contact: "" };
+  return { id: crypto.randomUUID(), category: "", name: "", contact: "", imageUrl: null };
 }
 
 export function PartnersEditor() {
@@ -57,37 +57,55 @@ export function PartnersEditor() {
 
   return (
     <div>
-      <h1>Партнёры</h1>
+      <div className="card-title-row">
+        <h3>Партнёры</h3>
+      </div>
       <p className="muted">Кортеж, флористы, фотографы и другие рекомендуемые партнёры.</p>
 
       {saveError && <ErrorBanner message={saveError} />}
       {saved && <SuccessBanner message="Сохранено" />}
 
-      {items.map((partner) => (
-        <div key={partner.id} className="card">
-          <div className="card-title-row">
-            <input
-              placeholder="Категория (например, Флористы)"
-              value={partner.category}
-              onChange={(e) => update(partner.id, { category: e.target.value })}
-              style={{ flex: 1 }}
-            />
-            <button className="btn btn-danger" onClick={() => remove(partner.id)}>
-              Удалить
-            </button>
+      <div className="catalog-grid">
+        {items.map((partner) => (
+          <div key={partner.id} className="card">
+            {partner.imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={partner.imageUrl} alt={partner.name || "Партнёр"} className="catalog-card-image" />
+            ) : (
+              <div className="catalog-card-image-placeholder">Нет фото</div>
+            )}
+            <div className="card-title-row">
+              <input
+                placeholder="Категория (например, Флористы)"
+                value={partner.category}
+                onChange={(e) => update(partner.id, { category: e.target.value })}
+                style={{ flex: 1 }}
+              />
+              <button className="btn btn-danger" onClick={() => remove(partner.id)}>
+                Удалить
+              </button>
+            </div>
+            <div className="field">
+              <label>Ссылка на фото</label>
+              <input
+                placeholder="https://…"
+                value={partner.imageUrl ?? ""}
+                onChange={(e) => update(partner.id, { imageUrl: e.target.value || null })}
+              />
+            </div>
+            <div className="field">
+              <label>Название</label>
+              <input value={partner.name} onChange={(e) => update(partner.id, { name: e.target.value })} />
+            </div>
+            <div className="field">
+              <label>Контакт</label>
+              <input value={partner.contact} onChange={(e) => update(partner.id, { contact: e.target.value })} />
+            </div>
           </div>
-          <div className="field">
-            <label>Название</label>
-            <input value={partner.name} onChange={(e) => update(partner.id, { name: e.target.value })} />
-          </div>
-          <div className="field">
-            <label>Контакт</label>
-            <input value={partner.contact} onChange={(e) => update(partner.id, { contact: e.target.value })} />
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
-      <button className="btn btn-ghost" onClick={add}>
+      <button className="btn btn-ghost" onClick={add} style={{ marginTop: "1rem" }}>
         + Добавить партнёра
       </button>
 

@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     openai_api_key: str
     admin_telegram_chat_id: str | None = None
     internal_api_secret: str | None = None
+    google_service_account_json: str | None = None
     environment: str = "development"
 
 

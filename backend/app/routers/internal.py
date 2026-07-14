@@ -6,6 +6,7 @@ from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel
 
 from app.ai.engine import generate_reply
+from app.calendar_sync import get_service_account_email, sync_calendar
 from app.config import get_settings
 from app.notifications import get_notifier_bot
 
@@ -101,3 +102,44 @@ async def broadcast(
             logger.exception("broadcast send failed for chat_id %s", chat_id)
 
     return BroadcastResponse(sent_count=sent_count)
+
+
+@router.get("/calendar-service-account-email")
+async def calendar_service_account_email(
+    x_internal_secret: str = Header(..., alias="X-Internal-Secret"),
+) -> dict[str, str]:
+    """The email the owner shares their Google Calendar with — see
+    dashboard/src/lib/calendar.ts for the only caller."""
+    settings = get_settings()
+    if not settings.internal_api_secret or not hmac.compare_digest(
+        x_internal_secret, settings.internal_api_secret
+    ):
+        raise HTTPException(status_code=401, detail="Invalid internal secret")
+
+    return {"email": get_service_account_email()}
+
+
+class SyncCalendarRequest(BaseModel):
+    tenant_id: str
+    calendar_id: str
+
+
+class SyncCalendarResponse(BaseModel):
+    synced_count: int
+
+
+@router.post("/sync-calendar", response_model=SyncCalendarResponse)
+async def sync_calendar_endpoint(
+    body: SyncCalendarRequest,
+    x_internal_secret: str = Header(..., alias="X-Internal-Secret"),
+) -> SyncCalendarResponse:
+    """Manual, owner-triggered sync — no automatic/scheduled runs (no job
+    scheduler exists in this repo). See dashboard/src/lib/calendar.ts."""
+    settings = get_settings()
+    if not settings.internal_api_secret or not hmac.compare_digest(
+        x_internal_secret, settings.internal_api_secret
+    ):
+        raise HTTPException(status_code=401, detail="Invalid internal secret")
+
+    synced_count = await sync_calendar(body.tenant_id, body.calendar_id)
+    return SyncCalendarResponse(synced_count=synced_count)

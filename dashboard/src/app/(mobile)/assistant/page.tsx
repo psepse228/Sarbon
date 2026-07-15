@@ -49,7 +49,9 @@ export default function AssistantPage() {
 
       {error && <ErrorBanner message={error} />}
 
-      <ChatThread messages={messages} input={input} onInputChange={setInput} onSend={send} sending={sending} suggestions={SUGGESTIONS} />
+      <div className="chat-frame">
+        <ChatThread messages={messages} input={input} onInputChange={setInput} onSend={send} sending={sending} suggestions={SUGGESTIONS} />
+      </div>
     </div>
   );
 }

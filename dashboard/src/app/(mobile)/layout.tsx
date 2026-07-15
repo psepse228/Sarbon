@@ -7,8 +7,10 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
   return (
     <div className="mobile-shell">
       <GemSmokeBackground />
-      <DesktopSuggestBanner />
-      <TopHeader />
+      <div className="mobile-top-stack">
+        <DesktopSuggestBanner />
+        <TopHeader />
+      </div>
       <main className="container">{children}</main>
       <TabBar />
     </div>

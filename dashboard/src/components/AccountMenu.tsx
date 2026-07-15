@@ -15,6 +15,7 @@ export function AccountMenu({ compact = false }: AccountMenuProps) {
   const [email, setEmail] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState<string | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,10 +38,20 @@ export function AccountMenu({ compact = false }: AccountMenuProps) {
 
   async function logout() {
     setLoggingOut(true);
+    setLogoutError(null);
     try {
-      await tmaFetch("/api/auth/logout", { method: "POST" });
-    } finally {
+      const res = await tmaFetch("/api/auth/logout", { method: "POST" });
+      if (!res.ok) throw new Error(`Не удалось выйти (${res.status})`);
+      // Full navigation, not router.push — the session cookie changed
+      // server-side and every already-fetched client cache should be dropped.
       window.location.href = "/login";
+    } catch (err) {
+      // Fail closed: if the request didn't succeed, the session cookie is
+      // still valid server-side, so don't redirect as if logout happened —
+      // that would look like a completed logout on a shared device while
+      // the account is still signed in.
+      setLoggingOut(false);
+      setLogoutError(err instanceof Error ? err.message : "Не удалось выйти");
     }
   }
 
@@ -65,6 +76,7 @@ export function AccountMenu({ compact = false }: AccountMenuProps) {
       {open && (
         <div className="account-menu-dropdown">
           <div className="account-menu-dropdown-email">{email}</div>
+          {logoutError && <div className="account-menu-dropdown-error">{logoutError}</div>}
           <button type="button" className="account-menu-dropdown-logout" onClick={logout} disabled={loggingOut}>
             {loggingOut ? "Выход…" : "Выйти"}
           </button>

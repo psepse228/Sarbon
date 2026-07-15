@@ -124,10 +124,16 @@ select:focus {
 
 /* --- Top header --- */
 
-.top-header {
+.mobile-top-stack {
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: 25;
+}
+
+/* Sticky positioning lives on the .mobile-top-stack wrapper above, not
+   on .top-header itself — sibling sticky elements at the same `top` don't
+   stack, they overlap, so the banner + header stick together as one group. */
+.top-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1039,9 +1045,6 @@ textarea.policies {
 /* --- Desktop-suggest banner (mobile shell only) --- */
 
 .desktop-suggest-banner {
-  position: sticky;
-  top: 0;
-  z-index: 25;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1428,6 +1431,12 @@ textarea.policies {
   word-break: break-all;
   border-bottom: 1px solid var(--glass-border-soft);
   margin-bottom: 0.5rem;
+}
+
+.account-menu-dropdown-error {
+  padding: 0 0.5rem 0.5rem;
+  font-size: 0.78rem;
+  color: var(--color-danger);
 }
 
 .account-menu-dropdown-logout {

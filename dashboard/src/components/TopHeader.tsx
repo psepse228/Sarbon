@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { AccountMenu } from "@/components/AccountMenu";
 import { ChevronLeftIcon } from "@/components/icons";
 
 const MAIN_TABS = ["/", "/analytics", "/assistant", "/more"];
@@ -33,6 +34,7 @@ export function TopHeader() {
       ) : (
         <span className="top-header-brand">Cortège</span>
       )}
+      <AccountMenu compact />
     </header>
   );
 }

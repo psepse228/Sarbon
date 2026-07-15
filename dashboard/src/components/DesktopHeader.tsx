@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { AccountMenu } from "@/components/AccountMenu";
 import { GlobeIcon, SearchIcon } from "@/components/icons";
 
 const LOCALE_KEY = "cortege-dashboard-locale";
@@ -58,6 +59,8 @@ export function DesktopHeader() {
           EN
         </button>
       </div>
+
+      <AccountMenu />
     </div>
   );
 }

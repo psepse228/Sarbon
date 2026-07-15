@@ -8,8 +8,8 @@ const GemSmoke = dynamic(() => import("@paper-design/shaders-react").then((mod) 
   ssr: false,
 });
 
-/** Replaces the desktop shell's old CSS-orb ambient background with a live
- * shader, tinted to Cortège's mint/gold identity. Skips rendering entirely
+/** Ambient shader background, tinted to Cortège's mint/gold identity, shared
+ * by both the desktop shell and the mobile shell. Skips rendering entirely
  * under prefers-reduced-motion rather than trying to freeze a single frame —
  * there's no static fallback worth showing for a shader like this. */
 export function GemSmokeBackground() {
@@ -24,7 +24,7 @@ export function GemSmokeBackground() {
   }, []);
 
   return (
-    <div className="desktop-ambient" aria-hidden="true">
+    <div className="ambient-shader" aria-hidden="true">
       {!reducedMotion && (
         <GemSmoke
           style={{ width: "100%", height: "100%" }}

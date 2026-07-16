@@ -19,29 +19,31 @@ import {
   TagIcon,
   UsersIcon,
 } from "@/components/icons";
+import { useT } from "@/lib/i18n/LocaleProvider";
 
-const TOP_ITEMS_BEFORE_GROUP = [{ href: "/d", label: "Обзор", Icon: HomeIcon }] as const;
+const TOP_ITEMS_BEFORE_GROUP = [{ href: "/d", labelKey: "sidebar.overview", Icon: HomeIcon }] as const;
 
 const CRM_GROUP_ITEMS = [
-  { href: "/d/conversations", label: "Диалоги", Icon: ChatIcon },
-  { href: "/d/leads", label: "Лиды", Icon: UsersIcon },
-  { href: "/d/broadcasts", label: "Рассылки", Icon: SendIcon },
-  { href: "/d/reviews", label: "Отзывы", Icon: StarIcon },
+  { href: "/d/conversations", labelKey: "sidebar.conversations", Icon: ChatIcon },
+  { href: "/d/leads", labelKey: "sidebar.leads", Icon: UsersIcon },
+  { href: "/d/broadcasts", labelKey: "sidebar.broadcasts", Icon: SendIcon },
+  { href: "/d/reviews", labelKey: "sidebar.reviews", Icon: StarIcon },
 ] as const;
 
 const TOP_ITEMS_AFTER_GROUP = [
-  { href: "/d/catalog", label: "Каталог", Icon: TagIcon },
-  { href: "/d/calendar", label: "Календарь", Icon: CalendarIcon },
-  { href: "/d/connectors", label: "Коннекторы", Icon: PlugIcon },
-  { href: "/d/configuration", label: "Настройки", Icon: GearIcon },
-  { href: "/d/test-console", label: "Тест-консоль", Icon: FlaskIcon },
-  { href: "/d/assistant", label: "Ассистент", Icon: SparkleIcon },
+  { href: "/d/catalog", labelKey: "sidebar.catalog", Icon: TagIcon },
+  { href: "/d/calendar", labelKey: "sidebar.calendar", Icon: CalendarIcon },
+  { href: "/d/connectors", labelKey: "sidebar.connectors", Icon: PlugIcon },
+  { href: "/d/configuration", labelKey: "sidebar.configuration", Icon: GearIcon },
+  { href: "/d/test-console", labelKey: "sidebar.testConsole", Icon: FlaskIcon },
+  { href: "/d/assistant", labelKey: "sidebar.assistant", Icon: SparkleIcon },
 ] as const;
 
 const CRM_EXPANDED_KEY = "cortege-sidebar-crm-expanded";
 
 export function Sidebar() {
   const pathname = usePathname();
+  const t = useT();
   const isOnCrmRoute = CRM_GROUP_ITEMS.some((item) => pathname.startsWith(item.href));
   const [expanded, setExpanded] = useState(false);
 
@@ -63,12 +65,12 @@ export function Sidebar() {
     window.localStorage.setItem(CRM_EXPANDED_KEY, String(next));
   }
 
-  function renderLink({ href, label, Icon }: { href: string; label: string; Icon: typeof HomeIcon }) {
+  function renderLink({ href, labelKey, Icon }: { href: string; labelKey: string; Icon: typeof HomeIcon }) {
     const active = href === "/d" ? pathname === "/d" : pathname.startsWith(href);
     return (
       <Link key={href} href={href} className="desktop-sidebar-item" data-active={active}>
         <Icon />
-        <span>{label}</span>
+        <span>{t(labelKey)}</span>
       </Link>
     );
   }
@@ -87,7 +89,7 @@ export function Sidebar() {
           aria-controls="crm-group-children"
         >
           <GridIcon />
-          <span>CRM</span>
+          <span>{t("sidebar.crm")}</span>
           <span className="desktop-sidebar-group-chevron" data-expanded={expanded}>
             <ChevronDownIcon />
           </span>

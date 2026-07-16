@@ -107,7 +107,7 @@ export function DesktopHeader() {
         )}
       </div>
 
-      <div className="desktop-header-lang" role="group" aria-label="Язык панели">
+      <div className="desktop-header-lang" role="group" aria-label={t("header.languageGroup")}>
         <GlobeIcon />
         <button type="button" data-active={locale === "ru"} onClick={() => setLocale("ru")}>
           RU

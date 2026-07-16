@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { ChevronDownIcon } from "@/components/icons";
+import { useT } from "@/lib/i18n/LocaleProvider";
 import { tmaFetch } from "@/lib/telegram/client";
 
 interface AccountMenuProps {
@@ -12,6 +13,7 @@ interface AccountMenuProps {
 }
 
 export function AccountMenu({ compact = false }: AccountMenuProps) {
+  const t = useT();
   const [email, setEmail] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -78,7 +80,7 @@ export function AccountMenu({ compact = false }: AccountMenuProps) {
           <div className="account-menu-dropdown-email">{email}</div>
           {logoutError && <div className="account-menu-dropdown-error">{logoutError}</div>}
           <button type="button" className="account-menu-dropdown-logout" onClick={logout} disabled={loggingOut}>
-            {loggingOut ? "Выход…" : "Выйти"}
+            {loggingOut ? t("account.loggingOut") : t("account.logout")}
           </button>
         </div>
       )}

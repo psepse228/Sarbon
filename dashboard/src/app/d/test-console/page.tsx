@@ -32,6 +32,7 @@ interface ToolCall {
 }
 
 function ToolCallTrace({ toolCalls }: { toolCalls: ToolCall[] }) {
+  const t = useT();
   if (toolCalls.length === 0) return null;
 
   return (
@@ -45,13 +46,19 @@ function ToolCallTrace({ toolCalls }: { toolCalls: ToolCall[] }) {
           .join(", ");
         let label: string;
         if (escalated) {
-          label = `Бот бы передал администратору: ${String((call.result as { reason?: string })?.reason ?? "")}`;
+          label = t("testConsole.wouldEscalate").replace(
+            "{reason}",
+            String((call.result as { reason?: string })?.reason ?? ""),
+          );
         } else if (gapFlagged) {
-          label = `Бот бы зафиксировал пробел в знаниях: ${String((call.result as { question?: string })?.question ?? "")}`;
+          label = t("testConsole.wouldFlagGap").replace(
+            "{question}",
+            String((call.result as { question?: string })?.question ?? ""),
+          );
         } else if (leadCaptured) {
           const lead = call.result as { name?: string; phone?: string };
           const parts = [lead?.name, lead?.phone].filter(Boolean);
-          label = `Бот бы сохранил лид: ${parts.join(", ")}`;
+          label = t("testConsole.wouldCaptureLead").replace("{details}", parts.join(", "));
         } else {
           label = `${call.name}(${argsText}) → ${JSON.stringify(call.result)}`;
         }

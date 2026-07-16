@@ -5,9 +5,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { AccountMenu } from "@/components/AccountMenu";
 import { GlobeIcon, SearchIcon } from "@/components/icons";
+import { useLocale, useT } from "@/lib/i18n/LocaleProvider";
 import { DESKTOP_ROUTES } from "@/lib/desktopRoutes";
-
-const LOCALE_KEY = "cortege-dashboard-locale";
 
 export function DesktopHeader() {
   const router = useRouter();
@@ -15,12 +14,8 @@ export function DesktopHeader() {
   const rootRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
-  const [locale, setLocale] = useState<"ru" | "en">("ru");
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem(LOCALE_KEY);
-    if (stored === "ru" || stored === "en") setLocale(stored);
-  }, []);
+  const { locale, setLocale } = useLocale();
+  const t = useT();
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -53,8 +48,8 @@ export function DesktopHeader() {
   const matches = useMemo(() => {
     const trimmed = query.trim().toLowerCase();
     if (!trimmed) return [];
-    return DESKTOP_ROUTES.filter((route) => route.label.toLowerCase().includes(trimmed));
-  }, [query]);
+    return DESKTOP_ROUTES.filter((route) => t(route.labelKey).toLowerCase().includes(trimmed));
+  }, [query, t]);
 
   function goTo(href: string) {
     router.push(href);
@@ -66,11 +61,6 @@ export function DesktopHeader() {
   function onSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (matches.length > 0) goTo(matches[0]!.href);
-  }
-
-  function setLocaleAndPersist(next: "ru" | "en") {
-    setLocale(next);
-    window.localStorage.setItem(LOCALE_KEY, next);
   }
 
   return (
@@ -87,8 +77,8 @@ export function DesktopHeader() {
                 setOpen(true);
               }}
               onFocus={() => setOpen(true)}
-              placeholder="Поиск по разделам…"
-              aria-label="Поиск по разделам"
+              placeholder={t("header.searchPlaceholder")}
+              aria-label={t("header.searchPlaceholder")}
             />
             <span className="desktop-header-search-kbd">
               <kbd>Ctrl</kbd>
@@ -105,24 +95,24 @@ export function DesktopHeader() {
                 className="desktop-header-search-result"
                 onMouseDown={() => goTo(route.href)}
               >
-                {route.label}
+                {t(route.labelKey)}
               </button>
             ))}
           </div>
         )}
         {open && query.trim() && matches.length === 0 && (
           <div className="desktop-header-search-results">
-            <div className="desktop-header-search-empty">Ничего не найдено</div>
+            <div className="desktop-header-search-empty">{t("header.searchEmpty")}</div>
           </div>
         )}
       </div>
 
       <div className="desktop-header-lang" role="group" aria-label="Язык панели">
         <GlobeIcon />
-        <button type="button" data-active={locale === "ru"} onClick={() => setLocaleAndPersist("ru")}>
+        <button type="button" data-active={locale === "ru"} onClick={() => setLocale("ru")}>
           RU
         </button>
-        <button type="button" data-active={locale === "en"} onClick={() => setLocaleAndPersist("en")}>
+        <button type="button" data-active={locale === "en"} onClick={() => setLocale("en")}>
           EN
         </button>
       </div>

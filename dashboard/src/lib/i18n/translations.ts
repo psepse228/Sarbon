@@ -1,0 +1,36 @@
+export type Locale = "ru" | "en";
+
+export const translations: Record<Locale, Record<string, string>> = {
+  ru: {
+    "sidebar.overview": "Обзор",
+    "sidebar.crm": "CRM",
+    "sidebar.conversations": "Диалоги",
+    "sidebar.leads": "Лиды",
+    "sidebar.broadcasts": "Рассылки",
+    "sidebar.reviews": "Отзывы",
+    "sidebar.catalog": "Каталог",
+    "sidebar.calendar": "Календарь",
+    "sidebar.connectors": "Коннекторы",
+    "sidebar.configuration": "Настройки",
+    "sidebar.testConsole": "Тест-консоль",
+    "sidebar.assistant": "Ассистент",
+    "header.searchPlaceholder": "Поиск по разделам…",
+    "header.searchEmpty": "Ничего не найдено",
+  },
+  en: {
+    "sidebar.overview": "Overview",
+    "sidebar.crm": "CRM",
+    "sidebar.conversations": "Conversations",
+    "sidebar.leads": "Leads",
+    "sidebar.broadcasts": "Broadcasts",
+    "sidebar.reviews": "Reviews",
+    "sidebar.catalog": "Catalog",
+    "sidebar.calendar": "Calendar",
+    "sidebar.connectors": "Connectors",
+    "sidebar.configuration": "Settings",
+    "sidebar.testConsole": "Test Console",
+    "sidebar.assistant": "Assistant",
+    "header.searchPlaceholder": "Search sections…",
+    "header.searchEmpty": "No matches",
+  },
+};

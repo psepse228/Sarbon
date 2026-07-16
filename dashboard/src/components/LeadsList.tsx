@@ -3,14 +3,15 @@
 import { useEffect, useState } from "react";
 
 import { ErrorBanner } from "@/components/StatusBanner";
+import { useT } from "@/lib/i18n/LocaleProvider";
 import { tmaFetch } from "@/lib/telegram/client";
 import type { Lead } from "@/lib/types";
 
-const COLUMNS: { status: Lead["status"]; label: string }[] = [
-  { status: "new", label: "Новые" },
-  { status: "contacted", label: "В работе" },
-  { status: "booked", label: "Забронировано" },
-  { status: "lost", label: "Потеряно" },
+const COLUMNS: { status: Lead["status"]; labelKey: string }[] = [
+  { status: "new", labelKey: "leads.columnNew" },
+  { status: "contacted", labelKey: "leads.columnContacted" },
+  { status: "booked", labelKey: "leads.columnBooked" },
+  { status: "lost", labelKey: "leads.columnLost" },
 ];
 
 const NEXT_STATUS: Partial<Record<Lead["status"], Lead["status"]>> = {
@@ -24,6 +25,7 @@ const PREV_STATUS: Partial<Record<Lead["status"], Lead["status"]>> = {
 };
 
 export function LeadsList() {
+  const t = useT();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,14 +72,12 @@ export function LeadsList() {
     }
   }
 
-  if (loading) return <p className="muted">Загрузка…</p>;
+  if (loading) return <p className="muted">{t("leads.loading")}</p>;
 
   return (
     <div>
-      <h1>Лиды</h1>
-      <p className="muted">
-        Клиенты, которые проявили намерение забронировать. Двигайте карточку по мере работы с заявкой.
-      </p>
+      <h1>{t("leads.title")}</h1>
+      <p className="muted">{t("leads.subtitle")}</p>
 
       {error && <ErrorBanner message={error} />}
 
@@ -90,17 +90,17 @@ export function LeadsList() {
           return (
             <div key={column.status} className="kanban-column">
               <div className="kanban-column-title">
-                {column.label} ({columnLeads.length})
+                {t(column.labelKey)} ({columnLeads.length})
               </div>
               {columnLeads.map((lead) => (
                 <div key={lead.id} className="card">
-                  <div className="kanban-card-name">{lead.name ?? "Без имени"}</div>
+                  <div className="kanban-card-name">{lead.name ?? t("leads.noName")}</div>
                   <div className="kanban-card-meta">
-                    {lead.phone ?? "—"} · {lead.preferredDate ?? "дата не указана"} · {lead.guestCount ?? "—"} гостей
+                    {lead.phone ?? "—"} · {lead.preferredDate ?? t("leads.noDate")} · {lead.guestCount ?? "—"} {t("leads.guests")}
                   </div>
                   <div className="kanban-card-actions">
                     <a href={`/d/conversations?conversationId=${lead.conversationId}`} className="btn btn-secondary">
-                      Диалог
+                      {t("leads.conversation")}
                     </a>
                     {prev && (
                       <button
@@ -109,7 +109,7 @@ export function LeadsList() {
                         disabled={busyId === lead.id}
                         onClick={() => changeStatus(lead, prev)}
                       >
-                        ← {COLUMNS.find((c) => c.status === prev)?.label}
+                        ← {t(COLUMNS.find((c) => c.status === prev)!.labelKey)}
                       </button>
                     )}
                     {next && (
@@ -119,7 +119,7 @@ export function LeadsList() {
                         disabled={busyId === lead.id}
                         onClick={() => changeStatus(lead, next)}
                       >
-                        {COLUMNS.find((c) => c.status === next)?.label} →
+                        {t(COLUMNS.find((c) => c.status === next)!.labelKey)} →
                       </button>
                     )}
                     {column.status === "lost" && (
@@ -129,7 +129,7 @@ export function LeadsList() {
                         disabled={busyId === lead.id}
                         onClick={() => changeStatus(lead, "contacted")}
                       >
-                        Восстановить
+                        {t("leads.restore")}
                       </button>
                     )}
                     {column.status !== "lost" && (
@@ -139,13 +139,13 @@ export function LeadsList() {
                         disabled={busyId === lead.id}
                         onClick={() => changeStatus(lead, "lost")}
                       >
-                        Потерян
+                        {t("leads.lost")}
                       </button>
                     )}
                   </div>
                 </div>
               ))}
-              {columnLeads.length === 0 && <p className="muted">Пусто</p>}
+              {columnLeads.length === 0 && <p className="muted">{t("leads.empty")}</p>}
             </div>
           );
         })}

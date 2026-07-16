@@ -3,17 +3,18 @@
 import { useEffect, useState } from "react";
 
 import { ErrorBanner } from "@/components/StatusBanner";
+import { useT } from "@/lib/i18n/LocaleProvider";
 import { tmaFetch } from "@/lib/telegram/client";
 import type { Broadcast, BroadcastAudience } from "@/lib/types";
 
-const AUDIENCE_LABELS: Record<BroadcastAudience, string> = {
-  all: "Все диалоги",
-  leads_new: "Лиды: новые",
-  leads_contacted: "Лиды: в работе",
-  leads_booked: "Лиды: забронировано",
-};
-
 export default function BroadcastsPage() {
+  const t = useT();
+  const AUDIENCE_LABELS: Record<BroadcastAudience, string> = {
+    all: t("broadcasts.audienceAll"),
+    leads_new: t("broadcasts.audienceLeadsNew"),
+    leads_contacted: t("broadcasts.audienceLeadsContacted"),
+    leads_booked: t("broadcasts.audienceLeadsBooked"),
+  };
   const [broadcasts, setBroadcasts] = useState<Broadcast[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,6 +36,7 @@ export default function BroadcastsPage() {
 
   useEffect(() => {
     loadBroadcasts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function send() {
@@ -61,18 +63,18 @@ export default function BroadcastsPage() {
     }
   }
 
-  if (loading) return <p className="muted">Загрузка…</p>;
+  if (loading) return <p className="muted">{t("broadcasts.loading")}</p>;
 
   return (
     <div>
-      <h1>Рассылки</h1>
-      <p className="muted">Отправьте сообщение сразу нескольким гостям или лидам.</p>
+      <h1>{t("broadcasts.title")}</h1>
+      <p className="muted">{t("broadcasts.subtitle")}</p>
 
       {error && <ErrorBanner message={error} />}
 
       <div className="card">
         <div className="field">
-          <label>Кому</label>
+          <label>{t("broadcasts.audienceLabel")}</label>
           <select value={audience} onChange={(e) => setAudience(e.target.value as BroadcastAudience)}>
             {(Object.keys(AUDIENCE_LABELS) as BroadcastAudience[]).map((key) => (
               <option key={key} value={key}>
@@ -82,27 +84,29 @@ export default function BroadcastsPage() {
           </select>
         </div>
         <div className="field">
-          <label>Сообщение</label>
+          <label>{t("broadcasts.messageLabel")}</label>
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             rows={4}
-            placeholder="Например: У нас акция — скидка 10% на будни в этом месяце"
+            placeholder={t("broadcasts.messagePlaceholder")}
           />
         </div>
         <button type="button" className="btn btn-primary" disabled={sending || message.trim().length === 0} onClick={send}>
-          {sending ? "Отправка…" : "Отправить"}
+          {sending ? t("broadcasts.sending") : t("broadcasts.send")}
         </button>
-        {lastResult !== null && <p className="muted">Отправлено получателям: {lastResult}</p>}
+        {lastResult !== null && (
+          <p className="muted">{t("broadcasts.sentTo").replace("{count}", String(lastResult))}</p>
+        )}
       </div>
 
-      <h3>История рассылок</h3>
-      {broadcasts.length === 0 && <p className="muted">Пока нет рассылок.</p>}
+      <h3>{t("broadcasts.history")}</h3>
+      {broadcasts.length === 0 && <p className="muted">{t("broadcasts.noneYet")}</p>}
       {broadcasts.map((b) => (
         <div key={b.id} className="card">
           <p>{b.message}</p>
           <p className="muted">
-            {AUDIENCE_LABELS[b.audience]} · {b.recipientCount} получателей ·{" "}
+            {AUDIENCE_LABELS[b.audience]} · {b.recipientCount} {t("broadcasts.recipients")} ·{" "}
             {new Date(b.createdAt).toLocaleString("ru-RU")}
           </p>
         </div>

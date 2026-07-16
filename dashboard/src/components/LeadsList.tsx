@@ -99,7 +99,7 @@ export function LeadsList() {
                     {lead.phone ?? "—"} · {lead.preferredDate ?? "дата не указана"} · {lead.guestCount ?? "—"} гостей
                   </div>
                   <div className="kanban-card-actions">
-                    <a href={`/d/conversations/${lead.conversationId}`} className="btn btn-secondary">
+                    <a href={`/d/conversations?conversationId=${lead.conversationId}`} className="btn btn-secondary">
                       Диалог
                     </a>
                     {prev && (

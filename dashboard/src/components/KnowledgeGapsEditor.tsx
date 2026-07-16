@@ -91,7 +91,7 @@ export function KnowledgeGapsEditor() {
         <div key={gap.id} className="card">
           <div className="card-title-row">
             <strong>{gap.question}</strong>
-            <a href={`/d/conversations/${gap.conversationId}`}>Открыть диалог</a>
+            <a href={`/d/conversations?conversationId=${gap.conversationId}`}>Открыть диалог</a>
           </div>
           <div className="field">
             <label>Ответ</label>

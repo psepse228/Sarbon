@@ -125,7 +125,7 @@ export default function DesktopOverviewPage() {
                 {activity.map((item) => (
                   <Link
                     key={item.conversationId}
-                    href={`/d/conversations/${item.conversationId}`}
+                    href={`/d/conversations?conversationId=${item.conversationId}`}
                     className="activity-row"
                   >
                     <div className="activity-main">

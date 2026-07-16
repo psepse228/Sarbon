@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { ErrorBanner } from "@/components/StatusBanner";
@@ -59,11 +60,18 @@ function ConversationRow({
 
 export default function DesktopConversationsPage() {
   const { items, loading, error } = useConversations();
+  const searchParams = useSearchParams();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!selectedId && items.length > 0) setSelectedId(items[0]!.id);
-  }, [items, selectedId]);
+    if (selectedId || items.length === 0) return;
+    // Deep-link support: Обзор/Лиды/Пробелы link here with ?conversationId=
+    // to open a specific conversation directly, instead of always landing on
+    // the first one in the list.
+    const requestedId = searchParams.get("conversationId");
+    const requested = requestedId ? items.find((item) => item.id === requestedId) : null;
+    setSelectedId((requested ?? items[0]!).id);
+  }, [items, selectedId, searchParams]);
 
   const { messages, loading: messagesLoading, error: messagesError } = useConversationMessages(selectedId ?? "");
   const selected = items.find((item) => item.id === selectedId) ?? null;
@@ -100,6 +108,9 @@ export default function DesktopConversationsPage() {
                 <div className="inbox-thread-messages">
                   {messagesError && <ErrorBanner message={messagesError} />}
                   {messagesLoading && <p className="muted">Загрузка…</p>}
+                  {!messagesLoading && !messagesError && messages.length === 0 && (
+                    <p className="muted">Сообщений пока нет.</p>
+                  )}
                   {!messagesLoading &&
                     !messagesError &&
                     messages.map((message) => (

@@ -2020,6 +2020,10 @@ textarea.policies {
   color: var(--color-text);
 }
 
+.chat-bubble[data-sender="human"] .chat-bubble-time {
+  color: var(--color-text-faint);
+}
+
 /* --- Test Console: side-by-side Настройка / Проверка split --- */
 
 .test-console-split {

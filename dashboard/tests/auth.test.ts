@@ -78,9 +78,12 @@ describe("resolveOrCreateTenantByEmail", () => {
     selectResult?: { data: unknown; error: unknown };
     insertResult?: { data: unknown; error: unknown };
     raceSelectResult?: { data: unknown; error: unknown };
+    secondRaceSelectResult?: { data: unknown; error: unknown };
   }) {
     let selectCallCount = 0;
-    const selectResults = [overrides.selectResult, overrides.raceSelectResult].filter(Boolean);
+    const selectResults = [overrides.selectResult, overrides.raceSelectResult, overrides.secondRaceSelectResult].filter(
+      Boolean,
+    );
     const from = vi.fn(() => ({
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
@@ -146,5 +149,22 @@ describe("resolveOrCreateTenantByEmail", () => {
     const tenantId = await fn("racing-owner@example.com", null);
 
     expect(tenantId).toBe("tenant-race-winner");
+  });
+
+  it("retries a second time if the first re-select also comes back empty", async () => {
+    vi.doMock("@/lib/supabase/server", () => ({
+      getServiceSupabaseClient: () =>
+        makeFakeClient({
+          selectResult: { data: null, error: null },
+          insertResult: { data: null, error: { code: "23505", message: "duplicate key" } },
+          raceSelectResult: { data: null, error: null },
+          secondRaceSelectResult: { data: { id: "tenant-race-winner-2" }, error: null },
+        }),
+    }));
+    const { resolveOrCreateTenantByEmail: fn } = await import("@/lib/telegram/auth");
+
+    const tenantId = await fn("slow-racing-owner@example.com", null);
+
+    expect(tenantId).toBe("tenant-race-winner-2");
   });
 });

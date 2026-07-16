@@ -52,14 +52,18 @@ export async function resolveOrCreateTenantByEmail(email: string, name: string |
     // Unique-violation race: another concurrent first-login for the same
     // brand-new email won the insert between our select and insert above.
     if (insertError.code === "23505") {
-      const { data: raceWinner, error: retryError } = await client
-        .from("tenants")
-        .select("id")
-        .eq("owner_email", email)
-        .limit(1)
-        .maybeSingle<{ id: string }>();
+      const reselect = () =>
+        client.from("tenants").select("id").eq("owner_email", email).limit(1).maybeSingle<{ id: string }>();
+
+      let { data: raceWinner } = await reselect();
+      if (!raceWinner) {
+        // The winning insert may not have committed/become visible to our
+        // connection yet — one short delayed retry before giving up.
+        await new Promise((resolve) => setTimeout(resolve, 150));
+        ({ data: raceWinner } = await reselect());
+      }
       if (raceWinner) return raceWinner.id;
-      throw new AuthError(`Failed to create tenant: ${retryError?.message ?? "unknown race error"}`, 500);
+      throw new AuthError("Не удалось войти — попробуйте ещё раз.", 500);
     }
     throw new AuthError(`Failed to create tenant: ${insertError.message}`, 500);
   }

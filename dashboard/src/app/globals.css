@@ -1841,3 +1841,54 @@ textarea.policies {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--color-hairline-soft);
 }
+
+/* --- Connectors (Коннекторы section) --- */
+
+.connector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.connector-card {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.connector-card-icon {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.connector-card-body { flex: 1; min-width: 0; }
+
+.connector-status {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.connector-status[data-status="connected"] {
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+}
+
+.connector-status[data-status="not-configured"] {
+  background: var(--color-warning-tint);
+  color: var(--color-warning);
+}
+
+.connector-status[data-status="coming-soon"] {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-faint);
+}

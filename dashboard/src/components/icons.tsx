@@ -211,3 +211,59 @@ export function FlaskIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function TelegramIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M3.5 11.4 18 4.6l-2.5 13.8-5-3.7-2.4 2.3-.4-3.6 9-7.3-10.7 6.3-2.5-.7Z" />
+    </svg>
+  );
+}
+
+export function WhatsAppIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M6 17.2 3.7 18.5l1.2-3.5A7.4 7.4 0 1 1 8.7 17l-2.7.2Z" />
+      <path d="M8 9.3c0 3 2.4 5.4 5.4 5.4" />
+      <path d="M8 9.3c-.2-.7.3-1.6.9-1.6.5 0 .7.5.9 1 .1.4-.2.9-.4 1.2" />
+    </svg>
+  );
+}
+
+export function InstagramIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <rect x="3.6" y="3.6" width="14.8" height="14.8" rx="4.2" />
+      <circle cx="11" cy="11" r="3.4" />
+      <circle cx="15.1" cy="7.1" r="0.6" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function MessengerIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M4 6.8h14a1 1 0 0 1 1 1V15a1 1 0 0 1-1 1H10l-4.5 3v-3H4a1 1 0 0 1-1-1V7.8a1 1 0 0 1 1-1Z" />
+      <path d="M7.5 12 10 9.5l2 1.7 2.4-2.4" />
+    </svg>
+  );
+}
+
+export function MailIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <rect x="3.5" y="5.5" width="15" height="11" rx="2" />
+      <path d="M4.2 6.3 11 11.5l6.8-5.2" />
+    </svg>
+  );
+}
+
+export function PlugIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M8.5 3.6v4.2M13.5 3.6v4.2" />
+      <path d="M6.3 7.8h9.4v3.4a4.7 4.7 0 0 1-9.4 0V7.8Z" />
+      <path d="M11 15.4v3" />
+    </svg>
+  );
+}

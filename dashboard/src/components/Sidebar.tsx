@@ -12,6 +12,7 @@ import {
   GearIcon,
   GridIcon,
   HomeIcon,
+  PlugIcon,
   SendIcon,
   SparkleIcon,
   StarIcon,
@@ -31,6 +32,7 @@ const CRM_GROUP_ITEMS = [
 const TOP_ITEMS_AFTER_GROUP = [
   { href: "/d/catalog", label: "Каталог", Icon: TagIcon },
   { href: "/d/calendar", label: "Календарь", Icon: CalendarIcon },
+  { href: "/d/connectors", label: "Коннекторы", Icon: PlugIcon },
   { href: "/d/configuration", label: "Настройки", Icon: GearIcon },
   { href: "/d/test-console", label: "Тест-консоль", Icon: FlaskIcon },
   { href: "/d/assistant", label: "Ассистент", Icon: SparkleIcon },

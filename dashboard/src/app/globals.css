@@ -20,9 +20,9 @@
   --font-body: var(--font-golos), "Segoe UI", sans-serif;
 
   --color-gold: #d9b872;
-  --glass: rgba(255, 255, 255, 0.075);
-  --glass-border: rgba(255, 255, 255, 0.14);
-  --glass-border-soft: rgba(255, 255, 255, 0.07);
+  --glass: rgba(20, 22, 28, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-border-soft: rgba(255, 255, 255, 0.1);
   --glass-sheen: rgba(255, 255, 255, 0.5);
 }
 
@@ -996,7 +996,7 @@ textarea.policies {
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  opacity: 0.55;
+  opacity: 0.4;
 }
 
 /* --- Glass primitive (glassmorphism visual refresh) ---

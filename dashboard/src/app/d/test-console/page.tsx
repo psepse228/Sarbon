@@ -22,6 +22,8 @@ const PRESETS: { name: string; disabled: SkillKey[] }[] = [
   { name: "Без бронирования", disabled: ["availability"] },
 ];
 
+const ASSISTANT_SUGGESTIONS = ["Как идут дела за сегодня?", "У нас акция — скидка 10% на будни, скажи об этом клиентам"];
+
 interface ToolCall {
   name: string;
   arguments: Record<string, unknown>;
@@ -68,7 +70,55 @@ function ToolCallTrace({ toolCalls }: { toolCalls: ToolCall[] }) {
   );
 }
 
-export default function TestConsolePage() {
+function AssistantPane() {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function send(text: string) {
+    const trimmed = text.trim();
+    if (!trimmed || sending) return;
+
+    const nextMessages: ChatMessage[] = [...messages, { role: "user", content: trimmed, time: now() }];
+    setMessages(nextMessages);
+    setInput("");
+    setSending(true);
+    setError(null);
+
+    try {
+      const res = await tmaFetch("/api/assistant/chat", {
+        method: "POST",
+        body: JSON.stringify({ history: nextMessages.map(({ role, content }) => ({ role, content })) }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? `Не удалось получить ответ (${res.status})`);
+      }
+      const { reply } = await res.json();
+      setMessages((prev) => [...prev, { role: "assistant", content: reply, time: now() }]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Не удалось получить ответ");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <div className="test-console-pane">
+      <div className="test-console-pane-head">
+        <h3>Настройка</h3>
+        <p className="muted">Дайте указание боту — это реально меняет его поведение для всех клиентов.</p>
+      </div>
+      {error && <ErrorBanner message={error} />}
+      <div className="chat-frame">
+        <ChatThread messages={messages} input={input} onInputChange={setInput} onSend={send} sending={sending} suggestions={ASSISTANT_SUGGESTIONS} />
+      </div>
+    </div>
+  );
+}
+
+function TestPane() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -120,12 +170,11 @@ export default function TestConsolePage() {
   }
 
   return (
-    <div>
-      <h1>Тест-консоль</h1>
-      <p className="muted">
-        Постройте и протестируйте вашего бота. Спросите так, как спросил бы клиент — это настоящий бот, ответы не
-        сохраняются в диалоги и не уходят клиентам. Под каждым ответом видно, что бот на самом деле проверил.
-      </p>
+    <div className="test-console-pane">
+      <div className="test-console-pane-head">
+        <h3>Проверка</h3>
+        <p className="muted">Спросите так, как спросил бы клиент — ответы не сохраняются в диалоги и не уходят клиентам.</p>
+      </div>
 
       <div className="preset-row">
         {PRESETS.map((preset, index) => (
@@ -158,6 +207,23 @@ export default function TestConsolePage() {
 
       <div className="chat-frame">
         <ChatThread messages={messages} input={input} onInputChange={setInput} onSend={send} sending={sending} />
+      </div>
+    </div>
+  );
+}
+
+export default function TestConsolePage() {
+  return (
+    <div>
+      <h1>Тест-консоль</h1>
+      <p className="muted">
+        Слева — настройте поведение бота, справа — проверьте, как он отвечает клиенту. Обе стороны работают
+        с настоящим ботом.
+      </p>
+
+      <div className="test-console-split">
+        <AssistantPane />
+        <TestPane />
       </div>
 
       <div style={{ marginTop: "2rem", paddingTop: "2rem", borderTop: "1px solid var(--color-hairline)" }}>

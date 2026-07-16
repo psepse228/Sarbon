@@ -2019,3 +2019,24 @@ textarea.policies {
   border: 1px solid rgba(217, 184, 114, 0.4);
   color: var(--color-text);
 }
+
+/* --- Test Console: side-by-side Настройка / Проверка split --- */
+
+.test-console-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .test-console-split { grid-template-columns: 1fr; }
+}
+
+.test-console-pane-head {
+  margin-bottom: 0.8rem;
+}
+
+.test-console-pane-head h3 {
+  margin-bottom: 0.3rem;
+}

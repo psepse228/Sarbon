@@ -10,6 +10,7 @@ import {
   TelegramIcon,
   WhatsAppIcon,
 } from "@/components/icons";
+import { useT } from "@/lib/i18n/LocaleProvider";
 import { tmaFetch } from "@/lib/telegram/client";
 
 interface ConnectorCardProps {
@@ -17,15 +18,10 @@ interface ConnectorCardProps {
   name: string;
   description: string;
   status: "connected" | "not-configured" | "coming-soon";
+  statusLabel: string;
 }
 
-const STATUS_LABEL: Record<ConnectorCardProps["status"], string> = {
-  connected: "Подключено",
-  "not-configured": "Не настроено",
-  "coming-soon": "Скоро",
-};
-
-function ConnectorCard({ Icon, name, description, status }: ConnectorCardProps) {
+function ConnectorCard({ Icon, name, description, status, statusLabel }: ConnectorCardProps) {
   return (
     <div className="card connector-card">
       <div className="connector-card-icon">
@@ -35,7 +31,7 @@ function ConnectorCard({ Icon, name, description, status }: ConnectorCardProps) 
         <div className="card-title-row">
           <strong>{name}</strong>
           <span className="connector-status" data-status={status}>
-            {STATUS_LABEL[status]}
+            {statusLabel}
           </span>
         </div>
         <p className="muted">{description}</p>
@@ -45,6 +41,7 @@ function ConnectorCard({ Icon, name, description, status }: ConnectorCardProps) 
 }
 
 export default function ConnectorsPage() {
+  const t = useT();
   const [telegramConnected, setTelegramConnected] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -54,47 +51,55 @@ export default function ConnectorsPage() {
       .catch(() => setTelegramConnected(false));
   }, []);
 
+  const telegramStatus = telegramConnected ? "connected" : "not-configured";
+
   return (
     <div>
-      <h1>Коннекторы</h1>
-      <p className="muted">Каналы, через которые бот получает и отправляет сообщения клиентам.</p>
+      <h1>{t("connectors.title")}</h1>
+      <p className="muted">{t("connectors.subtitle")}</p>
 
       <div className="connector-grid">
         <ConnectorCard
           Icon={TelegramIcon}
           name="Telegram"
-          description="Основной канал бота — клиенты пишут напрямую в Telegram."
-          status={telegramConnected === null ? "not-configured" : telegramConnected ? "connected" : "not-configured"}
+          description={t("connectors.telegramDesc")}
+          status={telegramStatus}
+          statusLabel={telegramStatus === "connected" ? t("connectors.connected") : t("connectors.notConfigured")}
         />
         <ConnectorCard
           Icon={InstagramIcon}
           name="Instagram"
-          description="Direct-сообщения из Instagram — в разработке."
+          description={t("connectors.instagramDesc")}
           status="coming-soon"
+          statusLabel={t("connectors.comingSoon")}
         />
         <ConnectorCard
           Icon={WhatsAppIcon}
           name="WhatsApp"
-          description="WhatsApp Business API — в разработке."
+          description={t("connectors.whatsappDesc")}
           status="coming-soon"
+          statusLabel={t("connectors.comingSoon")}
         />
         <ConnectorCard
           Icon={MessengerIcon}
           name="Facebook Messenger"
-          description="Сообщения со страницы Facebook — в разработке."
+          description={t("connectors.messengerDesc")}
           status="coming-soon"
+          statusLabel={t("connectors.comingSoon")}
         />
         <ConnectorCard
           Icon={ChatIcon}
-          name="Веб-чат"
-          description="Виджет чата на сайте заведения — в разработке."
+          name={t("connectors.webchatName")}
+          description={t("connectors.webchatDesc")}
           status="coming-soon"
+          statusLabel={t("connectors.comingSoon")}
         />
         <ConnectorCard
           Icon={MailIcon}
           name="Email"
-          description="Обращения по электронной почте — в разработке."
+          description={t("connectors.emailDesc")}
           status="coming-soon"
+          statusLabel={t("connectors.comingSoon")}
         />
       </div>
     </div>

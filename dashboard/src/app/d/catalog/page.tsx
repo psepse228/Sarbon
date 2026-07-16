@@ -1,11 +1,15 @@
+"use client";
+
 import { PackagesEditor } from "@/components/PackagesEditor";
 import { PartnersEditor } from "@/components/PartnersEditor";
+import { useT } from "@/lib/i18n/LocaleProvider";
 
 export default function CatalogPage() {
+  const t = useT();
   return (
     <div>
-      <h1>Каталог</h1>
-      <p className="muted">Пакеты и партнёры, которые бот показывает клиентам.</p>
+      <h1>{t("catalog.title")}</h1>
+      <p className="muted">{t("catalog.subtitle")}</p>
 
       <PackagesEditor />
 

@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 
 import { CalendarGrid } from "@/components/CalendarGrid";
 import { ErrorBanner, SuccessBanner } from "@/components/StatusBanner";
+import { useT } from "@/lib/i18n/LocaleProvider";
 import { tmaFetch } from "@/lib/telegram/client";
 import type { AvailabilityEntry } from "@/lib/types";
 import { useCompanyProfile } from "@/lib/useCompanyProfile";
 
 export default function CalendarPage() {
+  const t = useT();
   const { profile, loading: profileLoading, error: profileError, refetch: refetchProfile } = useCompanyProfile();
   const [entries, setEntries] = useState<AvailabilityEntry[]>([]);
   const [loadingEntries, setLoadingEntries] = useState(true);
@@ -99,42 +101,43 @@ export default function CalendarPage() {
 
   return (
     <div>
-      <h1>Календарь</h1>
-      <p className="muted">Свободные и занятые даты, которые бот использует, отвечая клиентам.</p>
+      <h1>{t("calendar.title")}</h1>
+      <p className="muted">{t("calendar.subtitle")}</p>
 
       <div className="card">
         <div className="card-title-row">
-          <h3>Google Calendar</h3>
+          <h3>{t("calendar.googleCalendar")}</h3>
         </div>
         {emailError && <ErrorBanner message={emailError} />}
         {serviceAccountEmail && (
           <p className="muted">
-            Откройте настройки доступа своего календаря в Google Calendar и предоставьте доступ на просмотр этому
-            адресу: <strong>{serviceAccountEmail}</strong>
+            {t("calendar.shareAccess")} <strong>{serviceAccountEmail}</strong>
           </p>
         )}
         <div className="field">
-          <label>ID вашего календаря (обычно ваш email)</label>
+          <label>{t("calendar.calendarIdLabel")}</label>
           <input value={calendarIdInput} onChange={(e) => setCalendarIdInput(e.target.value)} placeholder="you@gmail.com" />
         </div>
         {connectError && <ErrorBanner message={connectError} />}
-        {connectSaved && <SuccessBanner message="Сохранено" />}
+        {connectSaved && <SuccessBanner message={t("calendar.saved")} />}
         <button className="btn btn-secondary" onClick={connect} disabled={connecting}>
-          {connecting ? "Сохранение…" : "Сохранить"}
+          {connecting ? t("calendar.saving") : t("calendar.save")}
         </button>
         {profile?.googleCalendarId && (
           <div style={{ marginTop: "0.9rem" }}>
             {syncError && <ErrorBanner message={syncError} />}
-            {syncResult !== null && <SuccessBanner message={`Синхронизировано дат: ${syncResult}`} />}
+            {syncResult !== null && (
+              <SuccessBanner message={t("calendar.syncedCount").replace("{count}", String(syncResult))} />
+            )}
             <button className="btn btn-primary" onClick={sync} disabled={syncing}>
-              {syncing ? "Синхронизация…" : "Синхронизировать сейчас"}
+              {syncing ? t("calendar.syncing") : t("calendar.syncNow")}
             </button>
           </div>
         )}
       </div>
 
       <div className="card" style={{ marginTop: "1rem" }}>
-        {(loadingEntries || profileLoading) && <p className="muted">Загрузка…</p>}
+        {(loadingEntries || profileLoading) && <p className="muted">{t("calendar.loading")}</p>}
         {entriesError && <ErrorBanner message={entriesError} />}
         {profileError && <ErrorBanner message={profileError} />}
         {!loadingEntries && !entriesError && <CalendarGrid entries={entries} onChanged={loadEntries} />}

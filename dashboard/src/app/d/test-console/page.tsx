@@ -5,21 +5,22 @@ import { useState } from "react";
 import { ChatThread, now, type ChatMessage } from "@/components/ChatThread";
 import { SkillsEditor } from "@/components/SkillsEditor";
 import { ErrorBanner } from "@/components/StatusBanner";
+import { useT } from "@/lib/i18n/LocaleProvider";
 import { tmaFetch } from "@/lib/telegram/client";
 
 type SkillKey = "packages" | "availability" | "faq" | "partners";
 
-const SKILLS: { key: SkillKey; label: string }[] = [
-  { key: "packages", label: "Пакеты и цены" },
-  { key: "availability", label: "Доступность дат" },
-  { key: "faq", label: "Частые вопросы" },
-  { key: "partners", label: "Партнёры" },
+const SKILLS: { key: SkillKey; labelKey: string }[] = [
+  { key: "packages", labelKey: "testConsole.skillPackages" },
+  { key: "availability", labelKey: "testConsole.skillAvailability" },
+  { key: "faq", labelKey: "testConsole.skillFaq" },
+  { key: "partners", labelKey: "testConsole.skillPartners" },
 ];
 
-const PRESETS: { name: string; disabled: SkillKey[] }[] = [
-  { name: "Полный", disabled: [] },
-  { name: "Только цены", disabled: ["availability", "faq", "partners"] },
-  { name: "Без бронирования", disabled: ["availability"] },
+const PRESETS: { nameKey: string; disabled: SkillKey[] }[] = [
+  { nameKey: "testConsole.presetFull", disabled: [] },
+  { nameKey: "testConsole.presetPricesOnly", disabled: ["availability", "faq", "partners"] },
+  { nameKey: "testConsole.presetNoBooking", disabled: ["availability"] },
 ];
 
 const ASSISTANT_SUGGESTIONS = ["Как идут дела за сегодня?", "У нас акция — скидка 10% на будни, скажи об этом клиентам"];
@@ -71,6 +72,7 @@ function ToolCallTrace({ toolCalls }: { toolCalls: ToolCall[] }) {
 }
 
 function AssistantPane() {
+  const t = useT();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -107,8 +109,8 @@ function AssistantPane() {
   return (
     <div className="test-console-pane">
       <div className="test-console-pane-head">
-        <h3>Настройка</h3>
-        <p className="muted">Дайте указание боту — это реально меняет его поведение для всех клиентов.</p>
+        <h3>{t("testConsole.assistantHead")}</h3>
+        <p className="muted">{t("testConsole.assistantSubhead")}</p>
       </div>
       {error && <ErrorBanner message={error} />}
       <div className="chat-frame">
@@ -119,6 +121,7 @@ function AssistantPane() {
 }
 
 function TestPane() {
+  const t = useT();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -172,20 +175,20 @@ function TestPane() {
   return (
     <div className="test-console-pane">
       <div className="test-console-pane-head">
-        <h3>Проверка</h3>
-        <p className="muted">Спросите так, как спросил бы клиент — ответы не сохраняются в диалоги и не уходят клиентам.</p>
+        <h3>{t("testConsole.testHead")}</h3>
+        <p className="muted">{t("testConsole.testSubhead")}</p>
       </div>
 
       <div className="preset-row">
         {PRESETS.map((preset, index) => (
           <button
-            key={preset.name}
+            key={preset.nameKey}
             type="button"
             className="preset-chip"
             data-active={activePreset === index}
             onClick={() => selectPreset(index)}
           >
-            {preset.name}
+            {t(preset.nameKey)}
           </button>
         ))}
       </div>
@@ -193,7 +196,7 @@ function TestPane() {
       <div className="preset-editor">
         {SKILLS.map((skill) => (
           <label key={skill.key} className="toggle-switch-row">
-            <span>{skill.label}</span>
+            <span>{t(skill.labelKey)}</span>
             <label className="toggle-switch">
               <input type="checkbox" checked={!disabledSkills.includes(skill.key)} onChange={() => toggleSkill(skill.key)} />
               <span className="toggle-switch-track" />
@@ -213,13 +216,11 @@ function TestPane() {
 }
 
 export default function TestConsolePage() {
+  const t = useT();
   return (
     <div>
-      <h1>Тест-консоль</h1>
-      <p className="muted">
-        Слева — настройте поведение бота, справа — проверьте, как он отвечает клиенту. Обе стороны работают
-        с настоящим ботом.
-      </p>
+      <h1>{t("testConsole.title")}</h1>
+      <p className="muted">{t("testConsole.subtitle")}</p>
 
       <div className="test-console-split">
         <AssistantPane />

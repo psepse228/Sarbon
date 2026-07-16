@@ -4,11 +4,13 @@ import { useState } from "react";
 
 import { ChatThread, now, type ChatMessage } from "@/components/ChatThread";
 import { ErrorBanner } from "@/components/StatusBanner";
+import { useT } from "@/lib/i18n/LocaleProvider";
 import { tmaFetch } from "@/lib/telegram/client";
 
 const SUGGESTIONS = ["Как идут дела за сегодня?", "У нас акция — скидка 10% на будни, скажи об этом клиентам"];
 
 export default function DesktopAssistantPage() {
+  const t = useT();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -44,8 +46,8 @@ export default function DesktopAssistantPage() {
 
   return (
     <div>
-      <h1>Ваш Личный Ассистент</h1>
-      <p className="muted">Спросите, как идут дела, или дайте указание, которое учтёт бот для клиентов.</p>
+      <h1>{t("assistant.pageTitle")}</h1>
+      <p className="muted">{t("assistant.pageSubtitle")}</p>
 
       {error && <ErrorBanner message={error} />}
 

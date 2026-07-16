@@ -1302,9 +1302,50 @@ textarea.policies {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 24px 60px -32px rgba(0, 0, 0, 0.75);
 }
 
-.desktop-header-search {
+.desktop-header-search-wrap {
+  position: relative;
   flex: 1;
   max-width: 420px;
+}
+
+.desktop-header-search-results {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  z-index: 40;
+  padding: 0.4rem;
+  border-radius: 14px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(40px) saturate(165%);
+  -webkit-backdrop-filter: blur(40px) saturate(165%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 24px 60px -32px rgba(0, 0, 0, 0.75);
+}
+
+.desktop-header-search-result {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0.7rem;
+  border-radius: 9px;
+  font-size: 0.86rem;
+  color: var(--color-text-soft);
+}
+
+.desktop-header-search-result:hover {
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+}
+
+.desktop-header-search-empty {
+  padding: 0.5rem 0.7rem;
+  font-size: 0.82rem;
+  color: var(--color-text-faint);
+}
+
+.desktop-header-search {
+  flex: 1;
   display: flex;
   align-items: center;
   gap: 0.6rem;

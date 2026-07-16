@@ -22,6 +22,7 @@ const golosText = Golos_Text({
 export const metadata: Metadata = {
   title: "Cortège — панель владельца",
   description: "Управление пакетами, вопросами и партнёрами заведения",
+  robots: { index: false, follow: false },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",

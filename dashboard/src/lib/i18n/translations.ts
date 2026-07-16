@@ -16,6 +16,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "sidebar.assistant": "Ассистент",
     "header.searchPlaceholder": "Поиск по разделам…",
     "header.searchEmpty": "Ничего не найдено",
+    "assistant.floatingTitle": "Ваш Ассистент",
+    "assistant.close": "Закрыть",
   },
   en: {
     "sidebar.overview": "Overview",
@@ -32,5 +34,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "sidebar.assistant": "Assistant",
     "header.searchPlaceholder": "Search sections…",
     "header.searchEmpty": "No matches",
+    "assistant.floatingTitle": "Your Assistant",
+    "assistant.close": "Close",
   },
 };

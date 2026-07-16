@@ -2044,3 +2044,92 @@ textarea.policies {
 .test-console-pane-head h3 {
   margin-bottom: 0.3rem;
 }
+
+/* --- Floating Assistant widget (persistent across all desktop pages) --- */
+
+.floating-assistant-trigger {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 50;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-accent);
+  color: #04140e;
+  box-shadow: 0 12px 30px -10px rgba(52, 211, 153, 0.6);
+}
+
+.floating-assistant-trigger:hover {
+  background: var(--color-accent-strong);
+}
+
+.floating-assistant-window {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 50;
+  width: 360px;
+  height: 520px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(40px) saturate(165%);
+  -webkit-backdrop-filter: blur(40px) saturate(165%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 24px 60px -32px rgba(0, 0, 0, 0.75);
+}
+
+.floating-assistant-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid var(--glass-border-soft);
+  flex-shrink: 0;
+}
+
+.floating-assistant-close {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-text-faint);
+  display: flex;
+  cursor: pointer;
+}
+
+.floating-assistant-close:hover {
+  color: var(--color-text);
+}
+
+.floating-assistant-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Reuses .chat-frame's own internal .chat-page/.chat-log/.chat-input-row
+   overrides (selectors keyed off the "chat-frame" class, which this element
+   also carries) — only the OUTER sizing/glass differs here, since the
+   floating window itself already provides the glass panel. */
+.floating-assistant-body.chat-frame {
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  margin-top: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}

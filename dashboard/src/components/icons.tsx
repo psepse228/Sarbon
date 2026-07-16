@@ -267,3 +267,11 @@ export function PlugIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function CloseIcon({ className }: IconProps) {
+  return (
+    <svg {...base} width={18} height={18} viewBox="0 0 22 22" className={className}>
+      <path d="M5.5 5.5l11 11M16.5 5.5l-11 11" />
+    </svg>
+  );
+}

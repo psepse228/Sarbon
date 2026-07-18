@@ -13,14 +13,17 @@ interface RawLeadRow {
   guest_count: number | null;
   budget: string | null;
   status: "new" | "contacted" | "booked" | "lost";
+  notes: string | null;
   created_at: string;
 }
+
+const LEAD_COLUMNS = "id,conversation_id,name,phone,preferred_date,guest_count,budget,status,notes,created_at";
 
 export async function fetchLeads(tenantId: string): Promise<Lead[]> {
   const client = getServiceSupabaseClient();
   const { data, error } = await client
     .from("cortege_leads")
-    .select("id,conversation_id,name,phone,preferred_date,guest_count,budget,status,created_at")
+    .select(LEAD_COLUMNS)
     .eq("tenant_id", tenantId)
     .order("created_at", { ascending: false })
     .returns<RawLeadRow[]>();
@@ -38,6 +41,7 @@ export async function fetchLeads(tenantId: string): Promise<Lead[]> {
     guestCount: row.guest_count,
     budget: row.budget,
     status: row.status,
+    notes: row.notes,
     createdAt: row.created_at,
   }));
 }
@@ -46,7 +50,7 @@ async function fetchLeadForTenant(tenantId: string, leadId: string): Promise<Raw
   const client = getServiceSupabaseClient();
   const { data, error } = await client
     .from("cortege_leads")
-    .select("id,conversation_id,name,phone,preferred_date,guest_count,budget,status,created_at")
+    .select(LEAD_COLUMNS)
     .eq("id", leadId)
     .eq("tenant_id", tenantId)
     .maybeSingle<RawLeadRow>();
@@ -80,5 +84,18 @@ export async function updateLeadStatus(tenantId: string, leadId: string, status:
 
   if (status === "booked" && lead.preferred_date) {
     await upsertAvailability(tenantId, lead.preferred_date, false, `Бронь: ${lead.name ?? "без имени"}`);
+  }
+}
+
+export async function updateLeadNotes(tenantId: string, leadId: string, notes: string): Promise<void> {
+  await fetchLeadForTenant(tenantId, leadId); // confirms tenant ownership before writing
+
+  const client = getServiceSupabaseClient();
+  const { error } = await client
+    .from("cortege_leads")
+    .update({ notes, updated_at: new Date().toISOString() })
+    .eq("id", leadId);
+  if (error) {
+    throw new Error(`Failed to update lead notes: ${error.message}`);
   }
 }

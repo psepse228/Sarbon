@@ -18,6 +18,9 @@ interface ChatThreadProps {
   onSend: (text: string) => void;
   sending: boolean;
   suggestions?: string[];
+  /** Shown centered in the log when there are no messages and no suggestion
+   * chips either -- without it that state is just a blank glass box. */
+  emptyHint?: string;
 }
 
 export function now(): string {
@@ -30,7 +33,7 @@ export function now(): string {
  * call; this component only renders. `extra` on a message lets a caller
  * attach additional content under a bubble without this component needing
  * to know what that content is. */
-export function ChatThread({ messages, input, onInputChange, onSend, sending, suggestions = [] }: ChatThreadProps) {
+export function ChatThread({ messages, input, onInputChange, onSend, sending, suggestions = [], emptyHint }: ChatThreadProps) {
   return (
     <div className="chat-page">
       {messages.length === 0 && suggestions.length > 0 && (
@@ -40,6 +43,12 @@ export function ChatThread({ messages, input, onInputChange, onSend, sending, su
               {s}
             </button>
           ))}
+        </div>
+      )}
+
+      {messages.length === 0 && suggestions.length === 0 && emptyHint && (
+        <div className="chat-empty-hint">
+          <p>{emptyHint}</p>
         </div>
       )}
 

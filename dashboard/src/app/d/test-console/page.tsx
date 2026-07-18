@@ -115,12 +115,19 @@ function AssistantPane() {
 
   return (
     <div className="test-console-pane">
-      <div className="test-console-pane-head">
-        <h3>{t("testConsole.assistantHead")}</h3>
-        <p className="muted">{t("testConsole.assistantSubhead")}</p>
+      <div className="test-console-panel-head">
+        <div className="test-console-pane-head-row">
+          <div>
+            <h3>{t("testConsole.assistantHead")}</h3>
+            <p className="muted">{t("testConsole.assistantSubhead")}</p>
+          </div>
+          <span className="test-console-mode-badge" data-mode="live">
+            {t("testConsole.liveBadge")}
+          </span>
+        </div>
       </div>
       {error && <ErrorBanner message={error} />}
-      <div className="chat-frame">
+      <div className="chat-frame test-console-panel-body">
         <ChatThread messages={messages} input={input} onInputChange={setInput} onSend={send} sending={sending} suggestions={ASSISTANT_SUGGESTIONS} />
       </div>
     </div>
@@ -181,42 +188,56 @@ function TestPane() {
 
   return (
     <div className="test-console-pane">
-      <div className="test-console-pane-head">
-        <h3>{t("testConsole.testHead")}</h3>
-        <p className="muted">{t("testConsole.testSubhead")}</p>
-      </div>
+      <div className="test-console-panel-head">
+        <div className="test-console-pane-head-row">
+          <div>
+            <h3>{t("testConsole.testHead")}</h3>
+            <p className="muted">{t("testConsole.testSubhead")}</p>
+          </div>
+          <span className="test-console-mode-badge" data-mode="sandbox">
+            {t("testConsole.sandboxBadge")}
+          </span>
+        </div>
 
-      <div className="preset-row">
-        {PRESETS.map((preset, index) => (
-          <button
-            key={preset.nameKey}
-            type="button"
-            className="preset-chip"
-            data-active={activePreset === index}
-            onClick={() => selectPreset(index)}
-          >
-            {t(preset.nameKey)}
-          </button>
-        ))}
-      </div>
+        <div className="preset-row">
+          {PRESETS.map((preset, index) => (
+            <button
+              key={preset.nameKey}
+              type="button"
+              className="preset-chip"
+              data-active={activePreset === index}
+              onClick={() => selectPreset(index)}
+            >
+              {t(preset.nameKey)}
+            </button>
+          ))}
+        </div>
 
-      <div className="preset-editor">
-        {SKILLS.map((skill) => (
-          <label key={skill.key} className="toggle-switch-row">
-            <span>{t(skill.labelKey)}</span>
-            <label className="toggle-switch">
-              <input type="checkbox" checked={!disabledSkills.includes(skill.key)} onChange={() => toggleSkill(skill.key)} />
-              <span className="toggle-switch-track" />
-              <span className="toggle-switch-knob" />
+        <div className="preset-editor">
+          {SKILLS.map((skill) => (
+            <label key={skill.key} className="toggle-switch-row">
+              <span>{t(skill.labelKey)}</span>
+              <label className="toggle-switch">
+                <input type="checkbox" checked={!disabledSkills.includes(skill.key)} onChange={() => toggleSkill(skill.key)} />
+                <span className="toggle-switch-track" />
+                <span className="toggle-switch-knob" />
+              </label>
             </label>
-          </label>
-        ))}
+          ))}
+        </div>
       </div>
 
       {error && <ErrorBanner message={error} />}
 
-      <div className="chat-frame">
-        <ChatThread messages={messages} input={input} onInputChange={setInput} onSend={send} sending={sending} />
+      <div className="chat-frame test-console-panel-body">
+        <ChatThread
+          messages={messages}
+          input={input}
+          onInputChange={setInput}
+          onSend={send}
+          sending={sending}
+          emptyHint={t("testConsole.testEmptyHint")}
+        />
       </div>
     </div>
   );

@@ -275,3 +275,26 @@ export function CloseIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function DragHandleIcon({ className }: IconProps) {
+  return (
+    <svg {...base} width={14} height={14} viewBox="0 0 22 22" className={className} fill="currentColor" stroke="none">
+      <circle cx="8" cy="6" r="1.4" />
+      <circle cx="14" cy="6" r="1.4" />
+      <circle cx="8" cy="11" r="1.4" />
+      <circle cx="14" cy="11" r="1.4" />
+      <circle cx="8" cy="16" r="1.4" />
+      <circle cx="14" cy="16" r="1.4" />
+    </svg>
+  );
+}
+
+export function NoteIcon({ className }: IconProps) {
+  return (
+    <svg {...base} width={17} height={17} viewBox="0 0 22 22" className={className}>
+      <path d="M5.5 4h9l3.2 3.2V18h-12.2V4Z" />
+      <path d="M14.5 4v3.5H18" />
+      <path d="M7.8 11.5h6.4M7.8 14.5h6.4" />
+    </svg>
+  );
+}

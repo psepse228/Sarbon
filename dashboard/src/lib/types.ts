@@ -89,6 +89,7 @@ export interface Lead {
   guestCount: number | null;
   budget: string | null;
   status: "new" | "contacted" | "booked" | "lost";
+  notes: string | null;
   createdAt: string;
 }
 

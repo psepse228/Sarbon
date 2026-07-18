@@ -25,6 +25,14 @@ function relativeTime(iso: string, t: (key: string) => string): string {
   return t("conversations.timeDays").replace("{n}", String(diffDay));
 }
 
+function statusLabelsFor(t: (key: string) => string): Record<string, string> {
+  return {
+    active: t("conversations.statusActive"),
+    escalated: t("conversations.statusEscalated"),
+    closed: t("conversations.statusClosed"),
+  };
+}
+
 function ConversationRow({
   conversation,
   active,
@@ -35,15 +43,13 @@ function ConversationRow({
   onSelect: () => void;
 }) {
   const t = useT();
-  const statusLabels: Record<string, string> = {
-    active: t("conversations.statusActive"),
-    escalated: t("conversations.statusEscalated"),
-    closed: t("conversations.statusClosed"),
-  };
+  const statusLabels = statusLabelsFor(t);
   const timestamp = conversation.lastMessageAt ?? conversation.createdAt;
   return (
     <button type="button" className="inbox-row" data-active={active} onClick={onSelect}>
-      <span className="inbox-row-avatar">{initialFor(conversation.clientId)}</span>
+      <span className="inbox-row-avatar" data-status={conversation.status}>
+        {initialFor(conversation.clientId)}
+      </span>
       <span className="inbox-row-body">
         <span className="inbox-row-name">{t("conversations.client")} {conversation.clientId}</span>
         <span className="inbox-row-preview">{statusLabels[conversation.status] ?? conversation.status}</span>
@@ -71,6 +77,7 @@ export default function DesktopConversationsPage() {
 
   const { messages, loading: messagesLoading, error: messagesError } = useConversationMessages(selectedId ?? "");
   const selected = items.find((item) => item.id === selectedId) ?? null;
+  const statusLabels = statusLabelsFor(t);
 
   const roleLabels: Record<string, string> = {
     client: t("conversations.roleClient"),
@@ -104,8 +111,13 @@ export default function DesktopConversationsPage() {
             {selected && (
               <>
                 <div className="inbox-thread-header">
-                  <span className="inbox-row-avatar">{initialFor(selected.clientId)}</span>
+                  <span className="inbox-row-avatar" data-status={selected.status}>
+                    {initialFor(selected.clientId)}
+                  </span>
                   <strong>{t("conversations.client")} {selected.clientId}</strong>
+                  <span className="inbox-thread-status-badge" data-status={selected.status}>
+                    {statusLabels[selected.status] ?? selected.status}
+                  </span>
                 </div>
                 <div className="inbox-thread-messages">
                   {messagesError && <ErrorBanner message={messagesError} />}

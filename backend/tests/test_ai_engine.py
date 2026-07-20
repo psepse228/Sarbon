@@ -587,3 +587,12 @@ async def test_generate_reply_ignores_override_when_none(monkeypatch):
     await engine.generate_reply("tenant-1", "conv-1", [{"role": "user", "content": "Привет"}])
 
     assert real_disabled_skills_called == ["tenant-1"]
+
+
+def test_prompt_requires_flag_knowledge_gap_before_telling_client_it_will_check():
+    # Regression guard: a live eval caught the model saying "I'll check with
+    # the administrator" for an unlisted package's price without actually
+    # calling flag_knowledge_gap -- the promise was hollow, the admin would
+    # never learn about the question. The prompt must forbid that gap.
+    assert "ты ОБЯЗАН вызвать" in engine.SYSTEM_PROMPT_BASE
+    assert "ничем не подкреплено" in engine.SYSTEM_PROMPT_BASE

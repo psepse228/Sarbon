@@ -77,7 +77,8 @@ export async function updateLeadStatus(tenantId: string, leadId: string, status:
   const { error } = await client
     .from("cortege_leads")
     .update({ status, updated_at: new Date().toISOString() })
-    .eq("id", leadId);
+    .eq("id", leadId)
+    .eq("tenant_id", tenantId);
   if (error) {
     throw new Error(`Failed to update lead: ${error.message}`);
   }
@@ -94,7 +95,8 @@ export async function updateLeadNotes(tenantId: string, leadId: string, notes: s
   const { error } = await client
     .from("cortege_leads")
     .update({ notes, updated_at: new Date().toISOString() })
-    .eq("id", leadId);
+    .eq("id", leadId)
+    .eq("tenant_id", tenantId);
   if (error) {
     throw new Error(`Failed to update lead notes: ${error.message}`);
   }

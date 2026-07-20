@@ -33,11 +33,14 @@ async function devBypassResponse(request: Request, devBypassEmail: string): Prom
 }
 
 /** Kicks off the Google OAuth Authorization Code flow. Local dev only:
- * DEV_BYPASS_EMAIL skips the entire Google round-trip — never set this in a
- * deployed environment. */
+ * DEV_BYPASS_EMAIL skips the entire Google round-trip. Gated on ENVIRONMENT
+ * !== "production" (matching Tender Agent's app/routers/auth_google.py
+ * pattern) as a second, independent check -- relying on "just don't set this
+ * var in production" alone means one misplaced env var during onboarding
+ * silently becomes a full auth bypass for whichever tenant it maps to. */
 export async function GET(request: Request) {
   const devBypassEmail = process.env.DEV_BYPASS_EMAIL;
-  if (devBypassEmail) {
+  if (devBypassEmail && process.env.ENVIRONMENT !== "production") {
     return devBypassResponse(request, devBypassEmail);
   }
 

@@ -8,6 +8,7 @@ from app.ai.engine import generate_reply
 from app.config import get_settings
 from app.conversations import get_or_create_conversation, get_recent_messages, save_message
 from app.notifications import notify_admin
+from app.rate_limit import RateLimitExceeded, enforce_chat_rate_limit
 from app.tenant import get_tenant_id
 
 logger = logging.getLogger(__name__)
@@ -16,6 +17,7 @@ router = Router()
 
 _DB_ROLE_TO_OPENAI_ROLE = {"client": "user", "bot": "assistant", "human": "assistant"}
 _FALLBACK_REPLY = "Извините, у нас технический сбой. Администратор уже уведомлён и скоро вернётся с ответом."
+_RATE_LIMIT_REPLY = "Пожалуйста, подождите немного перед следующим сообщением."
 
 
 @router.message(Command("whoami"))
@@ -31,6 +33,13 @@ async def handle_message(message: Message) -> None:
 
     conversation_id = get_or_create_conversation(tenant_id, client_id)
     save_message(conversation_id, "client", message.text)
+
+    try:
+        enforce_chat_rate_limit(tenant_id)
+    except RateLimitExceeded:
+        logger.warning("Rate limit hit for tenant %s (conversation %s)", tenant_id, conversation_id)
+        await message.answer(_RATE_LIMIT_REPLY)
+        return
 
     history = [
         {"role": _DB_ROLE_TO_OPENAI_ROLE[row["role"]], "content": row["content"]}

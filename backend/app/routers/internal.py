@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from app.ai.engine import generate_reply
 from app.calendar_sync import get_service_account_email, sync_calendar
 from app.config import get_settings
+from app.db import get_supabase_client
 from app.notifications import get_notifier_bot
 
 logger = logging.getLogger(__name__)
@@ -121,11 +122,23 @@ async def calendar_service_account_email(
 
 class SyncCalendarRequest(BaseModel):
     tenant_id: str
-    calendar_id: str
 
 
 class SyncCalendarResponse(BaseModel):
     synced_count: int
+
+
+def _get_tenant_calendar_id(tenant_id: str) -> str | None:
+    client = get_supabase_client()
+    response = (
+        client.table("company_profile")
+        .select("google_calendar_id")
+        .eq("tenant_id", tenant_id)
+        .limit(1)
+        .execute()
+    )
+    rows = response.data
+    return rows[0]["google_calendar_id"] if rows else None
 
 
 @router.post("/sync-calendar", response_model=SyncCalendarResponse)
@@ -134,12 +147,22 @@ async def sync_calendar_endpoint(
     x_internal_secret: str = Header(..., alias="X-Internal-Secret"),
 ) -> SyncCalendarResponse:
     """Manual, owner-triggered sync — no automatic/scheduled runs (no job
-    scheduler exists in this repo). See dashboard/src/lib/calendar.ts."""
+    scheduler exists in this repo). See dashboard/src/lib/calendar.ts.
+
+    Deliberately does not accept a calendar_id from the caller -- it was
+    previously taken from the request body and forwarded straight to Google,
+    which let any authenticated tenant sync (and read back) any other
+    tenant's real calendar just by naming it. The calendar to sync is always
+    this tenant's own saved company_profile.google_calendar_id."""
     settings = get_settings()
     if not settings.internal_api_secret or not hmac.compare_digest(
         x_internal_secret, settings.internal_api_secret
     ):
         raise HTTPException(status_code=401, detail="Invalid internal secret")
 
-    synced_count = await sync_calendar(body.tenant_id, body.calendar_id)
+    calendar_id = _get_tenant_calendar_id(body.tenant_id)
+    if not calendar_id:
+        raise HTTPException(status_code=400, detail="No calendar connected for this tenant")
+
+    synced_count = await sync_calendar(body.tenant_id, calendar_id)
     return SyncCalendarResponse(synced_count=synced_count)

@@ -83,7 +83,6 @@ export default function CalendarPage() {
     try {
       const res = await tmaFetch("/api/calendar/sync", {
         method: "POST",
-        body: JSON.stringify({ calendarId: profile.googleCalendarId }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));

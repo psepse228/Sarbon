@@ -23,10 +23,13 @@ export async function fetchServiceAccountEmail(): Promise<string> {
   return email;
 }
 
-export async function syncGoogleCalendar(tenantId: string, calendarId: string): Promise<number> {
+export async function syncGoogleCalendar(tenantId: string): Promise<number> {
+  // No calendarId parameter -- the backend looks up this tenant's own
+  // company_profile.google_calendar_id itself rather than trusting a
+  // client-supplied value (see the IDOR note in api/calendar/sync/route.ts).
   const { synced_count: syncedCount } = await callInternal<{ synced_count: number }>("/internal/sync-calendar", {
     method: "POST",
-    body: JSON.stringify({ tenant_id: tenantId, calendar_id: calendarId }),
+    body: JSON.stringify({ tenant_id: tenantId }),
   });
   return syncedCount;
 }

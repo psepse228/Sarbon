@@ -30,7 +30,7 @@ def get_service_account_email() -> str:
 def _build_calendar_service():
     info = _load_service_account_info()
     credentials = service_account.Credentials.from_service_account_info(info, scopes=SCOPES)
-    return build("calendar", "v3", credentials=credentials, cacheDiscovery=False)
+    return build("calendar", "v3", credentials=credentials, cache_discovery=False)
 
 
 async def upsert_availability(tenant_id: str, date_str: str, is_available: bool, event_details: str) -> None:

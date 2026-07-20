@@ -7,7 +7,7 @@ import {
   selectRecentActivity,
   selectUpcomingAvailability,
 } from "@/lib/stats";
-import type { AvailabilityEntry, ConversationSummary, Escalation } from "@/lib/types";
+import type { AvailabilityEntry, ConversationSummary, Escalation, Lead, Review } from "@/lib/types";
 
 function conversation(id: string, lastMessageAt: string | null = null): ConversationSummary {
   return { id, clientId: "client-1", channel: "telegram", status: "active", lastMessageAt, createdAt: "2026-07-01T00:00:00Z" };
@@ -19,6 +19,25 @@ function escalation(conversationId: string, notifiedOwner: boolean): Escalation 
 
 function availability(date: string, isAvailable: boolean): AvailabilityEntry {
   return { id: `av-${date}`, date, isAvailable, eventDetails: "" };
+}
+
+function lead(id: string, status: Lead["status"]): Lead {
+  return {
+    id,
+    conversationId: `conv-${id}`,
+    name: "Тест",
+    phone: null,
+    preferredDate: null,
+    guestCount: null,
+    budget: null,
+    status,
+    notes: null,
+    createdAt: "2026-07-01T00:00:00Z",
+  };
+}
+
+function review(id: string, rating: number): Review {
+  return { id, conversationId: `conv-${id}`, rating, comment: null, createdAt: "2026-07-01T00:00:00Z" };
 }
 
 describe("computeDashboardStats", () => {
@@ -49,6 +68,31 @@ describe("computeDashboardStats", () => {
 
     expect(stats.totalConversations).toBe(0);
     expect(stats.conversationsWithoutEscalation).toBe(0);
+  });
+
+  it("counts leads captured and booked separately", () => {
+    const leads = [lead("l1", "new"), lead("l2", "booked"), lead("l3", "booked"), lead("l4", "lost")];
+
+    const stats = computeDashboardStats([], [], [], leads, []);
+
+    expect(stats.leadsCaptured).toBe(4);
+    expect(stats.leadsBooked).toBe(2);
+  });
+
+  it("computes the average rating rounded to one decimal", () => {
+    const reviews = [review("r1", 5), review("r2", 4), review("r3", 5)];
+
+    const stats = computeDashboardStats([], [], [], [], reviews);
+
+    expect(stats.reviewsCaptured).toBe(3);
+    expect(stats.averageRating).toBe(4.7);
+  });
+
+  it("reports a null average rating when there are no reviews yet", () => {
+    const stats = computeDashboardStats([], [], [], [], []);
+
+    expect(stats.reviewsCaptured).toBe(0);
+    expect(stats.averageRating).toBeNull();
   });
 });
 

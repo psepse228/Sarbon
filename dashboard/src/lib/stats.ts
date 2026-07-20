@@ -1,4 +1,4 @@
-import type { AvailabilityEntry, ConversationSummary, Escalation } from "./types";
+import type { AvailabilityEntry, ConversationSummary, Escalation, Lead, Review } from "./types";
 
 export interface DashboardStats {
   totalConversations: number;
@@ -6,14 +6,22 @@ export interface DashboardStats {
   openEscalations: number;
   resolvedEscalations: number;
   upcomingAvailable: number;
+  leadsCaptured: number;
+  leadsBooked: number;
+  reviewsCaptured: number;
+  averageRating: number | null;
 }
 
 /** Shared by the mobile Analytics page and the desktop Overview page so the
- * two never quietly compute these numbers differently. */
+ * two never quietly compute these numbers differently. leads/reviews default
+ * to an empty array so existing callers that haven't been updated yet don't
+ * have to pass them. */
 export function computeDashboardStats(
   conversations: ConversationSummary[],
   escalations: Escalation[],
   availability: AvailabilityEntry[],
+  leads: Lead[] = [],
+  reviews: Review[] = [],
 ): DashboardStats {
   const today = new Date().toISOString().slice(0, 10);
   const escalatedConversationIds = new Set(escalations.map((e) => e.conversationId));
@@ -25,6 +33,11 @@ export function computeDashboardStats(
     openEscalations: escalations.filter((e) => !e.notifiedOwner).length,
     resolvedEscalations: escalations.filter((e) => e.notifiedOwner).length,
     upcomingAvailable: availability.filter((a) => a.isAvailable && a.date >= today).length,
+    leadsCaptured: leads.length,
+    leadsBooked: leads.filter((l) => l.status === "booked").length,
+    reviewsCaptured: reviews.length,
+    averageRating:
+      reviews.length > 0 ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length) * 10) / 10 : null,
   };
 }
 

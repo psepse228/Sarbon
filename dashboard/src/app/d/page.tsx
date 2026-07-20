@@ -17,7 +17,7 @@ import {
   type RecentActivityItem,
 } from "@/lib/stats";
 import { tmaFetch } from "@/lib/telegram/client";
-import type { AvailabilityEntry, ConversationSummary, Escalation } from "@/lib/types";
+import type { AvailabilityEntry, ConversationSummary, Escalation, Lead, Review } from "@/lib/types";
 
 const WEEKDAY_FORMAT = new Intl.DateTimeFormat("ru-RU", { weekday: "short" });
 const TIME_FORMAT = new Intl.DateTimeFormat("ru-RU", { hour: "2-digit", minute: "2-digit" });
@@ -34,20 +34,24 @@ export default function DesktopOverviewPage() {
   useEffect(() => {
     (async () => {
       try {
-        const [escalationsRes, conversationsRes, availabilityRes] = await Promise.all([
+        const [escalationsRes, conversationsRes, availabilityRes, leadsRes, reviewsRes] = await Promise.all([
           tmaFetch("/api/escalations"),
           tmaFetch("/api/conversations"),
           tmaFetch("/api/availability"),
+          tmaFetch("/api/leads"),
+          tmaFetch("/api/reviews"),
         ]);
-        if (!escalationsRes.ok || !conversationsRes.ok || !availabilityRes.ok) {
+        if (!escalationsRes.ok || !conversationsRes.ok || !availabilityRes.ok || !leadsRes.ok || !reviewsRes.ok) {
           throw new Error(t("overview.loadError"));
         }
 
         const escalations: Escalation[] = await escalationsRes.json();
         const conversations: ConversationSummary[] = await conversationsRes.json();
         const availability: AvailabilityEntry[] = await availabilityRes.json();
+        const leads: Lead[] = await leadsRes.json();
+        const reviews: Review[] = await reviewsRes.json();
 
-        setStats(computeDashboardStats(conversations, escalations, availability));
+        setStats(computeDashboardStats(conversations, escalations, availability, leads, reviews));
         setActivity(selectRecentActivity(conversations, escalations, 5));
         setUpcoming(selectUpcomingAvailability(availability, 7));
         setConversationsTrend(selectDailyTrend(conversations, 7, (c) => c.createdAt));
@@ -94,6 +98,20 @@ export default function DesktopOverviewPage() {
           <div className="kpi-tile">
             <div className="kpi-value">{stats.upcomingAvailable}</div>
             <div className="kpi-label">{t("overview.freeDates")}</div>
+          </div>
+          <div className="kpi-tile">
+            <div className="kpi-value">{stats.leadsCaptured}</div>
+            <div className="kpi-label">{t("overview.leadsCaptured")}</div>
+            {stats.leadsCaptured > 0 && (
+              <div className="kpi-sub">{stats.leadsBooked} {t("overview.leadsBooked")}</div>
+            )}
+          </div>
+          <div className="kpi-tile">
+            <div className="kpi-value">{stats.averageRating ?? "—"}</div>
+            <div className="kpi-label">{t("overview.averageRating")}</div>
+            {stats.reviewsCaptured > 0 && (
+              <div className="kpi-sub">{stats.reviewsCaptured} {t("overview.reviewsCaptured")}</div>
+            )}
           </div>
         </div>
       )}

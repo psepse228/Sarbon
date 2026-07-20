@@ -825,6 +825,13 @@ textarea.policies {
   margin-top: 0.15rem;
 }
 
+.kpi-sub {
+  font-size: 0.68rem;
+  color: var(--color-text-soft);
+  opacity: 0.75;
+  margin-top: 0.3rem;
+}
+
 /* --- Desktop shell (Phase 1 desktop dashboard) --- */
 
 .desktop-shell {

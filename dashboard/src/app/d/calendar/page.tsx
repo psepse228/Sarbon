@@ -113,6 +113,17 @@ export default function CalendarPage() {
             {t("calendar.shareAccess")} <strong>{serviceAccountEmail}</strong>
           </p>
         )}
+        {serviceAccountEmail && (
+          <a
+            href="https://calendar.google.com/calendar/u/0/r/settings/calendar/primary?card=sharing"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-secondary"
+            style={{ display: "inline-block", marginBottom: "0.9rem" }}
+          >
+            {t("calendar.openSharingSettings")}
+          </a>
+        )}
         <div className="field">
           <label>{t("calendar.calendarIdLabel")}</label>
           <input value={calendarIdInput} onChange={(e) => setCalendarIdInput(e.target.value)} placeholder="you@gmail.com" />

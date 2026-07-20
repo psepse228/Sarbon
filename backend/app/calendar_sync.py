@@ -60,12 +60,18 @@ async def upsert_availability(tenant_id: str, date_str: str, is_available: bool,
 
 async def sync_calendar(tenant_id: str, calendar_id: str) -> int:
     """Reads events on `calendar_id` for the next SYNC_WINDOW_DAYS days and
-    marks each day that has at least one event as unavailable in
-    availability_cache, with event_details set to that day's event
-    summary/summaries joined by ", ". Only ever asserts busy days from real
-    calendar events — a day with no event is left untouched, never marked
-    available from the absence of one. Returns the count of distinct days
-    synced."""
+    makes the real calendar authoritative over every day in that window --
+    days with at least one event are marked unavailable (event_details set
+    to that day's event summary/summaries joined by ", "), and every other
+    day in the window is explicitly marked available, clearing out any
+    stale/placeholder row left over from testing or a previous sync where
+    that day used to have an event but no longer does. Returns the count of
+    days marked unavailable.
+
+    (Earlier version only ever asserted busy days and left everything else
+    untouched -- meaning fake test data seeded directly into the database,
+    or a cancelled event from a prior sync, could never be corrected by a
+    real sync and would linger indefinitely.)"""
     service = _build_calendar_service()
 
     today = date.today()
@@ -93,7 +99,11 @@ async def sync_calendar(tenant_id: str, calendar_id: str) -> int:
         summary = event.get("summary") or "Занято"
         events_by_day[day_str].append(summary)
 
-    for day_str, summaries in events_by_day.items():
-        await upsert_availability(tenant_id, day_str, False, ", ".join(summaries))
+    for offset in range(SYNC_WINDOW_DAYS):
+        day_str = (today + timedelta(days=offset)).isoformat()
+        if day_str in events_by_day:
+            await upsert_availability(tenant_id, day_str, False, ", ".join(events_by_day[day_str]))
+        else:
+            await upsert_availability(tenant_id, day_str, True, "")
 
     return len(events_by_day)

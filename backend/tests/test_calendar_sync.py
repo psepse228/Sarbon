@@ -1,4 +1,5 @@
 import json
+from datetime import date, timedelta
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
@@ -99,10 +100,13 @@ async def test_sync_calendar_marks_days_with_events_as_unavailable(monkeypatch):
         lambda: SimpleNamespace(google_service_account_json=SERVICE_ACCOUNT_JSON),
     )
 
+    today = date.today()
+    day_with_event_1 = (today + timedelta(days=2)).isoformat()
+    day_with_event_2 = (today + timedelta(days=5)).isoformat()
     fake_events = {
         "items": [
-            {"summary": "Свадьба Ивановых", "start": {"date": "2026-08-15"}},
-            {"summary": "Юбилей", "start": {"date": "2026-08-20"}},
+            {"summary": "Свадьба Ивановых", "start": {"date": day_with_event_1}},
+            {"summary": "Юбилей", "start": {"date": day_with_event_2}},
         ]
     }
     fake_events_resource = MagicMock()
@@ -114,18 +118,26 @@ async def test_sync_calendar_marks_days_with_events_as_unavailable(monkeypatch):
 
     upserted = []
 
-    async def fake_upsert(tenant_id, date, is_available, event_details):
-        upserted.append((tenant_id, date, is_available, event_details))
+    async def fake_upsert(tenant_id, date_str, is_available, event_details):
+        upserted.append((tenant_id, date_str, is_available, event_details))
 
     monkeypatch.setattr(calendar_sync, "upsert_availability", fake_upsert)
 
     synced_count = await calendar_sync.sync_calendar("tenant-1", "owner@example.com")
 
+    # Return value is still just the count of busy days...
     assert synced_count == 2
-    assert upserted == [
-        ("tenant-1", "2026-08-15", False, "Свадьба Ивановых"),
-        ("tenant-1", "2026-08-20", False, "Юбилей"),
-    ]
+    # ...but every day in the sync window gets an authoritative upsert, not
+    # just the busy ones -- this is what clears stale/placeholder rows for
+    # days that no longer have a real event.
+    assert len(upserted) == calendar_sync.SYNC_WINDOW_DAYS
+    by_date = {row[1]: row for row in upserted}
+    assert by_date[day_with_event_1] == ("tenant-1", day_with_event_1, False, "Свадьба Ивановых")
+    assert by_date[day_with_event_2] == ("tenant-1", day_with_event_2, False, "Юбилей")
+    # A day with no event must be explicitly reset to available, not skipped.
+    untouched_day = today.isoformat()
+    assert by_date[untouched_day] == ("tenant-1", untouched_day, True, "")
+
     fake_events_resource.list.assert_called_once()
     call_kwargs = fake_events_resource.list.call_args.kwargs
     assert call_kwargs["calendarId"] == "owner@example.com"
@@ -138,10 +150,11 @@ async def test_sync_calendar_combines_multiple_events_on_the_same_day(monkeypatc
         lambda: SimpleNamespace(google_service_account_json=SERVICE_ACCOUNT_JSON),
     )
 
+    busy_day = (date.today() + timedelta(days=10)).isoformat()
     fake_events = {
         "items": [
-            {"summary": "Утренняя репетиция", "start": {"date": "2026-08-15"}},
-            {"summary": "Свадьба Ивановых", "start": {"date": "2026-08-15"}},
+            {"summary": "Утренняя репетиция", "start": {"date": busy_day}},
+            {"summary": "Свадьба Ивановых", "start": {"date": busy_day}},
         ]
     }
     fake_events_resource = MagicMock()
@@ -152,12 +165,14 @@ async def test_sync_calendar_combines_multiple_events_on_the_same_day(monkeypatc
 
     upserted = []
 
-    async def fake_upsert(tenant_id, date, is_available, event_details):
-        upserted.append((tenant_id, date, is_available, event_details))
+    async def fake_upsert(tenant_id, date_str, is_available, event_details):
+        upserted.append((tenant_id, date_str, is_available, event_details))
 
     monkeypatch.setattr(calendar_sync, "upsert_availability", fake_upsert)
 
     synced_count = await calendar_sync.sync_calendar("tenant-1", "owner@example.com")
 
     assert synced_count == 1
-    assert upserted == [("tenant-1", "2026-08-15", False, "Утренняя репетиция, Свадьба Ивановых")]
+    assert len(upserted) == calendar_sync.SYNC_WINDOW_DAYS
+    by_date = {row[1]: row for row in upserted}
+    assert by_date[busy_day] == ("tenant-1", busy_day, False, "Утренняя репетиция, Свадьба Ивановых")

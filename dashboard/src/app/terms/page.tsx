@@ -76,7 +76,7 @@ export default function TermsPage() {
 
       <h2 style={h2}>8. Contact</h2>
       <p style={p}>
-        Solura Agency — <a href="mailto:info@solura.agency">info@solura.agency</a>
+        Solura Agency — <a href="mailto:info@solura-agency.com">info@solura-agency.com</a>
       </p>
     </div>
   );

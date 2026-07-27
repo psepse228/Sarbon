@@ -97,13 +97,13 @@ export default function PrivacyPage() {
       <h2 style={h2}>6. Your rights</h2>
       <p style={p}>
         You may request access to, correction of, or deletion of your data by contacting us at{" "}
-        <a href="mailto:info@solura.agency">info@solura.agency</a>. We will respond within a
+        <a href="mailto:info@solura-agency.com">info@solura-agency.com</a>. We will respond within a
         reasonable time and delete data we are not otherwise required to retain.
       </p>
 
       <h2 style={h2}>7. Contact</h2>
       <p style={p}>
-        Solura Agency — <a href="mailto:info@solura.agency">info@solura.agency</a>
+        Solura Agency — <a href="mailto:info@solura-agency.com">info@solura-agency.com</a>
       </p>
     </div>
   );

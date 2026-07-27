@@ -19,7 +19,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<Status>("loading");
 
   useEffect(() => {
-    if (pathname === "/login") return;
+    if (pathname === "/login" || pathname === "/privacy" || pathname === "/terms") return;
     let cancelled = false;
     tmaFetch("/api/auth/me")
       .then(async (res) => {
@@ -39,7 +39,10 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     };
   }, [pathname]);
 
-  if (pathname === "/login") return <>{children}</>;
+  // Legal pages must be publicly readable (Meta App Review needs to fetch
+  // them without a Telegram session), so they're exempt the same way /login is.
+  const isPublicPage = pathname === "/login" || pathname === "/privacy" || pathname === "/terms";
+  if (isPublicPage) return <>{children}</>;
 
   if (status === "loading") return null;
 

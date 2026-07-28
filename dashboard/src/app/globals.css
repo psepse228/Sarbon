@@ -839,22 +839,18 @@ textarea.policies {
   min-height: 100vh;
 }
 
-/* --- Space indicator (replaces the old docked Sidebar) ---
-   A floating bottom icon-strip, macOS-Spaces-style: top-level nav is real
-   routes (Link, not JS state), so this is just "where am I" + a click
-   target to jump, not a sliding-highlight tracker like a single-page app
-   would use -- active state is a plain background/color tint per icon. */
-.space-indicator {
-  position: fixed;
-  left: 50%;
-  bottom: 1.1rem;
-  transform: translateX(-50%);
-  z-index: 20;
+.desktop-sidebar {
+  width: 248px;
+  flex-shrink: 0;
   display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.4rem;
-  border-radius: 18px;
+  flex-direction: column;
+  margin: 1.1rem 0 1.1rem 1.1rem;
+  padding: 1.5rem 1rem;
+  position: sticky;
+  top: 1.1rem;
+  z-index: 1;
+  height: calc(100vh - 2.2rem);
+  border-radius: 22px;
   border: 1px solid var(--glass-border);
   background: var(--glass);
   backdrop-filter: blur(40px) saturate(165%);
@@ -862,70 +858,62 @@ textarea.policies {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.14),
     0 24px 60px -32px rgba(0, 0, 0, 0.75);
+  overflow: hidden;
 }
 
-.space-indicator-item {
+.desktop-sidebar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-sheen), transparent);
+  opacity: 0.5;
+}
+
+.desktop-sidebar-brand {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 0.4rem 0.6rem 1.4rem;
+}
+
+.desktop-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.desktop-sidebar-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  gap: 0.65rem;
+  padding: 0.65rem 0.7rem;
   border-radius: 12px;
   color: var(--color-text-soft);
+  font-size: 0.9rem;
+  font-weight: 600;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.space-indicator-item:hover {
-  background: rgba(255, 255, 255, 0.06);
+.desktop-sidebar-item:hover {
+  background: rgba(255, 255, 255, 0.05);
   color: var(--color-text);
 }
 
-.space-indicator-item[data-active="true"] {
+.desktop-sidebar-item[data-active="true"] {
   background: var(--color-accent-tint);
   color: var(--color-accent);
-}
-
-.space-indicator-divider {
-  width: 1px;
-  height: 1.4rem;
-  background: var(--color-hairline);
-  margin: 0 0.15rem;
-  flex-shrink: 0;
 }
 
 .desktop-content {
   flex: 1;
   min-width: 0;
-  padding: 1.2rem 2.4rem 6rem;
+  padding: 1.2rem 2.4rem 2rem;
   max-width: 1160px;
   position: relative;
   z-index: 1;
-}
-
-/* Route-change entrance -- see HudPageTransition.tsx. Real routes (unlike
-   Argus's single sliding container), so this replays a short directional
-   fade+slide on the freshly-mounted page instead of transforming a shared
-   track between two mounted panels. */
-.hud-page-transition {
-  animation: hud-page-in-forward 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-
-.hud-page-transition[data-direction="back"] {
-  animation-name: hud-page-in-back;
-}
-
-@keyframes hud-page-in-forward {
-  from { opacity: 0; transform: translateX(14px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes hud-page-in-back {
-  from { opacity: 0; transform: translateX(-14px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hud-page-transition { animation: none; }
 }
 
 .desktop-kpi-row {
@@ -1825,6 +1813,54 @@ textarea.policies {
   min-width: 0;
   display: flex;
   flex-direction: column;
+}
+
+/* --- Sidebar collapsible group (dashboard polish pass) --- */
+
+.desktop-sidebar-group-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.65rem 0.7rem;
+  border: none;
+  background: transparent;
+  border-radius: 12px;
+  color: var(--color-text-soft);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.desktop-sidebar-group-toggle:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text);
+}
+
+.desktop-sidebar-group-chevron {
+  margin-left: auto;
+  display: flex;
+  transition: transform 0.15s ease;
+}
+
+.desktop-sidebar-group-chevron[data-expanded="true"] {
+  transform: rotate(180deg);
+}
+
+.desktop-sidebar-group-children {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding-left: 1.1rem;
+  margin: 0.1rem 0 0.3rem;
+  border-left: 1px solid var(--color-hairline-soft);
+}
+
+.desktop-sidebar-group-children .desktop-sidebar-item {
+  font-size: 0.86rem;
+  padding: 0.55rem 0.7rem;
 }
 
 /* --- Framed chat surface for desktop Test Console / Assistant

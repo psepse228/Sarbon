@@ -3,12 +3,23 @@
 import { useEffect, useState } from "react";
 
 import { ErrorBanner } from "@/components/StatusBanner";
-import { useT } from "@/lib/i18n/LocaleProvider";
+import { useLocale, useT } from "@/lib/i18n/LocaleProvider";
+import { pluralize } from "@/lib/i18n/pluralize";
 import { tmaFetch } from "@/lib/telegram/client";
 import type { Broadcast, BroadcastAudience } from "@/lib/types";
 
+// "получателей" was always used as a flat suffix regardless of count --
+// grammatically wrong for most numbers in Russian (e.g. "3 получателей",
+// "91 получателей" should read "получателя"/"получатель"). RECIPIENT_FORMS
+// covers both locales; pluralize() picks the right one per count.
+const RECIPIENT_FORMS: Record<"ru" | "en", [string, string, string]> = {
+  ru: ["получатель", "получателя", "получателей"],
+  en: ["recipient", "recipients", "recipients"],
+};
+
 export default function BroadcastsPage() {
   const t = useT();
+  const { locale } = useLocale();
   const AUDIENCE_LABELS: Record<BroadcastAudience, string> = {
     all: t("broadcasts.audienceAll"),
     leads_new: t("broadcasts.audienceLeadsNew"),
@@ -106,7 +117,7 @@ export default function BroadcastsPage() {
         <div key={b.id} className="card">
           <p>{b.message}</p>
           <p className="muted">
-            {AUDIENCE_LABELS[b.audience]} · {b.recipientCount} {t("broadcasts.recipients")} ·{" "}
+            {AUDIENCE_LABELS[b.audience]} · {b.recipientCount} {pluralize(b.recipientCount, locale, RECIPIENT_FORMS[locale])} ·{" "}
             {new Date(b.createdAt).toLocaleString("ru-RU")}
           </p>
         </div>

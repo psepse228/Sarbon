@@ -5,9 +5,17 @@ import { useEffect, useState } from "react";
 import { DragHandleIcon, NoteIcon } from "@/components/icons";
 import { LeadDetailModal } from "@/components/LeadDetailModal";
 import { ErrorBanner } from "@/components/StatusBanner";
-import { useT } from "@/lib/i18n/LocaleProvider";
+import { useLocale, useT } from "@/lib/i18n/LocaleProvider";
+import { pluralize } from "@/lib/i18n/pluralize";
 import { tmaFetch } from "@/lib/telegram/client";
 import type { Lead } from "@/lib/types";
+
+// Same "flat suffix regardless of count" bug as broadcasts.recipients had --
+// "20 гостей" reads fine but "1 гостей"/"2 гостей" don't.
+const GUEST_FORMS: Record<"ru" | "en", [string, string, string]> = {
+  ru: ["гость", "гостя", "гостей"],
+  en: ["guest", "guests", "guests"],
+};
 
 const COLUMNS: { status: Lead["status"]; labelKey: string; accent: string }[] = [
   { status: "new", labelKey: "leads.columnNew", accent: "info" },
@@ -33,6 +41,7 @@ function initialFor(name: string | null): string {
 
 export function LeadsList() {
   const t = useT();
+  const { locale } = useLocale();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -146,7 +155,8 @@ export function LeadsList() {
                     <div className="kanban-card-heading">
                       <div className="kanban-card-name">{lead.name ?? t("leads.noName")}</div>
                       <div className="kanban-card-meta">
-                        {lead.phone ?? "—"} · {lead.preferredDate ?? t("leads.noDate")} · {lead.guestCount ?? "—"} {t("leads.guests")}
+                        {lead.phone ?? "—"} · {lead.preferredDate ?? t("leads.noDate")} · {lead.guestCount ?? "—"}{" "}
+                        {lead.guestCount != null ? pluralize(lead.guestCount, locale, GUEST_FORMS[locale]) : t("leads.guests")}
                       </div>
                     </div>
                     <DragHandleIcon className="kanban-card-drag-handle" />

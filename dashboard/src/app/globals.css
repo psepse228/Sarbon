@@ -1354,9 +1354,12 @@ textarea.policies {
 .kanban-card-meta {
   font-size: 0.78rem;
   color: var(--color-text-soft);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  /* Was single-line nowrap+ellipsis, which meant phone/date/guest-count on
+     every card always got cut off ("+7 998 167-80-77 · 20...") since the
+     three together never fit one line at kanban-card width -- guest count
+     (arguably the most useful-at-a-glance field) was never visible at all.
+     Wrapping lets all three actually show. */
+  overflow-wrap: break-word;
 }
 
 .kanban-card-drag-handle {

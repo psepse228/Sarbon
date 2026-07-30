@@ -153,7 +153,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "broadcasts.sentTo": "Отправлено получателям: {count}",
     "broadcasts.history": "История рассылок",
     "broadcasts.noneYet": "Пока нет рассылок.",
-    "broadcasts.recipients": "получателей",
     "reviews.title": "Отзывы",
     "reviews.subtitle": "Оценки и отзывы, которые гости оставили добровольно в переписке с ботом.",
     "reviews.loading": "Загрузка…",

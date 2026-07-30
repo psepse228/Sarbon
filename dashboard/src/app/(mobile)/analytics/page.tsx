@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 import { ErrorBanner } from "@/components/StatusBanner";
 import { BellIcon, ChatIcon, ChevronRightIcon, QuestionIcon } from "@/components/icons";
+import { pluralize } from "@/lib/i18n/pluralize";
 import { computeDashboardStats, type DashboardStats } from "@/lib/stats";
 import { tmaFetch } from "@/lib/telegram/client";
 import type { AvailabilityEntry, ConversationSummary, Escalation } from "@/lib/types";
@@ -62,7 +63,9 @@ export default function AnalyticsPage() {
               <div className="meter-fill" style={{ width: `${resolutionRate ?? 0}%` }} />
             </div>
             <p className="meter-caption">
-              {stats.conversationsWithoutEscalation} из {stats.totalConversations} диалогов закрыты без эскалации на человека
+              {stats.conversationsWithoutEscalation} из {stats.totalConversations}{" "}
+              {pluralize(stats.totalConversations, "ru", ["диалог", "диалога", "диалогов"])}{" "}
+              {stats.conversationsWithoutEscalation === 1 ? "закрыт" : "закрыты"} без эскалации на человека
             </p>
           </div>
 

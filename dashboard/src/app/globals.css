@@ -1149,9 +1149,11 @@ textarea.policies {
 .activity-client {
   font-size: 0.9rem;
   font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  /* Same nowrap+ellipsis truncation as .kanban-card-name/.kanban-card-meta
+     had -- not yet visibly broken with today's short test-data names, but
+     real client names/usernames will be longer. Fixing preemptively since
+     the fix is identical and free. */
+  overflow-wrap: break-word;
 }
 
 .activity-channel {
@@ -1346,9 +1348,10 @@ textarea.policies {
 .kanban-card-name {
   font-weight: 600;
   margin-bottom: 0.25rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  /* Same nowrap+ellipsis truncation as .kanban-card-meta had -- two-name
+     wedding bookings ("Екатерина и Павел") are the common case for this
+     product and were clipping to "Екатерина и Па..." on every card. */
+  overflow-wrap: break-word;
 }
 
 .kanban-card-meta {

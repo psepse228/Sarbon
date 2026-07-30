@@ -46,8 +46,19 @@ export default function DesktopAssistantPage() {
 
   return (
     <div>
-      <h1>{t("assistant.pageTitle")}</h1>
-      <p className="muted">{t("assistant.pageSubtitle")}</p>
+      <div className="test-console-pane-head-row">
+        <div>
+          <h1>{t("assistant.pageTitle")}</h1>
+          <p className="muted">{t("assistant.pageSubtitle")}</p>
+        </div>
+        {/* Тест-консоль's identical "chat with your bot" panel carries this
+            same badge; this page drives the exact same live-bot-changing
+            action but previously had no visual cue that typing here affects
+            every current customer conversation, not just a preview. */}
+        <span className="test-console-mode-badge" data-mode="live">
+          {t("testConsole.liveBadge")}
+        </span>
+      </div>
 
       {error && <ErrorBanner message={error} />}
 

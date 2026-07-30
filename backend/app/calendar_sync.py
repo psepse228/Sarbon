@@ -3,6 +3,8 @@ from collections import defaultdict
 from datetime import date, timedelta
 from typing import Any
 
+import google_auth_httplib2
+import httplib2
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
@@ -11,6 +13,22 @@ from app.db import get_supabase_client
 
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 SYNC_WINDOW_DAYS = 90
+# Without this, a network hiccup (or Google just being slow) hangs the
+# underlying httplib2 socket indefinitely -- the only thing that ever ended
+# it was the dashboard's own 30s AbortSignal, which then surfaced a raw
+# "The operation was aborted due to timeout" JS error straight to the owner.
+# Failing fast here lets sync_calendar_endpoint's try/except turn this into
+# an actual friendly message instead.
+CALENDAR_API_TIMEOUT_SECONDS = 10
+
+
+class CalendarSyncError(Exception):
+    """Any failure reaching/reading the tenant's Google Calendar -- auth
+    rejected, calendar not shared, network timeout, etc. Deliberately
+    generic: from the owner's side, the fix is the same regardless of which
+    of these actually happened (re-check sharing settings), and the raw
+    underlying exception should never reach the browser as user-facing
+    text."""
 
 
 def _load_service_account_info() -> dict[str, Any]:
@@ -30,7 +48,10 @@ def get_service_account_email() -> str:
 def _build_calendar_service():
     info = _load_service_account_info()
     credentials = service_account.Credentials.from_service_account_info(info, scopes=SCOPES)
-    return build("calendar", "v3", credentials=credentials, cache_discovery=False)
+    authed_http = google_auth_httplib2.AuthorizedHttp(
+        credentials, http=httplib2.Http(timeout=CALENDAR_API_TIMEOUT_SECONDS)
+    )
+    return build("calendar", "v3", http=authed_http, cache_discovery=False)
 
 
 async def upsert_availability(tenant_id: str, date_str: str, is_available: bool, event_details: str) -> None:
@@ -72,23 +93,25 @@ async def sync_calendar(tenant_id: str, calendar_id: str) -> int:
     untouched -- meaning fake test data seeded directly into the database,
     or a cancelled event from a prior sync, could never be corrected by a
     real sync and would linger indefinitely.)"""
-    service = _build_calendar_service()
-
     today = date.today()
     time_min = today.isoformat() + "T00:00:00Z"
     time_max = (today + timedelta(days=SYNC_WINDOW_DAYS)).isoformat() + "T00:00:00Z"
 
-    response = (
-        service.events()
-        .list(
-            calendarId=calendar_id,
-            timeMin=time_min,
-            timeMax=time_max,
-            singleEvents=True,
-            orderBy="startTime",
+    try:
+        service = _build_calendar_service()
+        response = (
+            service.events()
+            .list(
+                calendarId=calendar_id,
+                timeMin=time_min,
+                timeMax=time_max,
+                singleEvents=True,
+                orderBy="startTime",
+            )
+            .execute()
         )
-        .execute()
-    )
+    except Exception as exc:
+        raise CalendarSyncError(f"Google Calendar API call failed: {exc}") from exc
 
     events_by_day: dict[str, list[str]] = defaultdict(list)
     for event in response.get("items", []):

@@ -85,14 +85,19 @@ export default function CalendarPage() {
         method: "POST",
       });
       if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error ?? `Не удалось синхронизировать (${res.status})`);
+        // Any failure here (our own timeout, a network blip, the backend's
+        // calendar_unreachable) means the same actionable thing to the
+        // owner -- previously this threw whatever raw string the failure
+        // happened to produce (once, literally the browser's own
+        // "operation was aborted due to timeout" message) straight into the
+        // error banner.
+        throw new Error(t("calendar.syncError"));
       }
       const body: { syncedCount: number } = await res.json();
       setSyncResult(body.syncedCount);
       loadEntries();
-    } catch (err) {
-      setSyncError(err instanceof Error ? err.message : "Не удалось синхронизировать");
+    } catch {
+      setSyncError(t("calendar.syncError"));
     } finally {
       setSyncing(false);
     }

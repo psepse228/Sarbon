@@ -6,7 +6,8 @@ import Link from "next/link";
 import { AnalyticsIcon, ChatIcon } from "@/components/icons";
 import { Sparkline } from "@/components/Sparkline";
 import { ErrorBanner } from "@/components/StatusBanner";
-import { useT } from "@/lib/i18n/LocaleProvider";
+import { useLocale, useT } from "@/lib/i18n/LocaleProvider";
+import { pluralize } from "@/lib/i18n/pluralize";
 import {
   computeDashboardStats,
   parseLocalDate,
@@ -22,8 +23,14 @@ import type { AvailabilityEntry, ConversationSummary, Escalation, Lead, Review }
 const WEEKDAY_FORMAT = new Intl.DateTimeFormat("ru-RU", { weekday: "short" });
 const TIME_FORMAT = new Intl.DateTimeFormat("ru-RU", { hour: "2-digit", minute: "2-digit" });
 
+const CONVERSATION_NOUN_FORMS: Record<"ru" | "en", [string, string, string]> = {
+  ru: ["диалог", "диалога", "диалогов"],
+  en: ["conversation", "conversations", "conversations"],
+};
+
 export default function DesktopOverviewPage() {
   const t = useT();
+  const { locale } = useLocale();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [activity, setActivity] = useState<RecentActivityItem[]>([]);
   const [upcoming, setUpcoming] = useState<AvailabilityEntry[]>([]);
@@ -132,7 +139,12 @@ export default function DesktopOverviewPage() {
             <p className="meter-caption">
               {t("overview.autonomyCaption")
                 .replace("{count}", String(stats.conversationsWithoutEscalation))
-                .replace("{total}", String(stats.totalConversations))}
+                .replace("{total}", String(stats.totalConversations))
+                .replace("{noun}", pluralize(stats.totalConversations, locale, CONVERSATION_NOUN_FORMS[locale]))
+                .replace(
+                  "{verb}",
+                  locale === "ru" ? (stats.conversationsWithoutEscalation === 1 ? "закрыт" : "закрыты") : "closed",
+                )}
             </p>
           </div>
 

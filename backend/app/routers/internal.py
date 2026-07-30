@@ -6,7 +6,7 @@ from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel
 
 from app.ai.engine import generate_reply
-from app.calendar_sync import get_service_account_email, sync_calendar
+from app.calendar_sync import CalendarSyncError, get_service_account_email, sync_calendar
 from app.config import get_settings
 from app.db import get_supabase_client
 from app.notifications import get_notifier_bot
@@ -164,5 +164,14 @@ async def sync_calendar_endpoint(
     if not calendar_id:
         raise HTTPException(status_code=400, detail="No calendar connected for this tenant")
 
-    synced_count = await sync_calendar(body.tenant_id, calendar_id)
+    try:
+        synced_count = await sync_calendar(body.tenant_id, calendar_id)
+    except CalendarSyncError as exc:
+        # Logged with the real cause for us; the client only ever gets a
+        # stable code ("calendar_unreachable") to translate into a friendly
+        # message -- previously an unhandled exception (or the dashboard's
+        # own 30s AbortSignal firing first) surfaced a raw English error
+        # straight to the owner on a Russian-language screen.
+        logger.warning("Calendar sync failed for tenant %s: %s", body.tenant_id, exc)
+        raise HTTPException(status_code=502, detail="calendar_unreachable") from exc
     return SyncCalendarResponse(synced_count=synced_count)

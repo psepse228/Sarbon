@@ -69,10 +69,16 @@ export async function answerKnowledgeGap(tenantId: string, gapId: string, answer
   }
 
   const client = getServiceSupabaseClient();
+  // Re-scoped by tenant_id on the mutation itself, not just the earlier
+  // fetchGapForTenant pre-check -- not exploitable today (the pre-check is
+  // solid), but leads.ts/availability.ts double-scope their mutations the
+  // same way and this should match that pattern rather than rely solely on
+  // an earlier check staying in place if this code is ever refactored.
   const { error } = await client
     .from("knowledge_gaps")
     .update({ status: "answered", answer, resolved_at: new Date().toISOString() })
-    .eq("id", gapId);
+    .eq("id", gapId)
+    .eq("tenant_id", tenantId);
   if (error) {
     throw new Error(`Failed to update knowledge_gaps: ${error.message}`);
   }
@@ -85,7 +91,8 @@ export async function dismissKnowledgeGap(tenantId: string, gapId: string): Prom
   const { error } = await client
     .from("knowledge_gaps")
     .update({ status: "dismissed", resolved_at: new Date().toISOString() })
-    .eq("id", gapId);
+    .eq("id", gapId)
+    .eq("tenant_id", tenantId);
   if (error) {
     throw new Error(`Failed to update knowledge_gaps: ${error.message}`);
   }
